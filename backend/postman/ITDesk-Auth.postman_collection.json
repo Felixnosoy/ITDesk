@@ -1,0 +1,501 @@
+{
+  "info": {
+    "_postman_id": "b7e1a2c0-2222-4a2b-9c3d-000000000002",
+    "name": "ITDesk Backend - Auth (login)",
+    "description": "Suite autocontenida: crea un grupo de usuarios de prueba, prueba login exitoso y todos los casos de fallo conocidos, y limpia los usuarios al final. Correr con Postman Runner en orden (Setup -> Login OK -> Login KO -> Info -> Cleanup) usando el environment 'ITDesk Backend - Local'.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 Setup - Crear usuarios de prueba",
+      "item": [
+        {
+          "name": "Crear usuario Admin (activo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Martinez\",\n  \"correo\": \"ana.martinez@itdesk.test\",\n  \"contraseña\": \"Password123!\",\n  \"rol\": \"admin\",\n  \"tipo_documento\": \"CC\",\n  \"num_documento\": \"1000000001\",\n  \"telefono\": \"3001234567\",\n  \"direccion\": \"Calle 1 # 1-01\",\n  \"especialidad\": null,\n  \"estado\": \"Activo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Usuario admin creado activo\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.correo).to.eql(\"ana.martinez@itdesk.test\");",
+                  "    pm.expect(json.data.estado).to.eql(\"Activo\");",
+                  "    pm.environment.set(\"id_admin\", json.data.id_usuario);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear usuario Tecnico (activo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Ruiz\",\n  \"correo\": \"carlos.ruiz@itdesk.test\",\n  \"contraseña\": \"Password123!\",\n  \"rol\": \"tecnico\",\n  \"tipo_documento\": \"CC\",\n  \"num_documento\": \"1000000002\",\n  \"telefono\": \"3001234568\",\n  \"direccion\": \"Calle 2 # 2-02\",\n  \"especialidad\": \"Redes\",\n  \"estado\": \"Activo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Usuario tecnico creado activo\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.correo).to.eql(\"carlos.ruiz@itdesk.test\");",
+                  "    pm.expect(json.data.estado).to.eql(\"Activo\");",
+                  "    pm.environment.set(\"id_tecnico\", json.data.id_usuario);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear usuario Inactivo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lucia\",\n  \"apellido\": \"Fernandez\",\n  \"correo\": \"lucia.fernandez@itdesk.test\",\n  \"contraseña\": \"Password123!\",\n  \"rol\": \"usuario\",\n  \"tipo_documento\": \"CC\",\n  \"num_documento\": \"1000000003\",\n  \"telefono\": \"3001234569\",\n  \"direccion\": \"Calle 3 # 3-03\",\n  \"especialidad\": null,\n  \"estado\": \"Inactivo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Usuario creado inactivo\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.correo).to.eql(\"lucia.fernandez@itdesk.test\");",
+                  "    pm.expect(json.data.estado).to.eql(\"Inactivo\");",
+                  "    pm.environment.set(\"id_inactivo\", json.data.id_usuario);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Login - Casos exitosos",
+      "item": [
+        {
+          "name": "Login exitoso - Admin activo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ana.martinez@itdesk.test\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve los datos del usuario correcto\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.correo).to.eql(\"ana.martinez@itdesk.test\");",
+                  "    pm.expect(json.data.rol).to.eql(\"admin\");",
+                  "    pm.expect(json.data.estado).to.eql(\"Activo\");",
+                  "});",
+                  "pm.test(\"La respuesta no incluye el hash de la contraseña\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.not.have.property(\"contraseña\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login exitoso - Tecnico activo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"carlos.ruiz@itdesk.test\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devuelve los datos del usuario correcto\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.correo).to.eql(\"carlos.ruiz@itdesk.test\");",
+                  "    pm.expect(json.data.rol).to.eql(\"tecnico\");",
+                  "    pm.expect(json.data.estado).to.eql(\"Activo\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Login - Casos fallidos",
+      "item": [
+        {
+          "name": "Login fallido - Usuario inactivo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"lucia.fernandez@itdesk.test\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403 (usuario inactivo, password correcto)\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Mensaje de usuario inactivo\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.message).to.eql(\"El usuario esta inactivo\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Password incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ana.martinez@itdesk.test\",\n  \"contraseña\": \"PasswordIncorrecta!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensaje generico de credenciales invalidas\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.message).to.eql(\"Correo o contraseña incorrectos\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Correo no registrado",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"no.existe@itdesk.test\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensaje generico de credenciales invalidas\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.message).to.eql(\"Correo o contraseña incorrectos\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Correo vacio",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 (validacion de campos requeridos)\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje de campos requeridos\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.false;",
+                  "    pm.expect(json.message).to.eql(\"Correo y contraseña son requeridos\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Correo ausente en el body",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 (validacion de campos requeridos)\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje de campos requeridos\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql(\"Correo y contraseña son requeridos\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Contraseña ausente en el body",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ana.martinez@itdesk.test\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 (validacion de campos requeridos)\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje de campos requeridos\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.eql(\"Correo y contraseña son requeridos\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Body vacio",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400 (validacion de campos requeridos)\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Intento de SQL injection en correo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"' OR '1'='1\",\n  \"contraseña\": \"cualquiercosa\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401 (la consulta parametrizada evita la inyeccion SQL)\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"No hay bypass de autenticacion\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login fallido - Password con espacio extra",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ana.martinez@itdesk.test\",\n  \"contraseña\": \"Password123! \"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401 (la contraseña es sensible a espacios extra)\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Login - Comportamiento informativo",
+      "item": [
+        {
+          "name": "Login - Correo en mayusculas (case-insensitive)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"ANA.MARTINEZ@ITDESK.TEST\",\n  \"contraseña\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"INFORMATIVO: el login funciona con el correo en mayusculas por el collation case-insensitive de MySQL\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "99 Cleanup - Borrar usuarios de prueba",
+      "item": [
+        {
+          "name": "Borrar usuario Admin",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/usuarios/{{id_admin}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{id_admin}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test(\"Status 200\", () => pm.response.to.have.status(200));"] } }
+          ]
+        },
+        {
+          "name": "Borrar usuario Tecnico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/usuarios/{{id_tecnico}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{id_tecnico}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test(\"Status 200\", () => pm.response.to.have.status(200));"] } }
+          ]
+        },
+        {
+          "name": "Borrar usuario Inactivo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/usuarios/{{id_inactivo}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{id_inactivo}}"] }
+          },
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test(\"Status 200\", () => pm.response.to.have.status(200));"] } }
+          ]
+        }
+      ]
+    }
+  ]
+}
