@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/*==========================
+    ITDESK - STYLE.CSS
+===========================*/
+:root {
+    --azul: #0A192F;
+    --azul2: #112240;
+    --azul3: #1D4ED8;
+    --gris: #4B5563;
+    --grisHover: #374151;
+    --blanco: #FFFFFF;
+    --fondo: #F8FAFC;
+    --texto: #334155;
+    --borde: #E2E8F0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--fondo);
+    color: var(--texto);
+}
+
+/*==========================
+NAVBAR
+===========================*/
+.bg-itdesk {
+    background: var(--azul) !important;
+}
+
+.navbar {
+    background: var(--azul) !important;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, .25);
+}
+
+.navbar-brand {
+    color: #fff !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.navbar-brand:hover {
+    color: #dbeafe !important;
+}
+
+.nav-link {
+    color: #d1d5db !important;
+    transition: .3s;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #60A5FA !important;
+}
+
+.nav-link.active {
+    color: #fff !important;
+    font-weight: bold;
+}
+
+/*==========================
+HERO
+===========================*/
+.hero {
+    background: linear-gradient(135deg, var(--azul), var(--azul2));
+    color: white;
+    padding: 100px 0;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.hero p {
+    color: #dbeafe;
+}
+
+/*==========================
+SECCIONES
+===========================*/
+section {
+    padding: 60px 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    color: var(--azul);
+    font-weight: 700;
+}
+
+p {
+    color: #475569;
+}
+
+/*==========================
+CARDS
+===========================*/
+.card {
+    border: none;
+    border-radius: 18px;
+    background: white;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+    transition: .35s;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(15, 23, 42, .18);
+}
+
+.card-header {
+    background: var(--azul) !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+/*==========================
+BOTONES
+===========================*/
+.btn {
+    border-radius: 10px;
+    transition: .3s;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: var(--azul3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #2563EB;
+}
+
+.btn-secondary {
+    background: var(--gris);
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--grisHover);
+}
+
+.btn-success {
+    background: #10B981;
+    border: none;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-danger:hover {
+    background: #DC2626;
+}
+
+/*==========================
+FORMULARIOS
+===========================*/
+.form-control,
+.form-select {
+    border-radius: 10px;
+    border: 1px solid var(--borde);
+    padding: 12px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .15);
+}
+
+/*==========================
+TABLAS
+===========================*/
+.table {
+    background: white;
+}
+
+.table thead {
+    background: var(--azul);
+    color: white;
+}
+
+.table-hover tbody tr:hover {
+    background: #EEF4FF;
+}
+
+/*==========================
+BADGES
+===========================*/
+.badge {
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+/*==========================
+ICONOS
+===========================*/
+.display-1,
+.display-2,
+.display-3,
+.display-4 {
+    color: var(--azul3);
+}
+
+.card i {
+    transition: .35s;
+}
+
+.card:hover i {
+    transform: scale(1.1);
+}
+
+/*==========================
+LOGIN
+===========================*/
+.login-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, .15);
+}
+
+.login-title {
+    color: var(--azul);
+}
+
+/*==========================
+ESTADISTICAS
+===========================*/
+.stats-card {
+    border-left: 5px solid var(--azul3);
+}
+
+/*==========================
+FOOTER
+===========================*/
+footer {
+    background: var(--azul);
+    color: white;
+    padding: 25px;
+    margin-top: 60px;
+    text-align: center;
+}
+
+footer p {
+    color: white;
+}
+
+/*==========================
+RESPONSIVE
+===========================*/
+@media(max-width:768px) {
+    .hero {
+        padding: 70px 20px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+}
+
+/*====================================
+ICONO HEADSET LOGIN
+====================================*/
+.login-icon {
+    color: #0A192F;
+    transition: .3s;
+}
+
+.login-icon:hover {
+    color: #60A5FA;
+    transform: scale(1.08);
+}
