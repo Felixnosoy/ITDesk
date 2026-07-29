@@ -119,6 +119,23 @@ const marcarMiNotificacionComoLeida = async (req, res) => {
     }
 }
 
+const marcarTodasMisNotificacionesComoLeidas = async (req, res) => {
+    try {
+        const { id_usuario } = req.usuario
+
+        const notificaciones = await notificacionService.marcarTodasComoLeidas(id_usuario);
+
+        responder(res, 200, {
+            data: notificaciones
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
 const eliminarNotificacion = async (req, res) => {
     try {
         const { id } = req.params
@@ -144,5 +161,6 @@ module.exports = {
     obtenerNotificacionesPorUsuario,
     obtenerMisNotificaciones,
     marcarMiNotificacionComoLeida,
+    marcarTodasMisNotificacionesComoLeidas,
     eliminarNotificacion
 }

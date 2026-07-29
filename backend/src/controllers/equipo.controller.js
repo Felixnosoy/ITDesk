@@ -3,9 +3,7 @@ const responder = require("../utils/respuesta")
 
 const crearEquipo = async (req, res) => {
     try {
-        const { datos } = req.body
-
-        const equipo = await equipoController.crearEquipo(datos);
+        const equipo = await equipoController.crearEquipo(req.body);
 
         responder(res, 200, {
             message: "Equipo creado exitosamente",
@@ -90,10 +88,10 @@ const eliminarEquipo = async (req, res) => {
     try {
         const { id } = req.params
 
-        const equipo = await equipoController.eliminarEquipo(id);
+        await equipoController.eliminarEquipo(id);
 
         responder(res, 200, {
-            data: equipo
+            message: "Equipo eliminado exitosamente"
         })
 
     } catch (error) {

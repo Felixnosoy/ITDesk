@@ -14,21 +14,21 @@ router.use(autenticarToken);
 // crear tickets
 router.post(
     "/",
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     ticketController.crearTicket
 )
 
 // obtener todos los tickets
 router.get(
-    "/", 
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    "/",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     ticketController.obtenerTickets
 )
 
 // obtener todos los tickets de un usuario (solo staff, por id explícito)
 router.get(
     "/usuario/:id_usuario",
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     ticketController.obtenerTicketsDeUsuarioPorId
 )
 
@@ -40,6 +40,8 @@ router.get(
 )
 
 // obtener un ticket por un id
+
+ 
 router.get(
     "/:id",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO), 

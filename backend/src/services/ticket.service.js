@@ -1,6 +1,9 @@
 const pool = require("../config/database");
 const crearError = require("../utils/crearError");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
+const CATEGORIAS_TICKET = require("../constants/categoriasTicket");
+const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
+const ESTADOS_FACTURA = require("../constants/estadosFactura");
 const { verificarClienteExiste, verificarUsuarioExiste } = require("../validators/usuario.validator");
 
 const COLUMNAS_TICKET = `
@@ -15,6 +18,7 @@ const COLUMNAS_TICKET = `
     t.titulo,
     t.descripcion,
     t.prioridad,
+    t.categoria,
     t.estado,
     t.fecha_apertura,
     t.fecha_cierre
@@ -28,13 +32,16 @@ const JOIN_TICKET = `
         ON t.id_equipo = e.id_equipo
 `
 
+const CATEGORIAS_PERMITIDAS = Object.values(CATEGORIAS_TICKET);
+
 const crearTicket = async (datos) => {
     const {
         id_usuario,
         id_equipo,
         titulo,
         descripcion,
-        prioridad
+        prioridad,
+        categoria
     } = datos;
 
     if (
@@ -42,7 +49,8 @@ const crearTicket = async (datos) => {
         !id_equipo ||
         !titulo ||
         !descripcion ||
-        !prioridad
+        !prioridad ||
+        !categoria
     ) {
         throw crearError("Todos los campos obligatorios son requeridos.", 400);
     }
@@ -50,6 +58,14 @@ const crearTicket = async (datos) => {
     const tituloNormalizado = titulo.trim();
     const descripcionNormalizada = descripcion.trim();
     const prioridadNormalizada = prioridad.trim();
+    const categoriaNormalizada = categoria.trim();
+
+    if (!CATEGORIAS_PERMITIDAS.includes(categoriaNormalizada)) {
+        throw crearError(
+            `Categoría inválida. Debe ser: ${CATEGORIAS_PERMITIDAS.join(", ")}.`,
+            400
+        );
+    }
 
     // Verificar que el cliente exista
     await verificarClienteExiste(id_usuario);
@@ -78,9 +94,10 @@ const crearTicket = async (datos) => {
             titulo,
             descripcion,
             prioridad,
+            categoria,
             estado
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `,
         [
             id_usuario,
@@ -88,6 +105,7 @@ const crearTicket = async (datos) => {
             tituloNormalizado,
             descripcionNormalizada,
             prioridadNormalizada,
+            categoriaNormalizada,
             ESTADOS_TICKET.ABIERTO
         ]
     );
@@ -207,11 +225,48 @@ const cerrarTicket = async (id) => {
     return tickets[0];
 }
 
+// true si el ticket tiene una cotizacion Aprobada con una factura vigente
+// (no Anulada) — la señal de que el ciclo cotizar-aprobar-facturar se
+// completo para este ticket. Toma la linea de cotizacion mas reciente, ya
+// que un ticket puede tener varios intentos (rechazados/vencidos) en su
+// historial.
+const verificarTicketFacturado = async (id_ticket) => {
+
+    const [[ultimaLinea]] = await pool.query(
+        `
+        SELECT dc.id_cotizacion, c.estado AS estado_cotizacion
+        FROM detalle_cotizacion dc
+        INNER JOIN cotizacion c ON dc.id_cotizacion = c.id_cotizacion
+        WHERE dc.id_ticket = ?
+        ORDER BY dc.id_detalle_cotizacion DESC
+        LIMIT 1
+        `,
+        [id_ticket]
+    );
+
+    if (!ultimaLinea || ultimaLinea.estado_cotizacion !== ESTADOS_COTIZACION.APROBADA) {
+        return false;
+    }
+
+    const [[factura]] = await pool.query(
+        `
+        SELECT estado
+        FROM factura
+        WHERE id_cotizacion = ?
+        ORDER BY id_factura DESC
+        LIMIT 1
+        `,
+        [ultimaLinea.id_cotizacion]
+    );
+
+    return Boolean(factura) && factura.estado !== ESTADOS_FACTURA.ANULADA;
+}
+
 // cambia el estado del ticket a "En proceso" o "Resuelto".
 // abrir y cerrar el ticket tienen sus propios endpoints y no pasan por aquí.
 const ESTADOS_PERMITIDOS = [ESTADOS_TICKET.EN_PROCESO, ESTADOS_TICKET.RESUELTO];
 
-const cambiarEstadoTicket = async (id, estado) => {
+const cambiarEstadoTicket = async (id, estado, opciones = {}) => {
 
     if (typeof estado !== "string" || !ESTADOS_PERMITIDOS.includes(estado.trim())) {
         throw crearError(
@@ -237,6 +292,21 @@ const cambiarEstadoTicket = async (id, estado) => {
 
     if (ticketExistente[0].estado === ESTADOS_TICKET.CERRADO) {
         throw crearError("El ticket ya está cerrado y no puede cambiar de estado.", 409);
+    }
+
+    if (estadoNormalizado === ESTADOS_TICKET.RESUELTO && !(await verificarTicketFacturado(id))) {
+        const { sinCosto, motivoSinCosto } = opciones;
+
+        if (!sinCosto) {
+            throw crearError(
+                "No se puede marcar el ticket como Resuelto sin una cotización aprobada y facturada. Si no requiere cargo, indícalo explícitamente.",
+                409
+            );
+        }
+
+        if (typeof motivoSinCosto !== "string" || !motivoSinCosto.trim()) {
+            throw crearError("Debes indicar un motivo para cerrar el ticket sin costo.", 400);
+        }
     }
 
     await pool.query(

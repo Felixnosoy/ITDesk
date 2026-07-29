@@ -37,6 +37,12 @@ router.patch(
     notificacionController.marcarMiNotificacionComoLeida
 )
 
+// marcar todas las notificaciones propias como leidas (cualquier rol autenticado)
+router.patch(
+    "/mis/leidas",
+    notificacionController.marcarTodasMisNotificacionesComoLeidas
+)
+
 // obtener las notificaciones de un ticket en especifico
 router.get(
     "/ticket/:id_ticket",

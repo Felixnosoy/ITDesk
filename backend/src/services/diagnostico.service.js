@@ -43,26 +43,57 @@ const crearDiagnostico = async (datosDiagnostico) => {
     // Verificar que el usuario exista y tenga rol de Tecnico
     await verificarTecnicoExiste(id_tecnico);
 
-    // Insertar diagnostico (fecha_diagnostico la asigna la base de datos)
-    const [resultado] = await pool.query(
+    // Un ticket solo puede tener un diagnostico (UQ_Diagnostico_Ticket): si ya
+    // existe, se actualiza en vez de intentar insertar uno nuevo.
+    const [existente] = await pool.query(
         `
-        INSERT INTO diagnostico (
-            id_ticket,
-            id_usuario,
-            diagnostico,
-            solucion,
-            observaciones
-        )
-        VALUES (?, ?, ?, ?, ?)
+        SELECT id_diagnostico
+        FROM diagnostico
+        WHERE id_ticket = ?
         `,
-        [
-            id_ticket,
-            id_tecnico,
-            diagnosticoNormalizado,
-            solucionNormalizada,
-            observacionesNormalizadas
-        ]
+        [id_ticket]
     );
+
+    let idDiagnostico;
+
+    if (existente.length > 0) {
+        idDiagnostico = existente[0].id_diagnostico;
+
+        await pool.query(
+            `
+            UPDATE diagnostico
+            SET
+                id_usuario = ?,
+                diagnostico = ?,
+                solucion = ?,
+                observaciones = ?
+            WHERE id_diagnostico = ?
+            `,
+            [id_tecnico, diagnosticoNormalizado, solucionNormalizada, observacionesNormalizadas, idDiagnostico]
+        );
+    } else {
+        const [resultado] = await pool.query(
+            `
+            INSERT INTO diagnostico (
+                id_ticket,
+                id_usuario,
+                diagnostico,
+                solucion,
+                observaciones
+            )
+            VALUES (?, ?, ?, ?, ?)
+            `,
+            [
+                id_ticket,
+                id_tecnico,
+                diagnosticoNormalizado,
+                solucionNormalizada,
+                observacionesNormalizadas
+            ]
+        );
+
+        idDiagnostico = resultado.insertId;
+    }
 
     const [diagnosticos] = await pool.query(
         `
@@ -71,7 +102,7 @@ const crearDiagnostico = async (datosDiagnostico) => {
         ${JOIN_DIAGNOSTICO}
         WHERE d.id_diagnostico = ?
         `,
-        [resultado.insertId]
+        [idDiagnostico]
     );
 
     return diagnosticos[0];

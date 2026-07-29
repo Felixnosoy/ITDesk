@@ -3,61 +3,399 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Ticket | ITDESK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-itdesk">
-        <div class="container">
-            <a class="navbar-brand" href="dashboard-tecnico.html">
-                <i class="bi bi-headset"></i> ITDESK
-            </a>
-        </div>
-    </nav>
+<body data-protegido="Tecnico,Administrador" data-footer="Panel del Técnico">
+    <div class="app-shell">
+        <div id="sidebar-placeholder"></div>
+        <div class="app-main">
+            <div id="topbar-mobile-placeholder"></div>
+            <main class="app-content">
 
-    <div class="container my-5">
-        <div class="card shadow">
-            <div class="card-header bg-itdesk text-white">
-                <h3>Detalle del Ticket</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-itdesk">
+                <li class="breadcrumb-item"><a href="dashboard-tecnico.html">Mis tickets</a></li>
+                <li class="breadcrumb-item active" id="breadcrumbTicket">Ticket</li>
+            </ol>
+        </nav>
+
+        <!-- SKELETON -->
+        <div id="skeletonTicket">
+            <span class="skeleton-line mb-3" style="height:32px;width:280px;"></span>
+            <span class="skeleton-line mb-2" style="height:100px;"></span>
+        </div>
+
+        <div id="contenidoTicket" class="d-none">
+
+            <!-- HEADER -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                        <div>
+                            <h3 class="mb-1" id="tituloTicket"></h3>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span id="badgeEstadoTicket"></span>
+                                <span id="badgePrioridadTicket"></span>
+                                <span id="badgeCategoriaTicket"></span>
+                            </div>
+                        </div>
+                        <div class="text-md-end">
+                            <small class="text-muted d-block">Apertura: <span id="fechaAperturaTicket"></span></small>
+                            <small class="text-muted d-block d-none" id="fechaCierreWrap">Cierre: <span id="fechaCierreTicket"></span></small>
+                            <button class="btn btn-outline-secondary btn-sm mt-2" id="btnCerrarTicket" onclick="cerrarTicketDetalle()">
+                                <i class="bi bi-lock-fill"></i> Cerrar ticket
+                            </button>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="mb-0" id="descripcionTicket"></p>
+                </div>
             </div>
-            <div class="card-body">
-                <p><strong>ID:</strong> <span id="idTicket"></span></p>
-                <p><strong>Cliente:</strong> <span id="cliente"></span></p>
-                <p><strong>Equipo:</strong> <span id="equipo"></span></p>
-                <p><strong>Departamento:</strong> <span id="departamento"></span></p>
-                <p><strong>Descripción:</strong></p>
-                <div class="alert alert-light" id="descripcion"></div>
-                <hr>
-                <div class="mb-3">
-                    <label class="form-label">Estado</label>
-                    <select class="form-select" id="estado">
-                        <option>Pendiente</option>
-                        <option>En proceso</option>
-                        <option>Resuelto</option>
-                    </select>
+
+            <div class="alert alert-secondary d-none" id="avisoCerrado">
+                <i class="bi bi-lock-fill"></i> Este ticket está cerrado. No se pueden registrar más cambios.
+            </div>
+
+            <div class="row g-4">
+                <!-- CLIENTE, EQUIPO, DOCUMENTOS -->
+                <div class="col-lg-4">
+                    <div class="card card-info shadow mb-4 card-accent card-accent-info">
+                        <div class="card-header"><i class="bi bi-person-fill"></i> Cliente</div>
+                        <div class="card-body" id="infoCliente"></div>
+                    </div>
+                    <div class="card card-info shadow mb-4 card-accent card-accent-secondary">
+                        <div class="card-header"><i class="bi bi-pc-display"></i> Equipo</div>
+                        <div class="card-body" id="infoEquipo"></div>
+                    </div>
+                    <div class="card card-info shadow mb-4">
+                        <div class="card-header"><i class="bi bi-receipt"></i> Documentos relacionados</div>
+                        <div class="card-body" id="infoDocumentos">
+                            <span class="skeleton-line" style="height:14px;"></span>
+                        </div>
+                    </div>
+                    <!-- Solo aparece si el ticket esta Cerrado y el cliente
+                         ya lo califico — ver cargarEncuestaTecnico() -->
+                    <div class="card card-info shadow d-none" id="cardEncuestaTecnico">
+                        <div class="card-header"><i class="bi bi-star-fill"></i> Satisfacción del cliente</div>
+                        <div class="card-body" id="infoEncuestaTecnico"></div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label>Diagnóstico</label>
-                    <textarea id="diagnostico" class="form-control" rows="4"></textarea>
+
+                <!-- TRABAJO: pestañas en vez de bloques largos apilados -->
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-itdesk text-white p-0">
+                            <ul class="nav nav-tabs card-header-tabs px-2 pt-2" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabActividad" type="button">
+                                        <i class="bi bi-broadcast"></i> Actividad
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDiagnostico" type="button">
+                                        <i class="bi bi-clipboard2-pulse"></i> Diagnóstico
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPrivado" type="button">
+                                        <i class="bi bi-lock-fill"></i> Notas privadas
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="tab-content">
+                            <!-- ACTIVIDAD (PUBLIC LOG) -->
+                            <div class="tab-pane fade show active card-body" id="tabActividad">
+                                <p class="text-muted small mb-3"><i class="bi bi-eye"></i> Esta pestaña es visible para el cliente.</p>
+                                <div id="timelinePublico" class="mb-3"></div>
+                                <hr>
+                                <form id="formNuevaNota" onsubmit="agregarNota(event)">
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label small" for="notaEstado">Nuevo estado</label>
+                                            <select class="form-select" id="notaEstado">
+                                                <option value="En proceso">En proceso</option>
+                                                <option value="Resuelto">Resuelto</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label small" for="notaObservaciones">Mensaje para el cliente</label>
+                                            <textarea class="form-control" id="notaObservaciones" rows="2"
+                                                placeholder="Ej: Se recibió el repuesto, iniciando reparación." required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label small" for="notaArchivo">Adjuntar foto o PDF (opcional, máx. 5MB)</label>
+                                        <input class="form-control form-control-sm" type="file" id="notaArchivo"
+                                            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+                                        <div class="form-text">El cliente va a poder ver este archivo, igual que el mensaje. También podés pegar una captura de pantalla con Ctrl+V dentro del mensaje.</div>
+                                        <div class="adjunto-preview d-none" id="notaArchivoPreview"></div>
+                                    </div>
+                                    <div class="text-end mt-2">
+                                        <button class="btn btn-primary btn-sm" type="submit">
+                                            <i class="bi bi-send-fill"></i> Publicar actualización
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- DIAGNOSTICO -->
+                            <div class="tab-pane fade card-body" id="tabDiagnostico">
+                                <form id="formDiagnostico" onsubmit="guardarDiagnostico(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="dgDiagnostico">Diagnóstico</label>
+                                        <textarea class="form-control" id="dgDiagnostico" rows="3" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="dgSolucion">Solución aplicada</label>
+                                        <textarea class="form-control" id="dgSolucion" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="dgObservaciones">Observaciones internas</label>
+                                        <textarea class="form-control" id="dgObservaciones" rows="2"></textarea>
+                                    </div>
+                                    <button class="btn btn-success" type="submit">
+                                        <i class="bi bi-check2-circle"></i> Guardar y marcar Resuelto
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- PRIVATE LOG -->
+                            <div class="tab-pane fade card-body" id="tabPrivado">
+                                <p class="text-muted small mb-3"><i class="bi bi-lock-fill"></i> Esta pestaña NUNCA es visible para el cliente.</p>
+                                <div id="timelinePrivado" class="mb-3"></div>
+                                <hr>
+                                <form id="formNotaPrivada" onsubmit="agregarNotaPrivada(event)">
+                                    <label class="form-label small" for="notaPrivadaContenido">Nota interna</label>
+                                    <textarea class="form-control" id="notaPrivadaContenido" rows="2"
+                                        placeholder="Ej: El cliente pidió que lo llamen antes de continuar." required></textarea>
+                                    <div class="mt-2">
+                                        <label class="form-label small" for="notaPrivadaArchivo">Adjuntar foto o PDF (opcional, máx. 5MB)</label>
+                                        <input class="form-control form-control-sm" type="file" id="notaPrivadaArchivo"
+                                            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+                                        <div class="form-text">Solo Admin/Técnico van a poder ver este archivo. También podés pegar una captura de pantalla con Ctrl+V dentro de la nota.</div>
+                                        <div class="adjunto-preview d-none" id="notaPrivadaArchivoPreview"></div>
+                                    </div>
+                                    <div class="text-end mt-2">
+                                        <button class="btn btn-primary btn-sm" type="submit">
+                                            <i class="bi bi-send-fill"></i> Agregar nota
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label>Observaciones</label>
-                    <textarea id="observaciones" class="form-control" rows="4"></textarea>
+            </div>
+        </div>
+
+            </main>
+            <div id="footer-placeholder"></div>
+        </div>
+    </div>
+
+    <!-- MODAL COTIZAR REPARACION: crea (o reutiliza, si el cliente ya tiene
+         una pendiente) una cotizacion y le agrega una linea para este ticket -->
+    <div class="modal fade" id="modalCotizar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title">Cotizar reparación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mb-3">
-                    <label>Solución</label>
-                    <textarea id="solucion" class="form-control" rows="4"></textarea>
-                </div>
-                <button class="btn btn-primary" onclick="guardarCambiosTicket()">Guardar Cambios</button>
+                <form id="formCotizar" onsubmit="guardarCotizacion(event)">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3"><span class="campo-requerido">*</span> campo obligatorio</p>
+                        <div class="mb-3">
+                            <label class="form-label" for="cotDescripcion">Descripción del servicio <span class="campo-requerido">*</span></label>
+                            <textarea class="form-control" id="cotDescripcion" rows="2"
+                                placeholder="Ej: Cambio de pantalla" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="cotManoObra">Mano de obra (RD$)</label>
+                                <input type="number" class="form-control" id="cotManoObra" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="cotRepuestos">Repuestos (RD$)</label>
+                                <input type="number" class="form-control" id="cotRepuestos" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="cotDescuento">Descuento (RD$)</label>
+                                <input type="number" class="form-control" id="cotDescuento" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-0"><i class="bi bi-info-circle"></i> El ITBIS (18%) y el total se calculan automáticamente al guardar.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cash-coin"></i> Guardar cotización
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <!-- MODAL DESCUENTO: descuento general de la cotizacion (distinto del
+         descuento por linea que ya se pide al cotizar) -->
+    <div class="modal fade" id="modalDescuento" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title">Descuento de la cotización</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formDescuento" onsubmit="guardarDescuento(event)">
+                    <div class="modal-body">
+                        <label class="form-label" for="descMonto">Descuento total (RD$)</label>
+                        <input type="number" class="form-control" id="descMonto" min="0" step="0.01" value="0">
+                        <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle"></i> Se aplica sobre el subtotal antes de calcular el ITBIS.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CERRAR SIN COSTO -->
+    <div class="modal fade" id="modalSinCosto" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cerrar sin costo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formSinCosto">
+                    <div class="modal-body">
+                        <p class="small text-muted">Este ticket no tiene una cotización aprobada y facturada. Si no requiere cargo (garantía, revisión sin falla encontrada, etc.), indica el motivo para marcarlo como Resuelto de todas formas.</p>
+                        <label class="form-label small" for="motivoSinCosto">Motivo</label>
+                        <textarea class="form-control" id="motivoSinCosto" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-gift-fill"></i> Marcar Resuelto sin costo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR EQUIPO -->
+    <div class="modal fade" id="modalEditarEquipo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title">Editar equipo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEditarEquipo" onsubmit="guardarEdicionEquipo(event)">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="eqeTipo">Tipo</label>
+                                <select class="form-select" id="eqeTipo">
+                                    <option>Laptop</option>
+                                    <option>Computadora de Escritorio</option>
+                                    <option>Impresora</option>
+                                    <option>Servidor</option>
+                                    <option>Router</option>
+                                    <option>Switch</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="eqeMarca">Marca</label>
+                                <input class="form-control" id="eqeMarca" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="eqeModelo">Modelo</label>
+                                <input class="form-control" id="eqeModelo" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="eqeSerie">N.° de serie</label>
+                                <input class="form-control" id="eqeSerie" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="eqeEstado">Estado del equipo</label>
+                                <input class="form-control" id="eqeEstado" required>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label" for="eqeObservaciones">Observaciones</label>
+                            <textarea class="form-control" id="eqeObservaciones" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR NOTA DEL HISTORIAL: corrige el texto de una entrada ya
+         publicada. No cambia el estado actual real del ticket. -->
+    <div class="modal fade" id="modalEditarNota" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title">Editar entrada del historial</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEditarNota" onsubmit="guardarEdicionNota(event)">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3"><i class="bi bi-info-circle"></i> Esto no cambia el estado actual del ticket, solo corrige el texto de esta entrada del historial.</p>
+                        <div class="mb-3">
+                            <label class="form-label" for="enEstado">Estado registrado en esta entrada</label>
+                            <select class="form-select" id="enEstado">
+                                <option value="Abierto">Abierto</option>
+                                <option value="En proceso">En proceso</option>
+                                <option value="Resuelto">Resuelto</option>
+                                <option value="Cerrado">Cerrado</option>
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label" for="enObservaciones">Mensaje</label>
+                            <textarea class="form-control" id="enObservaciones" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de la vista imprimible (factura/cotizacion) — oculto en
+         pantalla, poblado por js/imprimir.js justo antes de window.print() -->
+    <div id="areaImprimir"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/codigos.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/imprimir.js"></script>
+    <script src="js/ticket-tecnico.js"></script>
 </body>
 
 </html>

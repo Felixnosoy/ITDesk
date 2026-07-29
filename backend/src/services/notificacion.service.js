@@ -174,6 +174,21 @@ const marcarComoLeida = async (id, id_usuario_solicitante) => {
     return obtenerNotificacionPorId(id);
 }
 
+// marca como leidas todas las notificaciones no leidas del usuario autenticado
+const marcarTodasComoLeidas = async (id_usuario) => {
+
+    await pool.query(
+        `
+        UPDATE notificacion
+        SET leida = TRUE
+        WHERE id_usuario = ? AND leida = FALSE
+        `,
+        [id_usuario]
+    );
+
+    return obtenerNotificacionesPorUsuario(id_usuario);
+}
+
 const eliminarNotificacion = async (id) => {
 
     // Verificar que la notificacion exista
@@ -195,5 +210,6 @@ module.exports = {
     obtenerNotificacionesPorTicket,
     obtenerNotificacionesPorUsuario,
     marcarComoLeida,
+    marcarTodasComoLeidas,
     eliminarNotificacion
 }

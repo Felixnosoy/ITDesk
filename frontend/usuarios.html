@@ -2,209 +2,178 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Usuarios | ITDESK</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
+    <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/style.css">
-
 </head>
 
-<body>
+<body data-protegido="Administrador">
+    <div class="app-shell">
+        <div id="sidebar-placeholder"></div>
+        <div class="app-main">
+            <div id="topbar-mobile-placeholder"></div>
+            <main class="app-content">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-itdesk">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-itdesk">
+                        <li class="breadcrumb-item"><a href="dashboard-admin.html">Inicio</a></li>
+                        <li class="breadcrumb-item active">Usuarios</li>
+                    </ol>
+                </nav>
 
-        <div class="container">
+                <div class="page-head d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h2 class="mb-1">Gestión de Usuarios</h2>
+                        <p class="text-muted mb-0">Clientes, técnicos, recepción y administradores del sistema.</p>
+                    </div>
+                    <button class="btn btn-success" onclick="abrirModalCrearUsuario()">
+                        <i class="bi bi-person-plus-fill"></i> Nuevo usuario
+                    </button>
+                </div>
 
-            <a class="navbar-brand fw-bold" href="dashboard-admin.html">
+                <div class="mb-3">
+                    <div class="input-group" style="max-width: 420px;">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <label class="visually-hidden" for="buscarUsuario">Buscar usuario</label>
+                        <input type="text" id="buscarUsuario" class="form-control"
+                            placeholder="Buscar por nombre, correo, rol o código...">
+                    </div>
+                    <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaUsuarios"></span>
+                </div>
 
-                <i class="bi bi-headset"></i>
+                <div>
+                    <div class="card shadow">
+                        <div class="card-header bg-itdesk text-white">
+                            Usuarios registrados
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle table-mobile-cards">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="id_usuario">Código</th>
+                                            <th data-sort="nombre">Nombre</th>
+                                            <th data-sort="correo">Correo</th>
+                                            <th data-sort="rol">Rol</th>
+                                            <th data-sort="estado">Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaUsuarios"></tbody>
+                                </table>
+                            </div>
+                            <div id="verMasUsuarios" class="d-none mt-3 text-center"></div>
+                        </div>
+                    </div>
+                </div>
 
-                ITDESK
-
-            </a>
-
-            <div class="ms-auto">
-
-                <a href="dashboard-admin.html" class="btn btn-outline-light">
-
-                    <i class="bi bi-arrow-left"></i>
-
-                    Volver
-
-                </a>
-
-            </div>
-
+            </main>
+            <div id="footer-placeholder"></div>
         </div>
-
-    </nav>
-
-    <div class="container my-5">
-
-        <h2 class="mb-4">
-
-            Gestión de Usuarios
-
-        </h2>
-
-        <div class="row mb-3">
-
-            <div class="col-md-6">
-
-                <input type="text" id="buscarUsuario" class="form-control" placeholder="Buscar usuario..."
-                    onkeyup="buscarUsuarios()">
-
-            </div>
-
-        </div>
-
-        <div class="card shadow">
-
-            <div class="card-header bg-itdesk text-white">
-
-                Usuarios Registrados
-
-            </div>
-
-            <div class="card-body">
-
-                <table class="table table-hover">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Usuario</th>
-
-                            <th>Rol</th>
-
-                            <th>Estado</th>
-
-                            <th>Acciones</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="tablaUsuarios">
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
     </div>
 
-    <!-- MODAL EDITAR USUARIO -->
-
-    <div class="modal fade" id="modalEditar" tabindex="-1">
-
+    <!-- MODAL RESETEAR CONTRASEÑA (Admin fija una nueva sin conocer la actual) -->
+    <div class="modal fade" id="modalResetearClave" tabindex="-1">
         <div class="modal-dialog">
-
             <div class="modal-content">
-
                 <div class="modal-header bg-itdesk text-white">
-
-                    <h5 class="modal-title">
-
-                        Editar Usuario
-
-                    </h5>
-
+                    <h5 class="modal-title">Resetear contraseña</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-
                 </div>
-
-                <div class="modal-body">
-
-                    <input type="hidden" id="editarIndex">
-
-                    <div class="mb-3">
-
-                        <label>Nombre</label>
-
-                        <input type="text" id="editarNombre" class="form-control">
-
+                <form id="formResetearClave" onsubmit="resetearClaveUsuario(event)">
+                    <div class="modal-body">
+                        <p class="text-muted small" id="resetearClaveUsuarioNombre"></p>
+                        <div class="mb-3">
+                            <label class="form-label" for="resetearClaveNueva">Contraseña nueva <span class="campo-requerido">*</span></label>
+                            <input type="password" id="resetearClaveNueva" class="form-control" required minlength="8" autocomplete="new-password">
+                            <div class="form-text">Mínimo 8 caracteres. Comunicásela al usuario por fuera del sistema.</div>
+                        </div>
                     </div>
-
-                    <div class="mb-3">
-
-                        <label>Correo</label>
-
-                        <input type="email" id="editarCorreo" class="form-control">
-
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Resetear contraseña</button>
                     </div>
-
-                    <div class="mb-3">
-
-                        <label>Teléfono</label>
-
-                        <input type="text" id="editarTelefono" class="form-control">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label>Departamento</label>
-
-                        <input type="text" id="editarDepartamento" class="form-control">
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label>Rol</label>
-
-                        <select id="editarRol" class="form-select">
-
-                            <option value="cliente">Cliente</option>
-
-                            <option value="tecnico">Técnico</option>
-
-                            <option value="admin">Administrador</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-
-                        Cancelar
-
-                    </button>
-
-                    <button class="btn btn-primary" onclick="guardarEdicionUsuario()">
-
-                        Guardar
-
-                    </button>
-
-                </div>
-
+                </form>
             </div>
-
         </div>
-
     </div>
-    <script src="js/script.js"></script>
+
+    <!-- MODAL NUEVO USUARIO (alta de cliente/tecnico/admin) -->
+    <div class="modal fade" id="modalCrear" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title">Nuevo usuario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formCrearUsuario" onsubmit="crearUsuarioAdmin(event)">
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3"><span class="campo-requerido">*</span> campo obligatorio</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearNombre">Nombre <span class="campo-requerido">*</span></label>
+                                <input type="text" id="crearNombre" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearApellido">Apellido <span class="campo-requerido">*</span></label>
+                                <input type="text" id="crearApellido" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearCorreo">Correo <span class="campo-requerido">*</span></label>
+                                <input type="email" id="crearCorreo" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearTelefono">Teléfono</label>
+                                <input type="text" id="crearTelefono" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearNumDocumento">Número de documento (cédula) <span class="campo-requerido">*</span></label>
+                                <input type="text" id="crearNumDocumento" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearRol">Rol</label>
+                                <select id="crearRol" class="form-select">
+                                    <option value="Cliente">Cliente</option>
+                                    <option value="Tecnico">Técnico</option>
+                                    <option value="Recepcionista">Recepcionista</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="crearPassword">Contraseña <span class="campo-requerido">*</span></label>
+                                <input type="password" id="crearPassword" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/codigos.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/ordenar.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 
 </html>

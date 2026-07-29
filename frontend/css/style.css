@@ -2,24 +2,16 @@
 
 /*==========================
     ITDESK - STYLE.CSS
+    Consume los tokens definidos en tokens.css (cargado antes que este
+    archivo en cada página). Ninguna regla de acá debería tener un color,
+    radio o sombra "suelto" — si hace falta uno nuevo, se agrega como token.
 ===========================*/
-:root {
-    --azul: #0A192F;
-    --azul2: #112240;
-    --azul3: #1D4ED8;
-    --gris: #4B5563;
-    --grisHover: #374151;
-    --blanco: #FFFFFF;
-    --fondo: #F8FAFC;
-    --texto: #334155;
-    --borde: #E2E8F0;
-}
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-base);
 }
 
 html {
@@ -29,10 +21,11 @@ html {
 body {
     background: var(--fondo);
     color: var(--texto);
+    transition: background-color var(--transition-base), color var(--transition-base);
 }
 
 /*==========================
-NAVBAR
+NAVBAR (chrome de marca: fijo en ambos temas)
 ===========================*/
 .bg-itdesk {
     background: var(--azul) !important;
@@ -40,7 +33,7 @@ NAVBAR
 
 .navbar {
     background: var(--azul) !important;
-    box-shadow: 0 5px 18px rgba(0, 0, 0, .25);
+    box-shadow: var(--shadow-2);
 }
 
 .navbar-brand {
@@ -53,32 +46,346 @@ NAVBAR
     color: #dbeafe !important;
 }
 
-.nav-link {
+/* Estas tres reglas son solo para la navbar publica (index.html) — .nav-link
+   es tambien la clase base de Bootstrap para nav-tabs/nav-pills, asi que se
+   acotan a .navbar para no filtrarse a pestañas u otros componentes. */
+.navbar .nav-link {
     color: #d1d5db !important;
-    transition: .3s;
+    transition: var(--transition-base);
     font-weight: 500;
 }
 
-.nav-link:hover {
+.navbar .nav-link:hover {
     color: #60A5FA !important;
 }
 
-.nav-link.active {
+.navbar .nav-link.active {
     color: #fff !important;
     font-weight: bold;
 }
 
+.theme-toggle {
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .16);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-base);
+    cursor: pointer;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+}
+
 /*==========================
-HERO
+APP SHELL (sidebar + contenido) — pantallas protegidas por rol
+===========================*/
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch;
+}
+
+.sidebar {
+    width: 260px;
+    flex: none;
+    background: var(--azul);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1040;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 20px 18px;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    color: rgba(255, 255, 255, .68);
+    font-weight: 500;
+    font-size: .92rem;
+    text-decoration: none;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-link i {
+    font-size: 1.05rem;
+    width: 20px;
+    text-align: center;
+    flex: none;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+}
+
+.sidebar-link:focus-visible,
+.theme-toggle:focus-visible,
+.topbar-menu-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.nav-tabs .nav-link:focus-visible {
+    outline: 2px solid var(--accent-600);
+    outline-offset: -2px;
+}
+
+.sidebar-link.active {
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    font-weight: 600;
+}
+
+.sidebar-link-danger {
+    color: #FCA5A5;
+}
+
+.sidebar-link-danger:hover {
+    background: rgba(220, 38, 38, .18);
+    color: #FEE2E2;
+}
+
+.sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    font-weight: 700;
+    flex: none;
+}
+
+/* Version grande del mismo avatar de iniciales, para perfil.html — mismo
+   componente que el del sidebar, no un icono generico aparte (Fase 2.5,
+   Hallazgo 4). */
+.perfil-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--accent-100);
+    color: var(--accent-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    font-weight: 700;
+}
+
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.sidebar-user-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: .85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+    color: rgba(255, 255, 255, .55);
+    font-size: .74rem;
+}
+
+.sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sidebar-actions .sidebar-link {
+    flex: 1;
+}
+
+.app-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-content {
+    flex: 1;
+    padding: 32px 40px;
+}
+
+.app-footer {
+    background: transparent;
+    color: var(--ink-300);
+    padding: 18px 40px;
+    text-align: center;
+    font-size: var(--fs-caption);
+    border-top: 1px solid var(--border);
+}
+
+.topbar-mobile {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--azul);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.topbar-brand {
+    font-weight: 700;
+    color: #fff;
+}
+
+.topbar-menu-btn {
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .16);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
+/* Panel de notificaciones (campanita del sidebar) — se mueve a
+   document.body en layout.js para escapar del overflow:auto de .sidebar,
+   asi que se posiciona y estiliza como su propio overlay flotante. */
+.notif-panel {
+    display: none;
+    position: fixed;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2);
+    z-index: 1080;
+}
+
+.notif-panel.show {
+    display: block;
+}
+
+.notif-panel-header {
+    position: sticky;
+    top: 0;
+    background: var(--surface-1);
+    z-index: 1;
+}
+
+@media (max-width: 991.98px) {
+    .app-shell {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform var(--transition-slow);
+        box-shadow: var(--shadow-3);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(7, 13, 24, .55);
+        z-index: 1035;
+    }
+
+    .sidebar-backdrop.show {
+        display: block;
+    }
+
+    .topbar-mobile {
+        display: flex;
+    }
+
+    .app-content {
+        padding: 20px 16px;
+    }
+
+    .app-footer {
+        padding: 16px;
+    }
+}
+
+/*==========================
+HERO (chrome de marca: fijo en ambos temas)
 ===========================*/
 .hero {
     background: linear-gradient(135deg, var(--azul), var(--azul2));
     color: white;
-    padding: 100px 0;
+    padding: var(--space-8) 0;
 }
 
-.hero h1 {
-    font-size: 3rem;
+.hero h1,
+.hero h2 {
+    color: #fff;
+    font-size: var(--fs-display);
     font-weight: 700;
 }
 
@@ -87,53 +394,203 @@ HERO
 }
 
 /*==========================
-SECCIONES
+UTILIDADES DE BOOTSTRAP RETEMATIZADAS
+(Bootstrap las trae con colores fijos y !important — se sobreescriben para
+que tambien respondan a los tokens claro/oscuro)
 ===========================*/
-section {
-    padding: 60px 0;
+.bg-light {
+    background-color: var(--surface-2) !important;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-    color: var(--azul);
-    font-weight: 700;
+.text-muted {
+    color: var(--ink-500) !important;
 }
+
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end {
+    border-color: var(--border) !important;
+}
+
+.list-group-item {
+    background: var(--surface-1);
+    color: var(--texto);
+    border-color: var(--border);
+}
+
+/*==========================
+SECCIONES / TIPOGRAFÍA
+===========================*/
+/* Solo para las secciones reales de la landing publica (index.html) — NO
+   usar <section> como contenedor generico de layout dentro de las paginas
+   protegidas, ese padding no es para eso (ver Fase 2.5, Hallazgo 1). */
+.landing-section {
+    padding: var(--space-7) 0;
+}
+
+h1, h2, h3, h4, h5 {
+    color: var(--ink-900);
+    font-weight: 700;
+    text-wrap: balance;
+}
+
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+h4, h5 { font-size: var(--fs-h4); }
 
 p {
-    color: #475569;
+    color: var(--ink-500);
+}
+
+.page-head {
+    margin-bottom: var(--space-6);
+}
+
+.page-head h2 {
+    margin-bottom: 4px;
+}
+
+.page-head p {
+    margin-bottom: 0;
+}
+
+.eyebrow {
+    display: inline-block;
+    font-size: var(--fs-caption);
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent-600);
 }
 
 /*==========================
 CARDS
 ===========================*/
 .card {
-    border: none;
-    border-radius: 18px;
-    background: white;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
-    transition: .35s;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-1);
+    transition: var(--transition-base);
+    color: var(--texto);
 }
 
 .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 35px rgba(15, 23, 42, .18);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-2);
 }
 
 .card-header {
     background: var(--azul) !important;
     color: white !important;
     font-weight: 600;
+    border-bottom: none;
+}
+
+/* los h1-h5 de arriba fijan color por elemento, lo que le gana a la
+   herencia del color blanco del .card-header (una regla que apunta directo
+   al elemento siempre le gana a un valor heredado). Se reafirma aqui. */
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5 {
+    color: inherit;
+}
+
+.card-body { color: var(--texto); }
+
+/* ---- Tipos de card (mismo lenguaje visual, distinto proposito) ---- */
+
+/* Estadística: numero como elemento dominante, icono chico de apoyo — no el
+   patron de icono gigante centrado tipico de templates de admin (Fase 2.5,
+   Hallazgo 2). El acento de color se reserva para la metrica que de verdad
+   pide atencion en cada pantalla, no para las cuatro tarjetas a la vez. */
+.card-stat .card-body {
+    padding: 18px 20px;
+}
+
+.card-stat-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.card-stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex: none;
+    background: var(--surface-2);
+    color: var(--ink-500);
+}
+
+.card-stat-icon.tone-info { background: var(--info-bg); color: var(--info); }
+.card-stat-icon.tone-warning { background: var(--warning-bg); color: var(--warning); }
+.card-stat-icon.tone-success { background: var(--success-bg); color: var(--success); }
+.card-stat-icon.tone-danger { background: var(--danger-bg); color: var(--danger); }
+.card-stat-icon.tone-accent { background: var(--accent-100); color: var(--accent-600); }
+
+.card-stat-label {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--ink-500);
+}
+
+.card-stat-value {
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink-900);
+    font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+.card-stat-sub {
+    font-size: var(--fs-caption);
+    color: var(--ink-500);
+    margin-top: 4px;
+}
+
+/* Info: contenido estatico de apoyo (cliente/equipo, accesos rapidos,
+   actividad reciente, documentos relacionados) — plano con borde, no
+   flotante. La sombra se reserva para lo que realmente eleva sobre la
+   pagina (modales, dropdowns, hover) o para el bloque de trabajo principal
+   de la pantalla (Fase 2.5, Hallazgo 3). Anula el utilitario .shadow de
+   Bootstrap si quedo en el HTML. */
+.card-info {
+    box-shadow: none !important;
+    border: 1px solid var(--border);
+}
+
+.card-info .card-header {
+    background: var(--surface-2) !important;
+    color: var(--ink-900) !important;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Detalle: contenedor principal de una vista de registro único */
+.card-detail {
+    padding: 0;
 }
 
 /*==========================
 BOTONES
 ===========================*/
 .btn {
-    border-radius: 10px;
-    transition: .3s;
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
     font-weight: 600;
 }
 
@@ -141,59 +598,181 @@ BOTONES
     transform: translateY(-2px);
 }
 
+.btn:active {
+    transform: translateY(0);
+    filter: brightness(.94);
+}
+
+.btn:disabled,
+.btn.disabled {
+    transform: none;
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--accent-600);
+    outline-offset: 2px;
+}
+
 .btn-primary {
-    background: var(--azul3);
-    border: none;
+    background: var(--accent-600);
+    border-color: var(--accent-600);
 }
 
 .btn-primary:hover {
-    background: #2563EB;
+    background: var(--accent-500);
+    border-color: var(--accent-500);
 }
 
 .btn-secondary {
-    background: var(--gris);
-    border: none;
+    background: var(--ink-500);
+    border-color: var(--ink-500);
     color: white;
 }
 
 .btn-secondary:hover {
-    background: var(--grisHover);
+    background: var(--ink-700);
+    border-color: var(--ink-700);
 }
 
 .btn-success {
-    background: #10B981;
-    border: none;
+    background: var(--success);
+    border-color: var(--success);
 }
 
 .btn-success:hover {
-    background: #059669;
+    filter: brightness(.92);
+}
+
+.btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
 }
 
 .btn-danger:hover {
-    background: #DC2626;
+    filter: brightness(.92);
+}
+
+.btn-outline-primary {
+    color: var(--accent-600);
+    border-color: var(--accent-600);
+}
+
+.btn-outline-primary:hover {
+    background: var(--accent-600);
+    border-color: var(--accent-600);
+}
+
+.btn-outline-secondary {
+    color: var(--ink-500);
+    border-color: var(--border);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--surface-2);
+    color: var(--ink-900);
+    border-color: var(--border);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink-500);
+}
+
+.btn-ghost:hover {
+    background: var(--surface-2);
+    color: var(--ink-900);
+}
+
+.btn-link {
+    font-weight: 600;
+    color: var(--accent-600);
 }
 
 /*==========================
 FORMULARIOS
 ===========================*/
+.input-group-text {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--ink-500);
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: var(--fs-small);
+    color: var(--ink-700);
+}
+
+.campo-requerido {
+    color: var(--danger);
+}
+
 .form-control,
 .form-select {
-    border-radius: 10px;
-    border: 1px solid var(--borde);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
     padding: 12px;
+    background: var(--surface-1);
+    color: var(--texto);
+}
+
+/* --ink-300 no alcanza 4.5:1 sobre el fondo del input en ninguno de los
+   dos temas (verificado: 2.56:1 claro, 3.66:1 oscuro) — se usa en otros 8
+   lugares (bordes, iconos deshabilitados) donde ese estándar no aplica, asi
+   que el placeholder usa su propio token (--placeholder, tokens.css) en vez
+   de tocar --ink-300. */
+.form-control::placeholder {
+    color: var(--placeholder);
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: #2563EB;
-    box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .15);
+    border-color: var(--accent-600);
+    box-shadow: 0 0 0 .2rem rgba(var(--accent-600-rgb), .15);
+    background: var(--surface-1);
+    color: var(--texto);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background: var(--surface-2);
+    color: var(--ink-300);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--danger);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    box-shadow: 0 0 0 .2rem rgba(220, 38, 38, .15);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--success);
+}
+
+.invalid-feedback {
+    color: var(--danger);
+    font-size: var(--fs-caption);
+}
+
+.valid-feedback {
+    color: var(--success);
+    font-size: var(--fs-caption);
 }
 
 /*==========================
 TABLAS
 ===========================*/
 .table {
-    background: white;
+    background: var(--surface-1);
+    color: var(--texto);
 }
 
 .table thead {
@@ -201,16 +780,136 @@ TABLAS
     color: white;
 }
 
-.table-hover tbody tr:hover {
-    background: #EEF4FF;
+/* Bootstrap pinta el fondo/color por celda via variables propias
+   (--bs-table-bg) con una regla mas especifica que ".table thead" — se
+   fuerza aca para que el header siempre quede navy con texto blanco. */
+.table > thead > tr > th {
+    background-color: var(--azul) !important;
+    color: #fff !important;
+    font-size: var(--fs-caption);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: none;
 }
 
 /*==========================
-BADGES
+ENCABEZADOS ORDENABLES (js/ordenar.js) — el <th> ya es navy con texto
+blanco fijo en los dos temas (ver regla de arriba), asi que el estado
+hover/activo se resuelve con opacidad/fondo semitransparente, no con un
+color de texto distinto (uno oscuro seria invisible sobre navy).
+===========================*/
+.th-ordenable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 22px !important;
+}
+
+.th-ordenable:hover {
+    background-color: rgba(255, 255, 255, .1) !important;
+}
+
+.th-ordenable:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+}
+
+.th-ordenable::after {
+    content: "\2195";
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: .45;
+    font-size: .8em;
+}
+
+.th-ordenable.th-orden-asc::after {
+    content: "\2191";
+    opacity: 1;
+}
+
+.th-ordenable.th-orden-desc::after {
+    content: "\2193";
+    opacity: 1;
+}
+
+.table > tbody > tr > * {
+    background-color: var(--surface-1);
+    border-bottom-color: var(--border);
+    color: var(--texto);
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: var(--accent-100);
+}
+
+/* Cabecera fija al hacer scroll en tablas largas (sin topbar fijo en
+   desktop que la tape, es seguro pegarla a la parte superior). */
+.table-responsive > .table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.table-group-row td {
+    background-color: var(--surface-2) !important;
+    color: var(--ink-500) !important;
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 8px 16px !important;
+}
+
+.table-group-row:hover td {
+    background-color: var(--surface-2) !important;
+}
+
+/* Ultimo ticket que el tecnico abrio en esta pestaña (ver tecnico.js) */
+.fila-reciente td {
+    background-color: var(--accent-100) !important;
+    border-left: 3px solid var(--accent-600);
+}
+
+/*==========================
+BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
 ===========================*/
 .badge {
     padding: 8px 12px;
     font-weight: 500;
+}
+
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.badge-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+}
+
+.badge-pill.tone-success { background: var(--success-bg); color: var(--success); }
+.badge-pill.tone-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-pill.tone-danger  { background: var(--danger-bg);  color: var(--danger); }
+.badge-pill.tone-info    { background: var(--info-bg);    color: var(--info); }
+.badge-pill.tone-accent  { background: var(--accent-100); color: var(--accent-600); }
+.badge-pill.tone-neutral {
+    background: var(--surface-2);
+    color: var(--ink-500);
+    border: 1px solid var(--border);
 }
 
 /*==========================
@@ -220,45 +919,332 @@ ICONOS
 .display-2,
 .display-3,
 .display-4 {
-    color: var(--azul3);
+    color: var(--accent-600);
 }
 
 .card i {
-    transition: .35s;
+    transition: var(--transition-base);
 }
 
 .card:hover i {
-    transform: scale(1.1);
+    transform: scale(1.08);
+}
+
+/*==========================
+PESTAÑAS (nav-tabs) — Bootstrap asume una tarjeta blanca por defecto
+===========================*/
+.nav-tabs {
+    border-bottom-color: var(--border);
+}
+
+.nav-tabs .nav-link {
+    color: var(--ink-500);
+    border: 1px solid transparent;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--border) var(--border) transparent;
+    color: var(--ink-900);
+    isolation: isolate;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-600);
+    background-color: var(--surface-1);
+    border-color: var(--border) var(--border) var(--surface-1);
+}
+
+/*==========================
+PESTAÑAS DENTRO DE UN HEADER DE CARD OSCURO (detalle de ticket)
+===========================*/
+.card-header.bg-itdesk .nav-tabs {
+    border-bottom: none;
+}
+
+.card-header.bg-itdesk .nav-tabs .nav-link {
+    color: rgba(255, 255, 255, .65);
+    border: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    padding: 8px 16px;
+    font-size: .88rem;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.card-header.bg-itdesk .nav-tabs .nav-link:hover {
+    color: #fff;
+}
+
+.card-header.bg-itdesk .nav-tabs .nav-link.active {
+    color: var(--azul);
+    background: var(--surface-1);
+}
+
+/*==========================
+MODALES / DROPDOWNS / TOASTS (Bootstrap con colores fijos por defecto)
+===========================*/
+.modal-content {
+    background-color: var(--surface-1);
+    color: var(--texto);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.modal-header {
+    border-bottom-color: var(--border);
+}
+
+.modal-footer {
+    border-top-color: var(--border);
+}
+
+/*==========================
+ASIGNAR TECNICO (modal en dashboard-admin.html) — antes era un <select>
+apretado adentro de una celda de tabla junto a un boton; ahora la tabla
+solo abre este modal, y aca adentro cada tecnico es una fila grande,
+clickeable con el teclado, en vez de un <option> minusculo.
+===========================*/
+.ticket-pick-contexto {
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-small);
+}
+
+.ticket-pick-contexto strong {
+    color: var(--ink-900);
+}
+
+.tecnico-pick {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.tecnico-pick:hover {
+    border-color: var(--accent-600);
+    background: var(--surface-2);
+}
+
+.tecnico-pick:has(input:checked) {
+    border-color: var(--accent-600);
+    background: var(--accent-100);
+}
+
+.tecnico-pick:has(input:focus-visible) {
+    outline: 2px solid var(--accent-600);
+    outline-offset: 1px;
+}
+
+.tecnico-pick input[type="radio"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.tecnico-pick-info {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.tecnico-pick-nombre {
+    font-weight: 600;
+    color: var(--ink-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*==========================
+VISTA PREVIA DE ADJUNTO (composer de Actividad / Notas privadas) — se
+muestra tanto si el archivo se eligio con el <input type=file> como si se
+pego una captura de pantalla con Ctrl+V (ver activarPegarCaptura en
+ticket-tecnico.js). Sin esto, pegar una captura no da ninguna confirmacion
+visual de que realmente se adjunto algo.
+===========================*/
+.adjunto-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.adjunto-preview-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex: none;
+}
+
+.adjunto-preview span {
+    flex: 1;
+    color: var(--ink-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*==========================
+IMAGEN ADJUNTA EN UN COMENTARIO (timeline publico/privado) — se ve la foto
+directo en el comentario, sin tener que descargarla primero; un click la
+agranda en el lightbox (.lightbox-*, UI.mostrarImagen en ui.js).
+===========================*/
+.adjunto-imagen-wrap {
+    display: inline-block;
+}
+
+.adjunto-imagen-thumb {
+    display: block;
+    width: 160px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    cursor: zoom-in;
+    transition: var(--transition-fast);
+}
+
+.adjunto-imagen-thumb:hover {
+    opacity: .85;
+}
+
+.adjunto-imagen-loading {
+    width: 100px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--ink-500);
+}
+
+.lightbox-content {
+    background: rgba(7, 13, 24, .96);
+    border: none;
+}
+
+.lightbox-img {
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: var(--radius-md);
+}
+
+/*==========================
+ESTRELLAS DE CALIFICACION (encuesta de satisfaccion, ticket-cliente.html)
+===========================*/
+.estrellas-picker {
+    display: flex;
+    gap: 6px;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.estrellas-picker i {
+    cursor: pointer;
+    color: var(--ink-300);
+    transition: var(--transition-fast);
+}
+
+.estrellas-picker i:hover,
+.estrellas-picker i.activa {
+    color: var(--warning);
+}
+
+.estrellas-estaticas {
+    font-size: 1.25rem;
+    color: var(--warning);
+}
+
+.modal-backdrop {
+    --bs-backdrop-bg: #070D18;
+}
+
+.dropdown-menu {
+    background-color: var(--surface-1);
+    color: var(--texto);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-2);
+}
+
+.dropdown-item {
+    color: var(--texto);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--surface-2);
+    color: var(--ink-900);
+}
+
+.dropdown-divider {
+    border-top-color: var(--border);
+}
+
+.toast {
+    box-shadow: var(--shadow-2);
 }
 
 /*==========================
 LOGIN
 ===========================*/
+/* Fondo con un leve tinte de marca en vez de gris plano — la primera
+   pantalla que ve cualquiera no deberia sentirse como un tutorial de
+   Bootstrap (Fase 2.5, Hallazgo 6). */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background:
+        radial-gradient(circle at 12% 15%, rgba(var(--accent-600-rgb), .12), transparent 42%),
+        radial-gradient(circle at 88% 85%, rgba(var(--accent-600-rgb), .08), transparent 46%),
+        var(--surface-0);
+}
+
 .login-card {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, .15);
+    background: var(--surface-1);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-3);
+    border: 1px solid var(--border);
 }
 
 .login-title {
-    color: var(--azul);
+    color: var(--ink-900);
 }
 
 /*==========================
 ESTADISTICAS
 ===========================*/
 .stats-card {
-    border-left: 5px solid var(--azul3);
+    border-left: 5px solid var(--accent-600);
 }
 
 /*==========================
-FOOTER
+FOOTER (chrome de marca: fijo en ambos temas)
 ===========================*/
 footer {
     background: var(--azul);
     color: white;
-    padding: 25px;
-    margin-top: 60px;
+    padding: var(--space-5);
+    margin-top: var(--space-7);
     text-align: center;
 }
 
@@ -282,17 +1268,443 @@ RESPONSIVE
     .navbar-brand {
         font-size: 1.3rem;
     }
+
+    .step-indicator {
+        gap: 6px;
+    }
+
+    .step-indicator .step-label {
+        display: none;
+    }
+
+    .timeline {
+        padding-left: 22px;
+    }
+
+    .timeline-marker {
+        left: -22px;
+    }
+
+    dl.row dt,
+    dl.row dd {
+        text-align: left;
+    }
 }
 
 /*====================================
 ICONO HEADSET LOGIN
 ====================================*/
+/* A diferencia del navbar/sidebar/hero (chrome fijo, siempre oscuro), la
+   card de login SI sigue el tema — el icono tenia --azul fijo y quedaba
+   practicamente invisible sobre la card oscura en modo oscuro (Fase 2.5,
+   verificacion visual). Debe ser tematico como el resto del contenido. */
 .login-icon {
-    color: #0A192F;
-    transition: .3s;
+    color: var(--ink-900);
+    transition: var(--transition-base);
 }
 
 .login-icon:hover {
-    color: #60A5FA;
+    color: var(--accent-600);
     transform: scale(1.08);
+}
+
+/*==========================
+BREADCRUMB
+===========================*/
+.breadcrumb-itdesk {
+    background: transparent;
+    padding: 0;
+    margin-bottom: var(--space-2);
+    font-size: var(--fs-small);
+}
+
+.breadcrumb-itdesk a {
+    color: var(--ink-500);
+    text-decoration: none;
+}
+
+.breadcrumb-itdesk a:hover {
+    color: var(--accent-600);
+    text-decoration: underline;
+}
+
+.breadcrumb-itdesk .breadcrumb-item.active {
+    color: var(--ink-900);
+}
+
+.breadcrumb-itdesk .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--ink-300);
+}
+
+/*==========================
+TARJETAS CON ACENTO LATERAL
+===========================*/
+.card-accent {
+    border-left: 4px solid var(--accent-600);
+}
+
+.card-accent-danger {
+    border-left-color: var(--danger);
+}
+
+.card-accent-warning {
+    border-left-color: var(--warning);
+}
+
+.card-accent-success {
+    border-left-color: var(--success);
+}
+
+.card-accent-info {
+    border-left-color: var(--info);
+}
+
+.card-accent-secondary {
+    border-left-color: var(--ink-300);
+}
+
+/*==========================
+EMPTY STATE
+===========================*/
+.empty-state {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--ink-300);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--border);
+}
+
+.empty-state p {
+    color: var(--ink-300);
+    margin: 0;
+}
+
+/*==========================
+SKELETON LOADING
+===========================*/
+.skeleton-line {
+    display: block;
+    height: 14px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    background: linear-gradient(90deg, var(--border) 25%, var(--surface-2) 37%, var(--border) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.skeleton-row td {
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+/*==========================
+TIMELINE (PUBLIC / PRIVATE LOG)
+===========================*/
+.timeline {
+    position: relative;
+    padding-left: 34px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline-date-divider {
+    margin: 0 0 var(--space-3) -34px;
+    padding-left: 34px;
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-300);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: var(--space-5);
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -34px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    background: var(--accent-100);
+    color: var(--accent-600);
+    border: 2px solid var(--surface-0);
+    box-shadow: 0 0 0 1px var(--border);
+}
+
+.timeline-marker.tone-danger { background: var(--danger-bg); color: var(--danger); }
+.timeline-marker.tone-warning { background: var(--warning-bg); color: var(--warning); }
+.timeline-marker.tone-success { background: var(--success-bg); color: var(--success); }
+.timeline-marker.tone-info { background: var(--info-bg); color: var(--info); }
+.timeline-marker.tone-neutral { background: var(--surface-2); color: var(--ink-500); }
+
+.timeline-content {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    color: var(--texto);
+}
+
+.timeline-private .timeline-marker {
+    background: var(--ink-500);
+    border-color: var(--surface-2);
+}
+
+/*==========================
+INDICADOR DE PASOS (WIZARD RECEPCION)
+===========================*/
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+}
+
+.step-indicator .step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-300);
+    font-weight: 600;
+}
+
+.step-indicator .step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    color: var(--ink-500);
+    font-size: .9rem;
+    border: 1px solid var(--border);
+}
+
+.step-indicator .step.active .step-circle,
+.step-indicator .step.done .step-circle {
+    background: var(--accent-600);
+    color: white;
+    border-color: transparent;
+}
+
+.step-indicator .step.active {
+    color: var(--ink-900);
+}
+
+.step-indicator .step.done .step-circle {
+    background: var(--success);
+}
+
+.step-indicator .step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    min-width: 24px;
+}
+
+/*==========================
+TABLA RESPONSIVE -> TARJETAS EN MOVIL
+===========================*/
+@media (max-width: 767px) {
+    table.table-mobile-cards thead {
+        display: none;
+    }
+
+    table.table-mobile-cards,
+    table.table-mobile-cards tbody,
+    table.table-mobile-cards tr,
+    table.table-mobile-cards td {
+        display: block;
+        width: 100%;
+    }
+
+    table.table-mobile-cards tr {
+        margin-bottom: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 10px 14px;
+        box-shadow: var(--shadow-1);
+    }
+
+    table.table-mobile-cards td {
+        border: none;
+        padding: 6px 0;
+        text-align: right;
+    }
+
+    table.table-mobile-cards td[data-label]::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: 600;
+        color: var(--ink-900);
+        margin-right: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .btn, body, .sidebar, .sidebar-link, .theme-toggle, .nav-tabs .nav-link {
+        transition: none;
+    }
+}
+
+/*==========================
+IMPRESION DE DOCUMENTOS (factura / cotizacion) — no existe factura.html como
+pagina propia: el documento se arma en #areaImprimir (js/imprimir.js) y se
+imprime con window.print(); "Guardar como PDF" del navegador es el export
+real, sin agregar ninguna libreria. #areaImprimir vive oculto en pantalla en
+cualquier tema/idioma y solo se muestra durante la impresion — colores fijos
+(no tokens de tema), porque un documento impreso siempre es blanco y negro,
+sin importar si el usuario tenia modo oscuro activado en pantalla.
+===========================*/
+#areaImprimir {
+    display: none;
+}
+
+.documento-imprimible {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+    font-size: 13px;
+    color: #000;
+    background: #fff;
+}
+
+.doc-header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.doc-marca {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .05em;
+}
+
+.doc-subtitulo {
+    font-size: 12px;
+    color: #444;
+}
+
+.doc-tipo {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    margin-top: 8px;
+}
+
+.doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.doc-seccion {
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.doc-seccion-titulo {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+}
+
+.doc-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.doc-tabla th,
+.doc-tabla td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.doc-totales {
+    margin-left: auto;
+    width: 260px;
+    margin-bottom: 12px;
+}
+
+.doc-totales > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.doc-total-final {
+    font-weight: 700;
+    border-top: 1px solid #000;
+    margin-top: 4px;
+    padding-top: 4px !important;
+}
+
+.doc-footer > div {
+    margin-bottom: 4px;
+}
+
+@media print {
+    @page {
+        margin: 1.5cm;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #areaImprimir,
+    #areaImprimir * {
+        visibility: visible;
+    }
+
+    #areaImprimir {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
 }

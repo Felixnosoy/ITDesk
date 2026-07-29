@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Documentos | ITDESK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-protegido="Cliente" data-footer="Mis Documentos">
+    <div class="app-shell">
+        <div id="sidebar-placeholder"></div>
+        <div class="app-main">
+            <div id="topbar-mobile-placeholder"></div>
+            <main class="app-content">
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-itdesk">
+                        <li class="breadcrumb-item"><a href="dashboard-cliente.html">Inicio</a></li>
+                        <li class="breadcrumb-item active">Documentos</li>
+                    </ol>
+                </nav>
+
+                <div class="page-head">
+                    <h2 class="mb-1">Mis documentos</h2>
+                    <p class="text-muted mb-0">Cotizaciones y facturas asociadas a tus tickets. Solo lectura.</p>
+                </div>
+
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tabCotizaciones" data-bs-toggle="tab"
+                            data-bs-target="#panelCotizaciones" type="button" role="tab">
+                            <i class="bi bi-file-earmark-text"></i> Cotizaciones
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tabFacturas" data-bs-toggle="tab"
+                            data-bs-target="#panelFacturas" type="button" role="tab">
+                            <i class="bi bi-receipt"></i> Facturas
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="panelCotizaciones" role="tabpanel">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle table-mobile-cards">
+                                        <thead>
+                                            <tr>
+                                                <th data-sort="id_cotizacion">N.°</th>
+                                                <th data-sort="fecha_creacion">Fecha</th>
+                                                <th data-sort="estado">Estado</th>
+                                                <th data-sort="total" class="text-end">Total</th>
+                                                <th>Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tablaCotizaciones">
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">Cargando...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="verMasCotizaciones" class="d-none mt-3 text-center"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="panelFacturas" role="tabpanel">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle table-mobile-cards">
+                                        <thead>
+                                            <tr>
+                                                <th data-sort="id_factura">N.°</th>
+                                                <th data-sort="fecha_emision">Fecha</th>
+                                                <th data-sort="estado">Estado</th>
+                                                <th data-sort="total" class="text-end">Total</th>
+                                                <th>Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tablaFacturas">
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">Cargando...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="verMasFacturas" class="d-none mt-3 text-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+            <div id="footer-placeholder"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE DE DOCUMENTO -->
+    <div class="modal fade" id="modalDocumento" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-itdesk text-white">
+                    <h5 class="modal-title" id="modalDocumentoTitulo">Documento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalDocumentoBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnImprimirDocumento" onclick="imprimirDocumentoActual(event)">
+                        <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de la vista imprimible (factura/cotizacion) — oculto en
+         pantalla, poblado por js/imprimir.js justo antes de window.print() -->
+    <div id="areaImprimir"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/codigos.js"></script>
+    <script src="js/ordenar.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/imprimir.js"></script>
+    <script src="js/documentos.js"></script>
+</body>
+
+</html>

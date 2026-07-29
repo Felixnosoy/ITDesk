@@ -14,24 +14,24 @@ router.use(autenticarToken);
 // crear un equipo
 
 router.post(
-    "/", 
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO), 
+    "/",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     equipoController.crearEquipo
 )
 
 //obtener todos los equipos
 
 router.get(
-    "/", 
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO), 
+    "/",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     equipoController.obtenerEquipos
 )
 
 // obtener todos los equipos de un usuario
 
 router.get(
-    "/usuario/:id",
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    "/usuario/:id_usuario",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     equipoController.obtenerEquiposDeUsuarioPorId
 )
 

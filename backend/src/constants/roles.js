@@ -1,5 +1,6 @@
 module.exports = {
     ADMINISTRADOR: "Administrador",
     TECNICO: "Tecnico",
-    CLIENTE: "Cliente"
+    CLIENTE: "Cliente",
+    RECEPCIONISTA: "Recepcionista"
 };

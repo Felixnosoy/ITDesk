@@ -1,5 +1,6 @@
 const facturaService = require("../services/factura.service")
 const detalleFacturaService = require("../services/detalleFactura.service")
+const auditoriaService = require("../services/auditoria.service")
 const responder = require("../utils/respuesta")
 const crearError = require("../utils/crearError")
 
@@ -119,6 +120,12 @@ const cambiarEstadoFactura = async (req, res) => {
         const { estado } = req.body
 
         const factura = await facturaService.cambiarEstadoFactura(id, estado);
+
+        auditoriaService.registrarEvento({
+            id_usuario: req.usuario.id_usuario,
+            accion: `FACTURA_${factura.estado.toUpperCase()}`,
+            descripcion: `Cambió la factura #${factura.id_factura} de ${factura.cliente} a estado "${factura.estado}".`
+        });
 
         responder(res, 200, {
             data: factura

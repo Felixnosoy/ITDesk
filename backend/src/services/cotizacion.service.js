@@ -232,6 +232,29 @@ const cambiarEstadoCotizacion = async (id, estado) => {
     return obtenerCotizacionPorId(id);
 }
 
+// aprobar/rechazar es una decision del cliente dueño de la cotizacion — a
+// diferencia de cambiarEstadoCotizacion (Administrador, cualquier estado
+// valido), esta version solo acepta Aprobada/Rechazada y verifica dueño.
+const ESTADOS_CLIENTE = [ESTADOS_COTIZACION.APROBADA, ESTADOS_COTIZACION.RECHAZADA];
+
+const cambiarEstadoCotizacionCliente = async (id, estado, id_usuario_solicitante) => {
+
+    if (typeof estado !== "string" || !ESTADOS_CLIENTE.includes(estado.trim())) {
+        throw crearError(
+            `Estado inválido. Debe ser: ${ESTADOS_CLIENTE.join(" o ")}.`,
+            400
+        );
+    }
+
+    const cotizacion = await obtenerCotizacionPorId(id);
+
+    if (Number(cotizacion.id_usuario) !== Number(id_usuario_solicitante)) {
+        throw crearError("No tienes permisos para modificar esta cotización.", 403);
+    }
+
+    return cambiarEstadoCotizacion(id, estado.trim());
+}
+
 const eliminarCotizacion = async (id) => {
 
     // Verificar que la cotizacion exista
@@ -263,5 +286,6 @@ module.exports = {
     recalcularCotizacion,
     actualizarDescuentoTotal,
     cambiarEstadoCotizacion,
+    cambiarEstadoCotizacionCliente,
     eliminarCotizacion
 }

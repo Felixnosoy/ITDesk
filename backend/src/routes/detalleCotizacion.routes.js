@@ -39,6 +39,13 @@ router.get(
     detalleCotizacionController.obtenerDetallesPorTicket
 )
 
+// el cliente ve las lineas de cotizacion de su propio ticket
+router.get(
+    "/mis/ticket/:id_ticket",
+    verificarRol(ROLES.CLIENTE),
+    detalleCotizacionController.obtenerMisDetallesPorTicket
+)
+
 // obtener una linea por su id
 router.get(
     "/:id",

@@ -38,6 +38,37 @@ CREATE TABLE `actualizacion` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `archivo_adjunto`
+--
+
+DROP TABLE IF EXISTS `archivo_adjunto`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `archivo_adjunto` (
+  `id_archivo` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `nombre_original` varchar(255) NOT NULL,
+  `nombre_archivo` varchar(255) NOT NULL,
+  `tipo_mime` varchar(100) NOT NULL,
+  `tamano_bytes` int(11) NOT NULL,
+  `publico` tinyint(1) NOT NULL DEFAULT 0,
+  `id_actualizacion` int(11) DEFAULT NULL,
+  `id_nota_privada` int(11) DEFAULT NULL,
+  `fecha_subida` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_archivo`),
+  KEY `FK_ArchivoAdjunto_Ticket` (`id_ticket`),
+  KEY `FK_ArchivoAdjunto_Usuario` (`id_usuario`),
+  KEY `FK_ArchivoAdjunto_Actualizacion` (`id_actualizacion`),
+  KEY `FK_ArchivoAdjunto_NotaPrivada` (`id_nota_privada`),
+  CONSTRAINT `FK_ArchivoAdjunto_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ArchivoAdjunto_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ArchivoAdjunto_Actualizacion` FOREIGN KEY (`id_actualizacion`) REFERENCES `actualizacion` (`id_actualizacion`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_ArchivoAdjunto_NotaPrivada` FOREIGN KEY (`id_nota_privada`) REFERENCES `nota_privada` (`id_nota`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `asignacion`
 --
 
@@ -56,6 +87,28 @@ CREATE TABLE `asignacion` (
   CONSTRAINT `FK_Asignacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Asignacion_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `auditoria`
+--
+
+DROP TABLE IF EXISTS `auditoria`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auditoria` (
+  `id_auditoria` int(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) NOT NULL,
+  `accion` varchar(50) NOT NULL,
+  `descripcion` text NOT NULL,
+  `id_ticket` int(11) DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_auditoria`),
+  KEY `FK_Auditoria_Usuario` (`id_usuario`),
+  KEY `FK_Auditoria_Ticket` (`id_ticket`),
+  CONSTRAINT `FK_Auditoria_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Auditoria_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -96,7 +149,7 @@ CREATE TABLE `detalle_cotizacion` (
   `repuestos` decimal(10,2) DEFAULT 0.00,
   `descuento` decimal(10,2) DEFAULT 0.00,
   PRIMARY KEY (`id_detalle_cotizacion`),
-  UNIQUE KEY `UQ_DetalleCotizacion_Ticket` (`id_ticket`),
+  KEY `IX_DetalleCotizacion_Ticket` (`id_ticket`),
   KEY `FK_DetalleCotizacion_Cotizacion` (`id_cotizacion`),
   CONSTRAINT `FK_DetalleCotizacion_Cotizacion` FOREIGN KEY (`id_cotizacion`) REFERENCES `cotizacion` (`id_cotizacion`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_DetalleCotizacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -119,7 +172,7 @@ CREATE TABLE `detalle_factura` (
   `repuestos` decimal(10,2) DEFAULT 0.00,
   `descuento` decimal(10,2) DEFAULT 0.00,
   PRIMARY KEY (`id_detalle_factura`),
-  UNIQUE KEY `UQ_DetalleFactura_Ticket` (`id_ticket`),
+  KEY `IX_DetalleFactura_Ticket` (`id_ticket`),
   KEY `FK_DetalleFactura_Factura` (`id_factura`),
   CONSTRAINT `FK_DetalleFactura_Factura` FOREIGN KEY (`id_factura`) REFERENCES `factura` (`id_factura`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_DetalleFactura_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON UPDATE CASCADE
@@ -147,6 +200,28 @@ CREATE TABLE `diagnostico` (
   CONSTRAINT `FK_Diagnostico_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Diagnostico_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `encuesta_satisfaccion`
+--
+
+DROP TABLE IF EXISTS `encuesta_satisfaccion`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `encuesta_satisfaccion` (
+  `id_encuesta` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `calificacion` tinyint(1) NOT NULL,
+  `comentario` text DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_encuesta`),
+  UNIQUE KEY `UQ_Encuesta_Ticket` (`id_ticket`),
+  KEY `FK_Encuesta_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Encuesta_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Encuesta_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,6 +275,27 @@ CREATE TABLE `factura` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `nota_privada`
+--
+
+DROP TABLE IF EXISTS `nota_privada`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `nota_privada` (
+  `id_nota` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `contenido` text NOT NULL,
+  `fecha_creacion` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_nota`),
+  KEY `FK_NotaPrivada_Ticket` (`id_ticket`),
+  KEY `FK_NotaPrivada_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_NotaPrivada_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_NotaPrivada_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `notificacion`
 --
 
@@ -236,6 +332,7 @@ CREATE TABLE `ticket` (
   `titulo` varchar(150) NOT NULL,
   `descripcion` text NOT NULL,
   `prioridad` varchar(20) NOT NULL,
+  `categoria` varchar(20) NOT NULL DEFAULT 'Otro',
   `estado` varchar(20) DEFAULT 'Abierto',
   `fecha_apertura` datetime DEFAULT current_timestamp(),
   `fecha_cierre` datetime DEFAULT NULL,

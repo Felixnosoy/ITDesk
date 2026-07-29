@@ -14,6 +14,10 @@ const detalleCotizacionRoutes = require("./routes/detalleCotizacion.routes")
 const facturaRoutes = require("./routes/factura.routes")
 const detalleFacturaRoutes = require("./routes/detalleFactura.routes")
 const notificacionRoutes = require("./routes/notificacion.routes")
+const archivoRoutes = require("./routes/archivo.routes")
+const notaPrivadaRoutes = require("./routes/notaPrivada.routes")
+const auditoriaRoutes = require("./routes/auditoria.routes")
+const encuestaRoutes = require("./routes/encuesta.routes")
 
 const app = express();
 
@@ -33,5 +37,9 @@ app.use("/api/detalle-cotizacion", detalleCotizacionRoutes)
 app.use("/api/factura", facturaRoutes)
 app.use("/api/detalle-factura", detalleFacturaRoutes)
 app.use("/api/notificacion", notificacionRoutes)
+app.use("/api/archivos", archivoRoutes)
+app.use("/api/notas", notaPrivadaRoutes)
+app.use("/api/auditoria", auditoriaRoutes)
+app.use("/api/encuestas", encuestaRoutes)
 
 module.exports = app;

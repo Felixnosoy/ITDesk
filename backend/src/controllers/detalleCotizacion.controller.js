@@ -83,6 +83,24 @@ const obtenerDetallesPorTicket = async (req, res) => {
     }
 }
 
+const obtenerMisDetallesPorTicket = async (req, res) => {
+    try {
+        const { id_ticket } = req.params
+        const { id_usuario } = req.usuario
+
+        const detalles = await detalleCotizacionService.obtenerMisDetallesPorTicket(id_ticket, id_usuario);
+
+        responder(res, 200, {
+            data: detalles
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
 const actualizarDetalleCotizacion = async (req, res) => {
     try {
         const { id } = req.params
@@ -123,6 +141,7 @@ module.exports = {
     obtenerDetalleCotizacionPorId,
     obtenerDetallesPorCotizacion,
     obtenerDetallesPorTicket,
+    obtenerMisDetallesPorTicket,
     actualizarDetalleCotizacion,
     eliminarDetalleCotizacion
 }

@@ -3,35 +3,38 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | ITDESK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-light">
+<body class="login-page">
     <div class="container">
-        <div class="row justify-content-center align-items-center vh-100">
+        <div class="row justify-content-center align-items-center">
             <div class="col-lg-5">
                 <div class="card shadow-lg border-0 login-card">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
                             <a href="index.html" class="login-logo">
-                                <i class="bi bi-headset display-3 login-icon"></i>
+                                <i class="bi bi-headset login-icon" style="font-size: 2rem;"></i>
                             </a>
-                            <h2 class="fw-bold mt-3">ITDESK</h2>
-                            <p class="text-muted">Sistema de Gestión de Soporte Técnico</p>
+                            <h2 class="fw-bold mt-2 mb-1">ITDESK</h2>
+                            <p class="text-muted mb-0">Sistema de Gestión de Soporte Técnico</p>
                         </div>
+                        <div id="avisoSesion" class="alert alert-warning d-none" role="alert"></div>
                         <form onsubmit="iniciarSesion(event)">
                             <div class="mb-3">
-                                <label class="form-label">Usuario</label>
-                                <input type="text" class="form-control" id="usuario" placeholder="Ingrese su usuario"
-                                    required>
+                                <label class="form-label" for="correo">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="correo" autocomplete="username"
+                                    placeholder="Ingrese su correo electrónico" required>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password"
+                                <label class="form-label" for="password">Contraseña</label>
+                                <input type="password" class="form-control" id="password" autocomplete="current-password"
                                     placeholder="Ingrese su contraseña" required>
                             </div>
                             <div class="d-grid">
@@ -40,10 +43,8 @@
                                 </button>
                             </div>
                             <div class="text-center mt-4">
-                                <p class="mb-2">¿No tienes una cuenta?</p>
-                                <a href="registro.html" class="btn btn-outline-primary">
-                                    <i class="bi bi-person-plus-fill"></i> Crear una cuenta
-                                </a>
+                                <p class="text-muted small mb-0">¿Eres cliente y no tienes cuenta? Contáctanos y un
+                                    técnico la crea por ti.</p>
                             </div>
                         </form>
                     </div>
@@ -52,6 +53,10 @@
         </div>
     </div>
 
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>

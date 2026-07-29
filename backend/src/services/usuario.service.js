@@ -271,6 +271,90 @@ const actualizarEstadoUsuario = async (id, estado) => {
 
 }
 
+// el propio usuario edita su telefono/direccion — nunca correo, rol ni
+// documento, esos siguen siendo solo editables por Admin/Tecnico via
+// actualizarUsuario
+const actualizarPerfilPropio = async (id, { telefono, direccion }) => {
+
+    await verificarUsuarioExiste(id, "usuario no encontrado");
+
+    await pool.query(
+        `
+        UPDATE usuario
+        SET telefono = ?, direccion = ?
+        WHERE id_usuario = ?
+        `,
+        [telefono || null, direccion || null, id]
+    );
+
+    const [usuarios] = await pool.query(
+        `
+        SELECT
+            ${COLUMNAS_USUARIO}
+        FROM usuario
+        WHERE id_usuario = ?
+        `,
+        [id]
+    );
+
+    return usuarios[0];
+};
+
+const LONGITUD_MINIMA_CONTRASENA = 8;
+
+const validarContrasenaNueva = (contraseñaNueva) => {
+    if (typeof contraseñaNueva !== "string" || contraseñaNueva.trim().length < LONGITUD_MINIMA_CONTRASENA) {
+        throw crearError(`La nueva contraseña debe tener al menos ${LONGITUD_MINIMA_CONTRASENA} caracteres.`, 400);
+    }
+};
+
+// el propio usuario cambia su contraseña: exige la actual para confirmarla
+const cambiarContrasena = async (id, contraseñaActual, contraseñaNueva) => {
+
+    if (!contraseñaActual || !contraseñaNueva) {
+        throw crearError("La contraseña actual y la nueva son requeridas.", 400);
+    }
+
+    validarContrasenaNueva(contraseñaNueva);
+
+    const [usuarios] = await pool.query(
+        "SELECT contraseña FROM usuario WHERE id_usuario = ?",
+        [id]
+    );
+
+    if (usuarios.length === 0) {
+        throw crearError("usuario no encontrado", 404);
+    }
+
+    const contraseñaValida = await bcrypt.compare(contraseñaActual, usuarios[0].contraseña);
+
+    if (!contraseñaValida) {
+        throw crearError("La contraseña actual no es correcta.", 400);
+    }
+
+    const passwordHash = await bcrypt.hash(contraseñaNueva, 10);
+
+    await pool.query(
+        "UPDATE usuario SET contraseña = ? WHERE id_usuario = ?",
+        [passwordHash, id]
+    );
+};
+
+// un Admin fija una contraseña nueva para otro usuario, sin conocer la actual
+const resetearContrasena = async (id, contraseñaNueva) => {
+
+    await verificarUsuarioExiste(id, "usuario no encontrado");
+
+    validarContrasenaNueva(contraseñaNueva);
+
+    const passwordHash = await bcrypt.hash(contraseñaNueva, 10);
+
+    await pool.query(
+        "UPDATE usuario SET contraseña = ? WHERE id_usuario = ?",
+        [passwordHash, id]
+    );
+};
+
 //solo para datos de pruebas (no se debe usar)
 const borrarUsuario = async (id) => {
 
@@ -293,5 +377,8 @@ module.exports = {
     obtenerUsuarioPorId,
     actualizarUsuario,
     actualizarEstadoUsuario,
+    cambiarContrasena,
+    resetearContrasena,
+    actualizarPerfilPropio,
     borrarUsuario
 }

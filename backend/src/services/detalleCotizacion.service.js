@@ -77,18 +77,37 @@ const crearDetalleCotizacion = async (datos) => {
         throw crearError("El ticket no pertenece al mismo cliente de la cotización.", 400);
     }
 
-    // Verificar que el ticket no tenga ya una linea de cotizacion (UQ_DetalleCotizacion_Ticket)
-    const [lineaExistente] = await pool.query(
+    // El diagnostico define que se le va a cobrar al cliente y por que — no
+    // se puede cotizar antes de saber eso con certeza.
+    const [diagnosticos] = await pool.query(
         `
-        SELECT id_detalle_cotizacion
-        FROM detalle_cotizacion
+        SELECT id_diagnostico
+        FROM diagnostico
         WHERE id_ticket = ?
         `,
         [id_ticket]
     );
 
-    if (lineaExistente.length > 0) {
-        throw crearError("Este ticket ya tiene una línea de cotización asociada.", 409);
+    if (diagnosticos.length === 0) {
+        throw crearError("Debe existir un diagnóstico del ticket antes de crear una cotización.", 409);
+    }
+
+    // El ticket puede tener varias lineas a lo largo del tiempo (una cotizacion
+    // rechazada/vencida no bloquea intentarlo de nuevo), pero solo una activa
+    // (Pendiente o Aprobada) a la vez.
+    const [lineaActiva] = await pool.query(
+        `
+        SELECT dc.id_detalle_cotizacion
+        FROM detalle_cotizacion dc
+        INNER JOIN cotizacion c ON dc.id_cotizacion = c.id_cotizacion
+        WHERE dc.id_ticket = ?
+            AND c.estado IN (?, ?)
+        `,
+        [id_ticket, ESTADOS_COTIZACION.PENDIENTE, ESTADOS_COTIZACION.APROBADA]
+    );
+
+    if (lineaActiva.length > 0) {
+        throw crearError("Este ticket ya tiene una cotización activa (Pendiente o Aprobada).", 409);
     }
 
     // Insertar linea
@@ -207,6 +226,19 @@ const obtenerDetallesPorTicket = async (id_ticket) => {
     return detalles;
 }
 
+// mismas lineas que obtenerDetallesPorTicket, pero solo si el ticket es del
+// cliente autenticado (para que vea su propia cotizacion en el avance)
+const obtenerMisDetallesPorTicket = async (id_ticket, id_usuario_solicitante) => {
+
+    const ticket = await ticketService.obtenerTicketPorId(id_ticket);
+
+    if (Number(ticket.id_usuario) !== Number(id_usuario_solicitante)) {
+        throw crearError("No tienes permisos para ver esta información.", 403);
+    }
+
+    return obtenerDetallesPorTicket(id_ticket);
+}
+
 const actualizarDetalleCotizacion = async (id, nuevosDatos) => {
 
     const {
@@ -276,6 +308,7 @@ module.exports = {
     obtenerDetalleCotizacionPorId,
     obtenerDetallesPorCotizacion,
     obtenerDetallesPorTicket,
+    obtenerMisDetallesPorTicket,
     actualizarDetalleCotizacion,
     eliminarDetalleCotizacion
 }

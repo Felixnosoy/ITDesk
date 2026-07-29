@@ -172,6 +172,7 @@ const obtenerNotasProgresoPorTicket = async (id_ticket, id_cliente) => {
     const [notas] = await pool.query(
         `
         SELECT
+            id_actualizacion,
             estado,
             observaciones,
             fecha_actualizacion

@@ -1,5 +1,6 @@
 const cotizacionService = require("../services/cotizacion.service")
 const detalleCotizacionService = require("../services/detalleCotizacion.service")
+const auditoriaService = require("../services/auditoria.service")
 const responder = require("../utils/respuesta")
 const crearError = require("../utils/crearError")
 
@@ -131,12 +132,46 @@ const actualizarDescuentoTotal = async (req, res) => {
     }
 }
 
+const CAMBIO_A_ACCION = { Aprobada: "Aprobó", Rechazada: "Rechazó" };
+
 const cambiarEstadoCotizacion = async (req, res) => {
     try {
         const { id } = req.params
         const { estado } = req.body
 
         const cotizacion = await cotizacionService.cambiarEstadoCotizacion(id, estado);
+
+        auditoriaService.registrarEvento({
+            id_usuario: req.usuario.id_usuario,
+            accion: `COTIZACION_${cotizacion.estado.toUpperCase()}`,
+            descripcion: `${CAMBIO_A_ACCION[cotizacion.estado] || "Actualizó"} la cotización #${cotizacion.id_cotizacion} de ${cotizacion.cliente}.`
+        });
+
+        responder(res, 200, {
+            data: cotizacion
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
+// el cliente aprueba/rechaza su propia cotizacion (nunca la del tecnico)
+const cambiarEstadoCotizacionCliente = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { estado } = req.body
+        const { id_usuario } = req.usuario
+
+        const cotizacion = await cotizacionService.cambiarEstadoCotizacionCliente(id, estado, id_usuario);
+
+        auditoriaService.registrarEvento({
+            id_usuario: req.usuario.id_usuario,
+            accion: `COTIZACION_${cotizacion.estado.toUpperCase()}`,
+            descripcion: `${CAMBIO_A_ACCION[cotizacion.estado] || "Actualizó"} la cotización #${cotizacion.id_cotizacion} de ${cotizacion.cliente}.`
+        });
 
         responder(res, 200, {
             data: cotizacion
@@ -175,5 +210,6 @@ module.exports = {
     obtenerMiCotizacionPorId,
     actualizarDescuentoTotal,
     cambiarEstadoCotizacion,
+    cambiarEstadoCotizacionCliente,
     eliminarCotizacion
 }

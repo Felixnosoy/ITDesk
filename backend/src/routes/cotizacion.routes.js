@@ -60,11 +60,19 @@ router.patch(
     cotizacionController.actualizarDescuentoTotal
 )
 
-// aprobar, rechazar o vencer una cotizacion
+// vencer una cotizacion (aprobar/rechazar es decision del cliente, no del
+// tecnico que hizo el trabajo — eso vive en /mis/:id/estado)
 router.patch(
     "/:id/estado",
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    verificarRol(ROLES.ADMINISTRADOR),
     cotizacionController.cambiarEstadoCotizacion
+)
+
+// el cliente aprueba o rechaza su propia cotizacion
+router.patch(
+    "/mis/:id/estado",
+    verificarRol(ROLES.CLIENTE),
+    cotizacionController.cambiarEstadoCotizacionCliente
 )
 
 // eliminar una cotizacion (y sus lineas de detalle)

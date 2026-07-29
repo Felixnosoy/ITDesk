@@ -1,9 +1,17 @@
 const asignacionService = require("../services/asignacion.service")
+const auditoriaService = require("../services/auditoria.service")
 const responder = require("../utils/respuesta")
 
 const crearAsignacion = async (req, res) => {
     try {
         const asignacion = await asignacionService.crearAsignacion(req.body);
+
+        auditoriaService.registrarEvento({
+            id_usuario: req.usuario.id_usuario,
+            accion: "TICKET_ASIGNADO",
+            descripcion: `Asignó el ticket #${asignacion.id_ticket} a ${asignacion.tecnico}.`,
+            id_ticket: asignacion.id_ticket
+        });
 
         responder(res, 200, {
             message: "Técnico asignado exitosamente",
@@ -88,6 +96,13 @@ const actualizarAsignacion = async (req, res) => {
         const { id } = req.params
 
         const asignacion = await asignacionService.actualizarAsignacion(id, req.body);
+
+        auditoriaService.registrarEvento({
+            id_usuario: req.usuario.id_usuario,
+            accion: "TICKET_REASIGNADO",
+            descripcion: `Reasignó el ticket #${asignacion.id_ticket} a ${asignacion.tecnico}.`,
+            id_ticket: asignacion.id_ticket
+        });
 
         responder(res, 200, {
             data: asignacion
