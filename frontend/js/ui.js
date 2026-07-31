@@ -177,43 +177,113 @@ const UI = {
     },
 
     // Pagina el RENDER de una lista que ya esta completa en memoria (la API
-    // no soporta LIMIT/OFFSET) — muestra los primeros "tamano" items y un
-    // boton "Mostrar mas" mientras queden. renderFn(visibles, listaOrdenada)
-    // recibe la porcion a pintar y la lista completa ya ordenada (para casos
-    // como la cola del tecnico, que necesita el total real por grupo aunque
-    // solo se vean los primeros N). contenedorBoton: elemento donde se monta
-    // el boton (se limpia/oculta solo si no hace falta).
-    paginarRender(listaOrdenada, renderFn, contenedorBoton, tamano = 50) {
+    // no soporta LIMIT/OFFSET) — muestra los primeros N items y un boton
+    // "Mostrar mas" mientras queden. renderFn(visibles, listaOrdenada) recibe
+    // la porcion a pintar y la lista completa ya ordenada (para casos como la
+    // cola del tecnico, que necesita el total real por grupo aunque solo se
+    // vean los primeros N). contenedorBoton: elemento donde se monta el
+    // boton/selector (se limpia/oculta solo si no hace falta).
+    //
+    // opciones acepta 2 formas:
+    //   - numero: compatibilidad con los llamados existentes, tamano fijo.
+    //   - { tamano=50, selectorId=null, clave=null }: con selectorId conecta
+    //     un <select> de cantidad (10/25/50/100/todos) ya presente en el
+    //     HTML — cambia el tamano, redibuja, y persiste la eleccion en
+    //     localStorage[clave]. El listener del <select> se conecta una sola
+    //     vez por elemento (dataset.paginadoConectado) aunque paginarRender
+    //     se llame de nuevo en cada busqueda/filtro — lee el estado mas
+    //     reciente desde el propio elemento (selector._paginadoEstado), no
+    //     de un closure viejo, para no quedar pegado a datos desactualizados.
+    paginarRender(listaOrdenada, renderFn, contenedorBoton, opciones = {}) {
         if (!contenedorBoton) {
             renderFn(listaOrdenada, listaOrdenada);
             return;
         }
 
-        let mostrados = Math.min(tamano, listaOrdenada.length);
+        const config = typeof opciones === "number" ? { tamano: opciones } : opciones;
+        const { selectorId = null, clave = null } = config;
+        const selector = selectorId ? document.getElementById(selectorId) : null;
 
-        const pintar = () => {
-            renderFn(listaOrdenada.slice(0, mostrados), listaOrdenada);
-
-            const restantes = listaOrdenada.length - mostrados;
-            if (restantes <= 0) {
-                contenedorBoton.innerHTML = "";
-                contenedorBoton.classList.add("d-none");
-                return;
-            }
-
-            contenedorBoton.classList.remove("d-none");
-            contenedorBoton.innerHTML = `
-                <button type="button" class="btn btn-outline-secondary btn-sm">
-                    Mostrar ${Math.min(tamano, restantes)} más <span class="text-muted">(${restantes} restantes)</span>
-                </button>
-            `;
-            contenedorBoton.querySelector("button").addEventListener("click", () => {
-                mostrados = Math.min(mostrados + tamano, listaOrdenada.length);
-                pintar();
-            });
+        const estado = {
+            listaOrdenada,
+            renderFn,
+            contenedorBoton,
+            selector,
+            clave,
+            tamano: config.tamano ?? 50,
+            mostrados: 0
         };
 
-        pintar();
+        if (selector) {
+            if (clave && localStorage.getItem(clave)) {
+                selector.value = localStorage.getItem(clave);
+            }
+            estado.tamano = selector.value === "todos" ? Infinity : Number(selector.value);
+            // siempre el estado de la llamada mas reciente: el listener de
+            // "change" (conectado una sola vez, ver abajo) lee de aca.
+            selector._paginadoEstado = estado;
+
+            if (!selector.dataset.paginadoConectado) {
+                selector.dataset.paginadoConectado = "1";
+                selector.addEventListener("change", () => {
+                    const est = selector._paginadoEstado;
+                    est.tamano = selector.value === "todos" ? Infinity : Number(selector.value);
+                    if (est.clave) {
+                        localStorage.setItem(est.clave, selector.value);
+                    }
+                    est.mostrados = Math.min(est.tamano, est.listaOrdenada.length);
+                    this._pintarPaginado(est);
+                });
+            }
+        }
+
+        estado.mostrados = Math.min(estado.tamano, estado.listaOrdenada.length);
+        this._pintarPaginado(estado);
+    },
+
+    _pintarPaginado(estado) {
+        const { renderFn, listaOrdenada, mostrados, contenedorBoton, selector, tamano } = estado;
+        renderFn(listaOrdenada.slice(0, mostrados), listaOrdenada);
+
+        const restantes = listaOrdenada.length - mostrados;
+
+        if (selector) {
+            contenedorBoton.classList.remove("d-none");
+            contenedorBoton.innerHTML = listaOrdenada.length > 0
+                ? `<span class="text-muted small">Mostrando 1–${mostrados} de ${listaOrdenada.length}</span>`
+                : "";
+
+            if (restantes > 0) {
+                const paso = tamano === Infinity ? restantes : tamano;
+                const boton = document.createElement("button");
+                boton.type = "button";
+                boton.className = "btn btn-outline-secondary btn-sm ms-2";
+                boton.textContent = `Mostrar ${Math.min(paso, restantes)} más`;
+                boton.addEventListener("click", () => {
+                    estado.mostrados = Math.min(estado.mostrados + paso, listaOrdenada.length);
+                    this._pintarPaginado(estado);
+                });
+                contenedorBoton.appendChild(boton);
+            }
+            return;
+        }
+
+        if (restantes <= 0) {
+            contenedorBoton.innerHTML = "";
+            contenedorBoton.classList.add("d-none");
+            return;
+        }
+
+        contenedorBoton.classList.remove("d-none");
+        contenedorBoton.innerHTML = `
+            <button type="button" class="btn btn-outline-secondary btn-sm">
+                Mostrar ${Math.min(tamano, restantes)} más <span class="text-muted">(${restantes} restantes)</span>
+            </button>
+        `;
+        contenedorBoton.querySelector("button").addEventListener("click", () => {
+            estado.mostrados = Math.min(estado.mostrados + tamano, listaOrdenada.length);
+            this._pintarPaginado(estado);
+        });
     },
 
     renderErrorRow(tabla, cols, mensaje) {

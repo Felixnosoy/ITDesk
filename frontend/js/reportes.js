@@ -280,7 +280,9 @@ function renderTablaReporteTickets(visibles) {
 function aplicarFiltrosReporteTickets() {
     const filtrados = filtrarTicketsReporte();
     renderTotalesBarraReporteTickets(calcularTotalesReporte(filtrados));
-    UI.paginarRender(filtrados, renderTablaReporteTickets, document.getElementById("verMasReporteTickets"), 50);
+    UI.paginarRender(filtrados, renderTablaReporteTickets, document.getElementById("verMasReporteTickets"), {
+        selectorId: "cantidadReporteTickets", clave: "cantidadReporteTickets"
+    });
 }
 
 function poblarFiltroTecnicosReporte(usuarios) {
@@ -666,7 +668,9 @@ function renderTotalesNotificaciones(filtrados) {
 function aplicarFiltrosNotificaciones() {
     const filtrados = filtrarNotificacionesReporte();
     renderTotalesNotificaciones(filtrados);
-    UI.paginarRender(filtrados, renderTablaReporteNotificaciones, document.getElementById("verMasReporteNotificaciones"), 50);
+    UI.paginarRender(filtrados, renderTablaReporteNotificaciones, document.getElementById("verMasReporteNotificaciones"), {
+        selectorId: "cantidadReporteNotificaciones", clave: "cantidadReporteNotificaciones"
+    });
 }
 
 function poblarFiltroTipoNotificacion() {
@@ -845,7 +849,9 @@ function renderTotalesResueltos(resumen) {
 function aplicarFiltrosResueltos() {
     const filtrados = filtrarTicketsResueltos();
     renderTotalesResueltos(calcularResumenResueltos(filtrados));
-    UI.paginarRender(filtrados, renderTablaReporteResueltos, document.getElementById("verMasReporteResueltos"), 50);
+    UI.paginarRender(filtrados, renderTablaReporteResueltos, document.getElementById("verMasReporteResueltos"), {
+        selectorId: "cantidadReporteResueltos", clave: "cantidadReporteResueltos"
+    });
 }
 
 function poblarFiltrosResueltos() {
@@ -1029,7 +1035,9 @@ function renderTotalesEquipos() {
 function renderReporteEquipos(termino = "") {
     const filtrados = equiposFiltradosReporte(termino);
     renderTotalesEquipos();
-    UI.paginarRender(filtrados, renderTablaReporteEquipos, document.getElementById("verMasReporteEquipos"), 50);
+    UI.paginarRender(filtrados, renderTablaReporteEquipos, document.getElementById("verMasReporteEquipos"), {
+        selectorId: "cantidadReporteEquipos", clave: "cantidadReporteEquipos"
+    });
     return filtrados.length;
 }
 
@@ -1183,7 +1191,9 @@ function renderTotalesFacturas(resumen) {
 function aplicarFiltrosFacturas() {
     const filtradas = filtrarFacturasReporte();
     renderTotalesFacturas(calcularResumenFacturas(filtradas));
-    UI.paginarRender(filtradas, renderTablaReporteFacturas, document.getElementById("verMasReporteFacturas"), 50);
+    UI.paginarRender(filtradas, renderTablaReporteFacturas, document.getElementById("verMasReporteFacturas"), {
+        selectorId: "cantidadReporteFacturas", clave: "cantidadReporteFacturas"
+    });
 }
 
 function poblarFiltroClienteFacturas() {
@@ -1376,7 +1386,9 @@ function renderTotalesClientes() {
 function aplicarFiltrosClientes() {
     const filtrados = filtrarClientesReporte();
     renderTotalesClientes();
-    UI.paginarRender(filtrados, renderTablaReporteClientes, document.getElementById("verMasReporteClientes"), 50);
+    UI.paginarRender(filtrados, renderTablaReporteClientes, document.getElementById("verMasReporteClientes"), {
+        selectorId: "cantidadReporteClientes", clave: "cantidadReporteClientes"
+    });
     return filtrados.length;
 }
 
