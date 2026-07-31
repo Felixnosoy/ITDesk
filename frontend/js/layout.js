@@ -47,8 +47,9 @@ const NAV_POR_ROL = {
         ]
     },
     Recepcionista: {
-        marca: { href: "recepcion.html", texto: "ITDESK", icono: "bi-person-workspace" },
+        marca: { href: "dashboard-recepcion.html", texto: "ITDESK", icono: "bi-person-workspace" },
         links: [
+            { href: "dashboard-recepcion.html", label: "Inicio", icono: "bi-house-fill" },
             { href: "recepcion.html", label: "Nuevo ticket", icono: "bi-plus-circle" }
         ]
     }
@@ -275,13 +276,16 @@ const Layout = {
 
         const paginaActual = window.location.pathname.split("/").pop().replace(/^$/, "index.html");
 
-        // Tecnico y Recepcion trabajan sobre todo dentro de una sola pantalla
-        // (cola de trabajo / wizard) — para ellos el sidebar arranca
-        // colapsado a solo-iconos por defecto, salvo que ya hayan elegido
-        // expandirlo a mano (persistido en localStorage). Administrador y
-        // Cliente navegan mas entre secciones, asi que mantienen el sidebar
-        // completo siempre (Fase 4, redisenio estructural por rol).
-        const colapsablePorRol = rol === "Tecnico" || rol === "Recepcionista";
+        // Tecnico trabaja sobre todo dentro de una sola pantalla (cola de
+        // trabajo) — para el el sidebar arranca colapsado a solo-iconos por
+        // defecto, salvo que ya haya elegido expandirlo a mano (persistido en
+        // localStorage). Administrador y Cliente navegan mas entre secciones,
+        // asi que mantienen el sidebar completo siempre (Fase 4, redisenio
+        // estructural por rol). Recepcionista arranco en este grupo cuando
+        // tenia un solo link (el wizard); con panel + wizard (Fase 8) ya
+        // navega entre pantallas igual que Administrador, asi que se saca de
+        // aca.
+        const colapsablePorRol = rol === "Tecnico";
         const prefColapsado = localStorage.getItem("sidebarColapsado");
         const colapsado = colapsablePorRol && (prefColapsado === null ? true : prefColapsado === "1");
 

@@ -10,7 +10,7 @@ const DESTINO_POR_ROL = {
     Administrador: "dashboard-admin.html",
     Tecnico: "dashboard-tecnico.html",
     Cliente: "dashboard-cliente.html",
-    Recepcionista: "recepcion.html"
+    Recepcionista: "dashboard-recepcion.html"
 };
 
 // Si llegamos aca por un 401 (sesion vencida) o por requerirRol (rol sin

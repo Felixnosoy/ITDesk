@@ -2286,6 +2286,18 @@ sin importar si el usuario tenia modo oscuro activado en pantalla.
     gap: 32px;
 }
 
+/* linea de firma del comprobante de recepcion de equipo (Imprimir.recepcionEquipo) */
+.doc-firma {
+    margin-top: 32px;
+}
+
+.doc-firma-linea {
+    border-top: 1px solid #000;
+    width: 70%;
+    margin-top: 40px;
+    padding-top: 4px;
+}
+
 @media print {
     /* visibility:hidden esconde pero NO saca del flujo — .app-shell/.sidebar
        miden min-height/height:100vh, asi que el layout entero seguia

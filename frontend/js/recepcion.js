@@ -14,6 +14,16 @@ let clientesCache = [];
 let clientesFiltradosTypeahead = [];
 let indiceResaltadoTypeahead = -1;
 
+// Equipos del cliente actualmente seleccionado (se guarda al cargar el
+// select del paso 2) - se reusa al imprimir el comprobante en el paso 3
+// para no volver a pedir /equipo/usuario/:id de nuevo.
+let equiposDelClienteActual = [];
+
+// Datos del ultimo ticket creado, para el boton "Imprimir comprobante" de
+// la alerta de exito - se guarda porque cambiarCliente(true) limpia
+// clienteSeleccionado apenas termina crearTicketRecepcion().
+let ultimoComprobanteRecepcion = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     marcarPaso("cliente");
     cargarClientesCache();
@@ -340,6 +350,20 @@ function abrirModalNuevoCliente(prefill) {
     modal.show();
 }
 
+// El correo y el numero de documento ya los rechaza el backend si estan
+// repetidos (usuario.service.js, con mensaje claro) - este chequeo previo
+// solo adelanta ese mismo aviso sin esperar el viaje de red, y ademas cubre
+// el telefono, que el backend nunca valida como unico (una familia puede
+// compartir uno, no se puede rechazar de plano, solo advertir).
+function buscarClienteDuplicado(datos) {
+    const correo = datos.correo.toLowerCase();
+    return clientesCache.find(c =>
+        c.correo.toLowerCase() === correo ||
+        c.num_documento === datos.num_documento ||
+        (datos.telefono && c.telefono === datos.telefono)
+    );
+}
+
 // Alta de cliente: accion independiente, fuera del flujo de crear ticket.
 // Nunca se encadena con seleccionarCliente() — crear un ticket sigue siendo
 // siempre buscar y elegir, el recepcionista no "atajos" hacia el paso 2
@@ -359,6 +383,17 @@ async function crearClienteRecepcion(event) {
         rol: "Cliente",
         estado: "Activo"
     };
+
+    const duplicado = buscarClienteDuplicado(datos);
+    if (duplicado) {
+        const continuar = await UI.confirmar(
+            `Ya existe un cliente con datos parecidos: ${duplicado.nombre} ${duplicado.apellido} (${Codigos.cliente(duplicado)}, ${duplicado.correo}). ¿Registrar de todos modos?`,
+            { titulo: "Posible cliente duplicado", textoConfirmar: "Registrar de todos modos", claseConfirmar: "btn-warning" }
+        );
+        if (!continuar) {
+            return;
+        }
+    }
 
     const boton = event.target.querySelector("button[type=submit]");
 
@@ -385,6 +420,7 @@ async function cargarEquiposDelCliente() {
 
     try {
         const equipos = await apiFetch(`/equipo/usuario/${clienteSeleccionado.id_usuario}`);
+        equiposDelClienteActual = equipos;
         equipos.forEach(equipo => {
             const option = document.createElement("option");
             option.value = equipo.id_equipo;
@@ -482,9 +518,23 @@ async function crearTicketRecepcion(event) {
             body: JSON.stringify(datos)
         }));
 
+        // se guarda antes de cambiarCliente(true) mas abajo, que limpia
+        // clienteSeleccionado - el boton "Imprimir comprobante" de la alerta
+        // necesita estos datos disponibles despues de ese reset.
+        ultimoComprobanteRecepcion = {
+            ticket,
+            cliente: clienteSeleccionado,
+            equipo: equiposDelClienteActual.find(e => e.id_equipo === Number(idEquipo)) || null
+        };
+
         const alerta = document.getElementById("alertTicketCreado");
         alerta.classList.remove("d-none");
-        alerta.innerHTML = `<i class="bi bi-check-circle-fill"></i> <span class="codigo">${Codigos.ticket(ticket)}</span> creado correctamente para ${clienteSeleccionado.nombre} ${clienteSeleccionado.apellido}.`;
+        alerta.innerHTML = `
+            <i class="bi bi-check-circle-fill"></i> <span class="codigo">${Codigos.ticket(ticket)}</span> creado correctamente para ${clienteSeleccionado.nombre} ${clienteSeleccionado.apellido}.
+            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="imprimirComprobanteRecepcion()">
+                <i class="bi bi-printer"></i> Imprimir comprobante
+            </button>
+        `;
         alerta.scrollIntoView({ behavior: "smooth" });
 
         agregarActividad("bi-ticket-perforated", `<span class="codigo">${Codigos.ticket(ticket)}</span> creado`, ticket.titulo);
@@ -512,4 +562,34 @@ async function crearTicketRecepcion(event) {
     } catch (error) {
         UI.toast(error.message, "danger");
     }
+}
+
+function imprimirComprobanteRecepcion() {
+    if (!ultimoComprobanteRecepcion) {
+        return;
+    }
+    const { ticket, cliente, equipo } = ultimoComprobanteRecepcion;
+    const usuario = Auth.getUsuario();
+    const ahora = new Date();
+
+    Imprimir.recepcionEquipo({
+        ticketCodigo: Codigos.ticket(ticket),
+        ticketTitulo: ticket.titulo,
+        prioridad: ticket.prioridad,
+        categoria: ticket.categoria,
+        clienteNombre: `${cliente.nombre} ${cliente.apellido}`,
+        clienteCodigo: Codigos.cliente(cliente),
+        clienteCorreo: cliente.correo,
+        clienteTelefono: cliente.telefono,
+        equipoCodigo: equipo ? Codigos.equipo(equipo) : "",
+        equipoTipo: equipo?.tipo || "",
+        equipoMarca: equipo?.marca || "",
+        equipoModelo: equipo?.modelo || "",
+        equipoSerie: equipo?.numero_serie || "",
+        equipoEstado: equipo?.estado || "",
+        observaciones: equipo?.observaciones || "",
+        generadoPor: usuario ? `${usuario.nombre} ${usuario.apellido}` : "",
+        generadoFecha: ahora.toLocaleDateString("es-ES"),
+        generadoHora: ahora.toLocaleTimeString("es-ES")
+    });
 }

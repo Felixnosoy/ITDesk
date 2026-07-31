@@ -634,5 +634,76 @@ const Imprimir = {
         `;
 
         window.print();
+    },
+
+    // Comprobante de recepcion de equipo (Fase 8, recepcionista): a
+    // diferencia de documento() (factura/cotizacion, con montos), esto es
+    // un recibo simple para el cliente al dejar su equipo - que ticket
+    // quedo abierto, en que equipo, y una linea de firma para dejar
+    // constancia de que el cliente entrego el equipo en las condiciones
+    // descritas. Mismo mecanismo que el resto: rellena #areaImprimir y
+    // dispara window.print().
+    recepcionEquipo({
+        ticketCodigo, ticketTitulo, prioridad, categoria,
+        clienteNombre, clienteCodigo, clienteCorreo, clienteTelefono,
+        equipoCodigo, equipoTipo, equipoMarca, equipoModelo, equipoSerie, equipoEstado,
+        observaciones, generadoPor, generadoFecha, generadoHora
+    }) {
+        const area = document.getElementById("areaImprimir");
+        if (!area) {
+            return;
+        }
+
+        area.innerHTML = `
+            <div class="documento-imprimible">
+                <div class="doc-header">
+                    <div class="doc-marca">ITDESK</div>
+                    <div class="doc-subtitulo">Sistema de Gestión de Soporte Técnico</div>
+                    <div class="doc-tipo">COMPROBANTE DE RECEPCIÓN DE EQUIPO</div>
+                </div>
+
+                <div class="doc-meta">
+                    <div><strong>Ticket:</strong> ${ticketCodigo}</div>
+                    <div><strong>Fecha:</strong> ${generadoFecha} ${generadoHora}</div>
+                    <div><strong>Prioridad:</strong> ${prioridad}</div>
+                    <div><strong>Categoría:</strong> ${categoria}</div>
+                </div>
+
+                <div class="doc-seccion">
+                    <div class="doc-seccion-titulo">Datos del cliente</div>
+                    <div><strong>Nombre:</strong> ${clienteNombre}</div>
+                    <div><strong>Código:</strong> ${clienteCodigo}</div>
+                    ${clienteCorreo ? `<div><strong>Correo:</strong> ${clienteCorreo}</div>` : ""}
+                    ${clienteTelefono ? `<div><strong>Teléfono:</strong> ${clienteTelefono}</div>` : ""}
+                </div>
+
+                <div class="doc-seccion">
+                    <div class="doc-seccion-titulo">Equipo recibido</div>
+                    <div><strong>Código:</strong> ${equipoCodigo}</div>
+                    <div><strong>Tipo:</strong> ${equipoTipo}</div>
+                    <div><strong>Marca / Modelo:</strong> ${equipoMarca} ${equipoModelo}</div>
+                    <div><strong>N.° de serie:</strong> ${equipoSerie}</div>
+                    <div><strong>Estado declarado:</strong> ${equipoEstado}</div>
+                </div>
+
+                <div class="doc-seccion">
+                    <div class="doc-seccion-titulo">Motivo de la visita</div>
+                    <div>${ticketTitulo}</div>
+                    ${observaciones ? `<div class="doc-generado"><strong>Observaciones del equipo:</strong> ${observaciones}</div>` : ""}
+                </div>
+
+                <div class="doc-footer">
+                    <div><strong>Registrado por:</strong> ${generadoPor}</div>
+                </div>
+
+                <div class="doc-seccion doc-firma">
+                    <div class="doc-firma-linea">
+                        Firma del cliente que entrega el equipo
+                    </div>
+                </div>
+            </div>
+        `;
+
+        window.print();
     }
 };
