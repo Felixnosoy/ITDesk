@@ -2035,24 +2035,72 @@ sin importar si el usuario tenia modo oscuro activado en pantalla.
 }
 
 @media print {
+    /* visibility:hidden esconde pero NO saca del flujo — .app-shell/.sidebar
+       miden min-height/height:100vh, asi que el layout entero seguia
+       ocupando su alto en el documento impreso y generaba paginas en
+       blanco de mas. display:none si saca del flujo. #areaImprimir es
+       hijo directo de <body> en las 3 paginas que imprimen (verificado),
+       por eso alcanza con ocultar los hermanos; la segunda regla (por
+       clase) es respaldo si algun dia deja de serlo. */
     @page {
-        margin: 1.5cm;
+        size: A4;
+        margin: 14mm;
     }
 
-    body * {
-        visibility: hidden;
+    @page {
+        @bottom-right {
+            content: counter(page);
+        }
     }
 
-    #areaImprimir,
-    #areaImprimir * {
-        visibility: visible;
+    html, body {
+        height: auto !important;
+        min-height: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+    }
+
+    body > *:not(#areaImprimir) {
+        display: none !important;
+    }
+
+    .app-shell, .app-main, .app-content, .sidebar,
+    .app-footer, .topbar, .view-toolbar {
+        display: none !important;
     }
 
     #areaImprimir {
         display: block !important;
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: static !important;
+        width: auto;
+    }
+
+    .documento-imprimible {
+        break-inside: auto;
+    }
+
+    .doc-tabla {
         width: 100%;
+        break-inside: auto;
+    }
+
+    .doc-tabla thead {
+        display: table-header-group;
+    }
+
+    .doc-tabla tr,
+    .doc-totales,
+    .doc-totales-linea {
+        break-inside: avoid;
+    }
+
+    .doc-header,
+    .doc-meta,
+    .doc-meta-cols {
+        break-after: avoid;
+    }
+
+    #areaImprimir > *:last-child {
+        break-after: auto !important;
     }
 }
