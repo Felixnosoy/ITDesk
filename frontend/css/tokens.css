@@ -22,6 +22,20 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
     --azul: #0B1440;
     --azul2: #121B4F;
 
+    /* ---------- CHROME (texto/estados sobre --azul, fijos en ambos temas —
+       mismo motivo que --azul/--azul2: navbar/sidebar/topbar no cambian de
+       color con el tema, asi que el texto que va encima tampoco) ---------- */
+    --chrome-texto: #FFFFFF;
+    --chrome-texto-link: #DBEAFE;
+    --chrome-texto-tenue: #D1D5DB;
+    --chrome-texto-tenue-hover: #60A5FA;
+    --chrome-danger-texto: #FCA5A5;
+    --chrome-danger-texto-hover: #FEE2E2;
+
+    /* fondo del scrim de modales (Bootstrap): oscuro a proposito en los 2
+       temas, un modal siempre opaca la pagina de atras, no acompaña el tema */
+    --overlay-scrim: #0A0D18;
+
     /* ---------- TEXTO (primitivos, claro) ---------- */
     --ink-900: #10152B;
     --ink-700: #3C4257;
