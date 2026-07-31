@@ -19,6 +19,7 @@ let diagnosticoActual = null;
 let logActual = [];
 let notasPrivadasActual = [];
 let archivosActual = [];
+let notasPrivadasCargadas = false;
 
 function idDesdeUrl() {
     return new URLSearchParams(window.location.search).get("id");
@@ -146,13 +147,18 @@ async function initDetalleTicket() {
         sessionStorage.setItem("ultimoTicketVisto", id);
     }
 
-    const [cliente, log, diagnosticos, equipo, archivos, notasPrivadas] = await Promise.all([
+    // Diagnostico va en esta carga inicial (no en la carga diferida de mas
+    // abajo) aunque su pestaña casi nunca es la que se ve primero: la card
+    // de "Documentos relacionados" (fuera de las pestañas, siempre visible)
+    // lee diagnosticoActual para decidir si mostrar el boton "Cotizar" —
+    // diferirlo dejaria ese boton bloqueado hasta que el tecnico entre a la
+    // pestaña Diagnostico, aunque el ticket ya tuviera uno guardado.
+    const [cliente, log, diagnosticos, equipo, archivos] = await Promise.all([
         apiFetch(`/usuarios/${ticketActual.id_usuario}`).catch(() => null),
         apiFetch(`/actualizacion/ticket/${id}`).catch(() => []),
         apiFetch(`/diagnostico/ticket/${id}`).catch(() => []),
         apiFetch(`/equipo/${ticketActual.id_equipo}`).catch(() => null),
-        apiFetch(`/archivos/ticket/${id}`).catch(() => []),
-        apiFetch(`/notas/ticket/${id}`).catch(() => [])
+        apiFetch(`/archivos/ticket/${id}`).catch(() => [])
     ]);
 
     archivosActual = archivos;
@@ -160,14 +166,36 @@ async function initDetalleTicket() {
     renderCliente(cliente);
     renderEquipo(ticketActual, equipo);
     renderPublicLog(log);
-    renderNotasPrivadas(notasPrivadas);
     renderDiagnostico(diagnosticos[0] || null);
     renderAcciones(ticketActual);
     renderDocumentosRelacionados(id);
+    inicializarCargaDiferidaNotasPrivadas();
 
     if (ticketActual.estado === "Cerrado") {
         cargarEncuestaTecnico(id);
     }
+}
+
+// Notas privadas es la unica pestaña que no aporta nada fuera de si misma
+// (a diferencia de Diagnostico, que gatilla el boton "Cotizar" en la card
+// de al lado) — se carga recien cuando el tecnico la abre por primera vez,
+// no en el batch inicial. Con la cola del tecnico abriendo esta pagina en
+// un iframe por cada clic de fila, evitar este fetch cuando nadie mira esa
+// pestaña es una diferencia real.
+function inicializarCargaDiferidaNotasPrivadas() {
+    const tabPrivado = document.querySelector('[data-bs-target="#tabPrivado"]');
+    if (!tabPrivado) {
+        return;
+    }
+    tabPrivado.addEventListener("shown.bs.tab", async () => {
+        if (notasPrivadasCargadas) {
+            return;
+        }
+        notasPrivadasCargadas = true;
+        document.getElementById("timelinePrivado").innerHTML = `<div class="p-3 text-muted small">Cargando...</div>`;
+        const notas = await apiFetch(`/notas/ticket/${ticketActual.id_ticket}`).catch(() => []);
+        renderNotasPrivadas(notas);
+    });
 }
 
 // La tarjeta queda oculta por defecto (ver detalle-ticket.html) — solo se

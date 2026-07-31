@@ -236,9 +236,14 @@ async function imprimirDocumentoActual() {
     }
 }
 
+// Facturas se carga recien al abrir esa pestaña por primera vez —
+// Cotizaciones es la pestaña activa por defecto, asi que esa si se pide
+// de una. Antes las dos se pedian siempre, aunque el cliente nunca
+// llegara a mirar Facturas.
+let facturasCargadas = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarCotizaciones();
-    cargarFacturas();
 
     Ordenar.conectar(document.getElementById("tablaCotizaciones")?.closest("table"), (campo, direccion) => {
         ordenCotizaciones = { campo, direccion };
@@ -249,4 +254,15 @@ document.addEventListener("DOMContentLoaded", () => {
         ordenFacturas = { campo, direccion };
         actualizarTablaFacturas();
     });
+
+    const tabFacturas = document.getElementById("tabFacturas");
+    if (tabFacturas) {
+        tabFacturas.addEventListener("shown.bs.tab", () => {
+            if (facturasCargadas) {
+                return;
+            }
+            facturasCargadas = true;
+            cargarFacturas();
+        });
+    }
 });
