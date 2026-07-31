@@ -214,10 +214,10 @@ function renderListaNotificaciones() {
     contenedor.innerHTML = notificacionesCache.map(n => `
         <button type="button" class="dropdown-item text-wrap py-2 border-bottom" onclick="abrirNotificacion(${n.id_notificacion})">
             <div class="d-flex justify-content-between align-items-start gap-2">
-                <span class="small ${n.leida ? "" : "fw-semibold"}">${n.tipo}</span>
-                ${n.leida ? "" : `<span class="rounded-circle flex-shrink-0" style="width:8px;height:8px;background:var(--accent-600);margin-top:4px;"></span>`}
+                ${UI.badgeTipoNotificacion(n.tipo)}
+                ${n.leida ? "" : `<span class="notif-unread-dot"></span>`}
             </div>
-            <div class="small ${n.leida ? "text-muted" : ""}">${n.mensaje}</div>
+            <div class="small ${n.leida ? "text-muted" : ""} mt-1">${n.mensaje}</div>
             <div class="small text-muted mt-1">${n.ticket_titulo}</div>
         </button>
     `).join("");
@@ -275,10 +275,20 @@ const Layout = {
 
         const paginaActual = window.location.pathname.split("/").pop().replace(/^$/, "index.html");
 
+        // Tecnico y Recepcion trabajan sobre todo dentro de una sola pantalla
+        // (cola de trabajo / wizard) — para ellos el sidebar arranca
+        // colapsado a solo-iconos por defecto, salvo que ya hayan elegido
+        // expandirlo a mano (persistido en localStorage). Administrador y
+        // Cliente navegan mas entre secciones, asi que mantienen el sidebar
+        // completo siempre (Fase 4, redisenio estructural por rol).
+        const colapsablePorRol = rol === "Tecnico" || rol === "Recepcionista";
+        const prefColapsado = localStorage.getItem("sidebarColapsado");
+        const colapsado = colapsablePorRol && (prefColapsado === null ? true : prefColapsado === "1");
+
         const links = config.links.map(link => {
             const activo = link.href === paginaActual;
             return `
-                <a class="sidebar-link ${activo ? "active" : ""}" href="${link.href}" ${activo ? 'aria-current="page"' : ""}>
+                <a class="sidebar-link ${activo ? "active" : ""}" href="${link.href}" title="${link.label}" ${activo ? 'aria-current="page"' : ""}>
                     <i class="bi ${link.icono}"></i>
                     <span>${link.label}</span>
                 </a>
@@ -286,7 +296,7 @@ const Layout = {
         }).join("");
 
         contenedor.outerHTML = `
-            <aside class="sidebar" id="sidebar-placeholder">
+            <aside class="sidebar ${colapsado ? "collapsed" : ""}" id="sidebar-placeholder">
                 <a class="sidebar-brand" href="${config.marca.href}">
                     <i class="bi ${config.marca.icono}"></i>
                     <span>${config.marca.texto}</span>
@@ -297,7 +307,7 @@ const Layout = {
                 </nav>
 
                 <div class="sidebar-footer">
-                    <a class="sidebar-link" href="perfil.html">
+                    <a class="sidebar-link" href="perfil.html" title="${rol}">
                         <span class="sidebar-avatar" id="sidebarAvatar"></span>
                         <span class="sidebar-user-info">
                             <span class="sidebar-user-name" id="nombreUsuario"></span>
@@ -310,8 +320,7 @@ const Layout = {
                                 aria-expanded="false" aria-haspopup="true"
                                 title="Notificaciones" aria-label="Notificaciones">
                                 <i class="bi bi-bell"></i>
-                                <span class="badge rounded-pill bg-danger d-none" id="badgeNotificaciones"
-                                    style="position:absolute; top:-2px; right:-2px; font-size:.6rem;"></span>
+                                <span class="badge rounded-pill bg-danger notif-count d-none" id="badgeNotificaciones"></span>
                             </button>
                             <div class="notif-panel" id="listaNotificaciones">
                                 <div class="notif-panel-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
@@ -329,7 +338,13 @@ const Layout = {
                             title="Cambiar tema" aria-label="Cambiar a tema claro u oscuro">
                             <i class="bi" id="iconoTema"></i>
                         </button>
-                        <a class="sidebar-link sidebar-link-danger" href="#" id="btnCerrarSesion">
+                        ${colapsablePorRol ? `
+                        <button class="theme-toggle" id="btnColapsarSidebar" type="button"
+                            title="Expandir o colapsar el menú" aria-label="Expandir o colapsar el menú">
+                            <i class="bi ${colapsado ? "bi-chevron-right" : "bi-chevron-left"}" id="iconoColapsar"></i>
+                        </button>
+                        ` : ""}
+                        <a class="sidebar-link sidebar-link-danger" href="#" id="btnCerrarSesion" title="Cerrar sesión">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Cerrar sesión</span>
                         </a>
@@ -339,6 +354,18 @@ const Layout = {
         `;
 
         document.getElementById("sidebarAvatar").textContent = iniciales(usuario.nombre, usuario.apellido);
+
+        if (colapsablePorRol) {
+            const btnColapsar = document.getElementById("btnColapsarSidebar");
+            const iconoColapsar = document.getElementById("iconoColapsar");
+            btnColapsar.addEventListener("click", () => {
+                const aside = document.querySelector(".sidebar");
+                const ahoraColapsado = !aside.classList.contains("collapsed");
+                aside.classList.toggle("collapsed", ahoraColapsado);
+                localStorage.setItem("sidebarColapsado", ahoraColapsado ? "1" : "0");
+                iconoColapsar.className = `bi ${ahoraColapsado ? "bi-chevron-right" : "bi-chevron-left"}`;
+            });
+        }
 
         document.getElementById("btnCerrarSesion").addEventListener("click", async (event) => {
             event.preventDefault();
@@ -362,6 +389,11 @@ const Layout = {
 
         inicializarPanelNotificaciones();
         cargarNotificaciones();
+
+        // No hay websockets en este proyecto — un poll liviano es el punto
+        // medio pragmatico para "tiempo real sin recargar": la campanita se
+        // pone al dia sola cada 45s en vez de solo al navegar entre paginas.
+        setInterval(cargarNotificaciones, 45000);
     },
 
     renderTopbarMobile(rol) {

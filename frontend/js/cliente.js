@@ -11,13 +11,17 @@ const EXTRACTORES_ORDEN_CLIENTE = {
     estado: t => ORDEN_ESTADO_CLIENTE[t.estado] ?? 9
 };
 
+// Los 3 nodos del mini-timeline por tarjeta — la lista de cliente ya excluye
+// "Cerrado" (ver mas abajo), asi que nunca hace falta un 4to nodo aca.
+const PASOS_TIMELINE_CLIENTE = ["Abierto", "En proceso", "Resuelto"];
+
 async function cargarTicketsCliente() {
-    const tabla = document.getElementById("tablaTickets");
-    if (!tabla) {
+    const lista = document.getElementById("listaTickets");
+    if (!lista) {
         return;
     }
 
-    UI.renderSkeleton(tabla, 6);
+    renderSkeletonLista();
     renderSkeletonDestacada();
 
     try {
@@ -31,38 +35,59 @@ async function cargarTicketsCliente() {
 
         await renderSeccionDestacada(tickets);
 
-        // La tabla del dashboard es para lo activo — "Cerrado" ya tiene su
+        // La lista del dashboard es para lo activo — "Cerrado" ya tiene su
         // propio lugar en Historial, mezclarlos aca es ruido en la pantalla
         // que mas debe transmitir tranquilidad (Fase 2.5, Hallazgo 10).
         ticketsClienteActivos = tickets.filter(t => t.estado !== "Cerrado");
 
         if (tickets.length === 0) {
-            UI.renderEmptyState(tabla, 6, "Todavía no tienes tickets registrados. Visita o contacta a soporte para abrir uno.", "bi-ticket-perforated");
+            lista.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <p class="mb-0">Todavía no tienes tickets registrados. Visita o contacta a soporte para abrir uno.</p>
+                </div>
+            `;
             return;
         }
 
-        renderTablaTicketsCliente();
+        renderListaTicketsCliente();
 
     } catch (error) {
-        UI.renderErrorRow(tabla, 6, error.message);
+        lista.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <p class="mb-0 text-danger">${error.message}</p>
+            </div>
+        `;
         document.getElementById("seccionDestacada").innerHTML = "";
     }
 }
 
-function renderTablaTicketsCliente() {
-    const tabla = document.getElementById("tablaTickets");
+function renderSkeletonLista() {
+    const lista = document.getElementById("listaTickets");
+    lista.innerHTML = Array.from({ length: 3 }).map(() => `
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <span class="skeleton-line" style="height:16px;width:60%;"></span>
+                    <span class="skeleton-line mt-2" style="height:12px;width:40%;"></span>
+                    <span class="skeleton-line mt-3" style="height:20px;"></span>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
+
+function renderListaTicketsCliente() {
+    const lista = document.getElementById("listaTickets");
 
     if (ticketsClienteActivos.length === 0) {
-        tabla.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    <div class="empty-state">
-                        <i class="bi bi-check-circle"></i>
-                        <p class="mb-0">No tienes tickets activos. Revisa tus tickets anteriores en
-                            <a href="historial.html">Historial</a>.</p>
-                    </div>
-                </td>
-            </tr>
+        lista.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-check-circle"></i>
+                <p class="mb-0">No tienes tickets activos. Revisa tus tickets anteriores en
+                    <a href="historial.html">Historial</a>.</p>
+            </div>
         `;
         return;
     }
@@ -71,20 +96,37 @@ function renderTablaTicketsCliente() {
         ? Ordenar.aplicar(ticketsClienteActivos, ordenCliente.campo, ordenCliente.direccion, EXTRACTORES_ORDEN_CLIENTE[ordenCliente.campo])
         : ticketsClienteActivos;
 
-    tabla.innerHTML = datos.map(ticket => `
-        <tr>
-            <td data-label="ID">${Codigos.ticket(ticket)}</td>
-            <td data-label="Equipo">${ticket.equipo_tipo} ${ticket.equipo_marca}</td>
-            <td data-label="Título">${ticket.titulo}</td>
-            <td data-label="Categoría">${UI.badgeCategoria(ticket.categoria)}</td>
-            <td data-label="Estado">${UI.badgeEstado(ticket.estado)}</td>
-            <td data-label="Detalle">
-                <a class="btn btn-outline-primary btn-sm" href="ticket-cliente.html?id=${ticket.id_ticket}">
-                    <i class="bi bi-eye"></i> Ver
-                </a>
-            </td>
-        </tr>
-    `).join("");
+    lista.innerHTML = datos.map(ticket => {
+        const pasoActual = PASOS_TIMELINE_CLIENTE.indexOf(ticket.estado);
+        const pasos = PASOS_TIMELINE_CLIENTE.map((paso, indice) => `
+            ${indice > 0 ? '<div class="step-line"></div>' : ""}
+            <div class="step sm ${indice < pasoActual ? "done" : ""} ${indice === pasoActual ? "active" : ""}">
+                <span class="step-circle"><i class="bi ${indice <= pasoActual ? "bi-check-lg" : "bi-circle"}"></i></span>
+            </div>
+        `).join("");
+
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <span class="text-muted small">${Codigos.ticket(ticket)}</span>
+                                <h5 class="mb-0">${ticket.titulo}</h5>
+                            </div>
+                            ${UI.badgeCategoria(ticket.categoria)}
+                        </div>
+                        <p class="text-muted small mb-3">${ticket.equipo_tipo} ${ticket.equipo_marca}</p>
+                        <div class="step-indicator sm mt-auto mb-2">${pasos}</div>
+                        ${UI.badgeEstado(ticket.estado)}
+                        <a class="btn btn-outline-primary btn-sm mt-3" href="ticket-cliente.html?id=${ticket.id_ticket}">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
 function renderSkeletonDestacada() {
@@ -153,8 +195,9 @@ async function renderSeccionDestacada(tickets) {
 document.addEventListener("DOMContentLoaded", () => {
     cargarTicketsCliente();
 
-    Ordenar.conectar(document.getElementById("tablaTickets")?.closest("table"), (campo, direccion) => {
-        ordenCliente = { campo, direccion };
-        renderTablaTicketsCliente();
+    document.getElementById("ordenListaCliente")?.addEventListener("change", (evento) => {
+        const [campo, direccion] = evento.target.value.split(":");
+        ordenCliente = { campo: campo || null, direccion: direccion || "asc" };
+        renderListaTicketsCliente();
     });
 });

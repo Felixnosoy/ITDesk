@@ -3,13 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes | ITDESK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
 <body data-protegido="Administrador" data-footer="Reportes">
@@ -80,8 +83,458 @@
             </div>
         </div>
 
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Reporte de Tickets Registrados</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteTickets">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroEstadoReporte">Estado</label>
+                        <select class="form-select form-select-sm" id="filtroEstadoReporte">
+                            <option value="">Todos</option>
+                            <option value="Abierto">Abierto</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="Resuelto">Resuelto</option>
+                            <option value="Cerrado">Cerrado</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroPrioridadReporte">Prioridad</label>
+                        <select class="form-select form-select-sm" id="filtroPrioridadReporte">
+                            <option value="">Todas</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Baja">Baja</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroTecnicoReporte">Técnico</label>
+                        <select class="form-select form-select-sm" id="filtroTecnicoReporte">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroDesdeReporte">Desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeReporte">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroHastaReporte">Hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaReporte">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosReporte" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Ticket</th>
+                                <th>Cliente</th>
+                                <th>Equipo</th>
+                                <th>Serial</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Técnico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteTickets">
+                            <tr><td colspan="8" class="text-center text-muted">Cargando tickets...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteTickets" class="d-none mt-3 text-center"></div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-1" id="totalesReporteTickets"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Reporte de Rendimiento de Técnicos</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteRendimiento">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroTecnicoRendimiento">Técnico</label>
+                        <select class="form-select form-select-sm" id="filtroTecnicoRendimiento">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroDesdeRendimiento">Desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeRendimiento">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroHastaRendimiento">Hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaRendimiento">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosRendimiento" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="tecnicoDestacadoRendimiento" class="d-none mb-3"></div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Técnico</th>
+                                <th>Asignados</th>
+                                <th>Resueltos</th>
+                                <th>Pendientes</th>
+                                <th>T. Prom. (hrs)</th>
+                                <th>Eficiencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaRendimientoTecnicos">
+                            <tr><td colspan="7" class="text-center text-muted">Cargando técnicos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-1" id="resumenRendimientoTecnicos"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Historial de Notificaciones</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteNotificaciones">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroTipoNotificacion">Tipo</label>
+                        <select class="form-select form-select-sm" id="filtroTipoNotificacion">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroDesdeNotificacion">Desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeNotificacion">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroHastaNotificacion">Hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaNotificacion">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosNotificacion" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Ticket</th>
+                                <th>Destinatario</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Mensaje</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteNotificaciones">
+                            <tr><td colspan="7" class="text-center text-muted">Cargando notificaciones...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteNotificaciones" class="d-none mt-3 text-center"></div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-1" id="totalesReporteNotificaciones"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Reporte de Tickets Resueltos</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteResueltos">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroTecnicoResueltos">Técnico</label>
+                        <select class="form-select form-select-sm" id="filtroTecnicoResueltos">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroClienteResueltos">Cliente</label>
+                        <select class="form-select form-select-sm" id="filtroClienteResueltos">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroCalificacionResueltos">Calificación</label>
+                        <select class="form-select form-select-sm" id="filtroCalificacionResueltos">
+                            <option value="">Todas</option>
+                            <option value="5">5 ★</option>
+                            <option value="4">4 ★</option>
+                            <option value="3">3 ★</option>
+                            <option value="2">2 ★</option>
+                            <option value="1">1 ★</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroDesdeResueltos">Cierre desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeResueltos">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroHastaResueltos">Cierre hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaResueltos">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosResueltos" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Ticket</th>
+                                <th>Cliente</th>
+                                <th>Equipo</th>
+                                <th>Técnico</th>
+                                <th>Fecha cierre</th>
+                                <th>Duración</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteResueltos">
+                            <tr><td colspan="7" class="text-center text-muted">Cargando tickets resueltos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteResueltos" class="d-none mt-3 text-center"></div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-1" id="totalesReporteResueltos"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Reporte de Equipos Registrados</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteEquipos">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="input-group input-group-sm mb-3" style="max-width: 380px;">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <label class="visually-hidden" for="buscarEquiposReporte">Buscar equipos</label>
+                    <input type="text" id="buscarEquiposReporte" class="form-control"
+                        placeholder="Buscar por código, tipo, marca, cliente...">
+                </div>
+                <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaEquiposReporte"></span>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Serial</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteEquipos">
+                            <tr><td colspan="8" class="text-center text-muted">Cargando equipos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteEquipos" class="d-none mt-3 text-center"></div>
+
+                <div class="card card-info mt-3 d-none" id="detalleEquipoSeleccionado">
+                    <div class="card-body" id="detalleEquipoSeleccionadoBody"></div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-3" id="totalesReporteEquipos"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Listado de Facturas del Sistema</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteFacturas">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroEstadoFacturas">Estado</label>
+                        <select class="form-select form-select-sm" id="filtroEstadoFacturas">
+                            <option value="">Todos</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Pagada">Pagada</option>
+                            <option value="Anulada">Anulada</option>
+                            <option value="Vencida">Vencida</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="filtroClienteFacturas">Cliente</label>
+                        <select class="form-select form-select-sm" id="filtroClienteFacturas">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroDesdeFacturas">Desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeFacturas">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroHastaFacturas">Hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaFacturas">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosFacturas" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Factura</th>
+                                <th>Ticket</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteFacturas">
+                            <tr><td colspan="7" class="text-center text-muted">Cargando facturas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteFacturas" class="d-none mt-3 text-center"></div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-1" id="totalesReporteFacturas"></div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h4 class="mb-0">Listado de Clientes del Sistema</h4>
+                <button type="button" class="btn btn-primary btn-sm" id="btnImprimirReporteClientes">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small mb-1" for="buscarClientesReporte">Buscar</label>
+                        <input type="text" class="form-control form-control-sm" id="buscarClientesReporte"
+                            placeholder="Código, nombre o correo...">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroEstadoClientes">Estado</label>
+                        <select class="form-select form-select-sm" id="filtroEstadoClientes">
+                            <option value="">Todos</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroDesdeClientes">Registrado desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeClientes">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroHastaClientes">Registrado hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaClientes">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosClientes" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaClientesReporte"></span>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle table-mobile-cards">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
+                                <th>Tickets</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaReporteClientes">
+                            <tr><td colspan="7" class="text-center text-muted">Cargando clientes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="verMasReporteClientes" class="d-none mt-3 text-center"></div>
+
+                <div class="card card-info mt-3 d-none" id="detalleClienteSeleccionado">
+                    <div class="card-body" id="detalleClienteSeleccionadoBody"></div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 small text-muted border-top pt-3 mt-3" id="totalesReporteClientes"></div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-lg-4">
+                <div class="card shadow h-100">
+                    <div class="card-header"><h4 class="mb-0">Tickets por estado</h4></div>
+                    <div class="card-body"><canvas id="chartEstado" height="220"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow h-100">
+                    <div class="card-header"><h4 class="mb-0">Tickets por categoría</h4></div>
+                    <div class="card-body"><canvas id="chartCategoria" height="220"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow h-100">
+                    <div class="card-header"><h4 class="mb-0">Distribución de satisfacción</h4></div>
+                    <div class="card-body"><canvas id="chartSatisfaccion" height="220"></canvas></div>
+                </div>
+            </div>
+        </div>
+
         <div class="card shadow mt-5">
-            <div class="card-header bg-itdesk text-white">
+            <div class="card-header">
                 <h4 class="mb-0">Resumen General</h4>
             </div>
             <div class="card-body">
@@ -129,10 +582,18 @@
         </div>
     </div>
 
+    <!-- Contenedor de la vista imprimible del reporte — oculto en pantalla,
+         poblado por js/imprimir.js justo antes de window.print() -->
+    <div id="areaImprimir"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/codigos.js"></script>
+    <script src="js/imprimir.js"></script>
+    <script src="js/search.js"></script>
     <script src="js/layout.js"></script>
     <script src="js/reportes.js"></script>
 </body>

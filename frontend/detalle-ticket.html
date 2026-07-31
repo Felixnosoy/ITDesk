@@ -3,13 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Ticket | ITDESK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
 <body data-protegido="Tecnico,Administrador" data-footer="Panel del Técnico">
@@ -91,7 +94,7 @@
                 <!-- TRABAJO: pestañas en vez de bloques largos apilados -->
                 <div class="col-lg-8">
                     <div class="card shadow">
-                        <div class="card-header bg-itdesk text-white p-0">
+                        <div class="card-header p-0">
                             <ul class="nav nav-tabs card-header-tabs px-2 pt-2" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabActividad" type="button">
@@ -206,9 +209,9 @@
     <div class="modal fade" id="modalCotizar" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-itdesk text-white">
+                <div class="modal-header">
                     <h5 class="modal-title">Cotizar reparación</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formCotizar" onsubmit="guardarCotizacion(event)">
                     <div class="modal-body">
@@ -250,9 +253,9 @@
     <div class="modal fade" id="modalDescuento" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <div class="modal-header bg-itdesk text-white">
+                <div class="modal-header">
                     <h5 class="modal-title">Descuento de la cotización</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formDescuento" onsubmit="guardarDescuento(event)">
                     <div class="modal-body">
@@ -298,9 +301,9 @@
     <div class="modal fade" id="modalEditarEquipo" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-itdesk text-white">
+                <div class="modal-header">
                     <h5 class="modal-title">Editar equipo</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formEditarEquipo" onsubmit="guardarEdicionEquipo(event)">
                     <div class="modal-body">
@@ -332,7 +335,11 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="eqeEstado">Estado del equipo</label>
-                                <input class="form-control" id="eqeEstado" required>
+                                <select class="form-select" id="eqeEstado" required>
+                                    <option value="Activo">Activo</option>
+                                    <option value="En Reparación">En Reparación</option>
+                                    <option value="Baja">Baja</option>
+                                </select>
                             </div>
                         </div>
                         <div class="mb-0">
@@ -354,9 +361,9 @@
     <div class="modal fade" id="modalEditarNota" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-itdesk text-white">
+                <div class="modal-header">
                     <h5 class="modal-title">Editar entrada del historial</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formEditarNota" onsubmit="guardarEdicionNota(event)">
                     <div class="modal-body">

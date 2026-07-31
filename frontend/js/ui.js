@@ -36,6 +36,14 @@ const UI = {
         Inactivo: { tono: "neutral", icono: "bi-slash-circle" }
     },
 
+    // equipo.estado — hasta la Salida 7 esto era texto libre y en la
+    // practica el unico valor real era "Recibido"; ahora son estos 3 fijos.
+    MAPA_ESTADO_EQUIPO: {
+        Activo: { tono: "success", icono: "bi-check-circle-fill" },
+        "En Reparación": { tono: "warning", icono: "bi-tools" },
+        Baja: { tono: "neutral", icono: "bi-slash-circle" }
+    },
+
     MAPA_ROL: {
         Administrador: { tono: "accent", icono: "bi-shield-lock-fill" },
         Tecnico: { tono: "info", icono: "bi-tools" },
@@ -57,6 +65,23 @@ const UI = {
         Pagada: { tono: "success", icono: "bi-check-circle-fill" },
         Anulada: { tono: "danger", icono: "bi-x-circle-fill" },
         Vencida: { tono: "neutral", icono: "bi-clock-history" }
+    },
+
+    // "tipo" de notificacion (notificacion.tipo) — los 6 eventos formales de
+    // la Salida 5 (Registro/Asignación/Estado/Diagnóstico/Finalización/
+    // Reapertura) mas 3 tipos que ya existian antes de esa spec (Cotización/
+    // Cierre/Actualización, esta ultima el fallback para notas libres sin
+    // cambio de estado asociado).
+    MAPA_TIPO_NOTIFICACION: {
+        Registro: { tono: "info", icono: "bi-plus-circle-fill" },
+        Asignación: { tono: "accent", icono: "bi-person-check-fill" },
+        Estado: { tono: "warning", icono: "bi-arrow-repeat" },
+        Diagnóstico: { tono: "info", icono: "bi-clipboard2-pulse" },
+        Cotización: { tono: "warning", icono: "bi-receipt" },
+        Finalización: { tono: "success", icono: "bi-check-circle-fill" },
+        Reapertura: { tono: "danger", icono: "bi-arrow-counterclockwise" },
+        Cierre: { tono: "neutral", icono: "bi-lock-fill" },
+        Actualización: { tono: "info", icono: "bi-chat-left-text-fill" }
     },
 
     // Helper generico: valor + mapa de tonos -> pill con icono. El resto de
@@ -86,6 +111,14 @@ const UI = {
 
     badgeEstadoUsuario(estado) {
         return this.badge(estado, this.MAPA_ESTADO_USUARIO, "Sin estado");
+    },
+
+    badgeEstadoEquipo(estado) {
+        return this.badge(estado, this.MAPA_ESTADO_EQUIPO, "Sin estado");
+    },
+
+    badgeTipoNotificacion(tipo) {
+        return this.badge(tipo, this.MAPA_TIPO_NOTIFICACION, "Notificación");
     },
 
     badgeRol(rol) {
@@ -420,6 +453,80 @@ const UI = {
         });
     },
 
+    // Mismo patron lazy-modal que confirmar(), pero pide un texto libre en
+    // vez de solo confirmar/cancelar — ej. el motivo de "sin costo" al
+    // resolver un ticket sin cotizacion facturada. Resuelve al texto (nunca
+    // vacio) o a null si se cancela — no usa throw/reject, el llamador
+    // simplemente revisa `if (texto === null) return;`.
+    pedirTexto(mensaje, opciones = {}) {
+        return new Promise((resolve) => {
+            let modalEl = document.getElementById("modalPedirTextoUI");
+
+            if (!modalEl) {
+                const wrapper = document.createElement("div");
+                wrapper.innerHTML = `
+                    <div class="modal fade" id="modalPedirTextoUI" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalPedirTextoUITitulo">Ingresar detalle</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="modalPedirTextoUIMensaje" class="mb-2"></p>
+                                    <textarea class="form-control" id="modalPedirTextoUICampo" rows="3"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" id="modalPedirTextoUIBtn">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(wrapper.firstElementChild);
+                modalEl = document.getElementById("modalPedirTextoUI");
+            }
+
+            document.getElementById("modalPedirTextoUITitulo").textContent = opciones.titulo || "Ingresar detalle";
+            document.getElementById("modalPedirTextoUIMensaje").textContent = mensaje;
+            const campo = document.getElementById("modalPedirTextoUICampo");
+            campo.value = "";
+            campo.classList.remove("is-invalid");
+            campo.placeholder = opciones.placeholder || "";
+
+            const btnConfirmar = document.getElementById("modalPedirTextoUIBtn");
+            btnConfirmar.textContent = opciones.textoConfirmar || "Confirmar";
+
+            const modal = new bootstrap.Modal(modalEl);
+            let resuelto = false;
+
+            const alConfirmar = () => {
+                const texto = campo.value.trim();
+                if (!texto) {
+                    campo.classList.add("is-invalid");
+                    return;
+                }
+                resuelto = true;
+                modal.hide();
+                resolve(texto);
+            };
+
+            const alOcultar = () => {
+                btnConfirmar.removeEventListener("click", alConfirmar);
+                modalEl.removeEventListener("hidden.bs.modal", alOcultar);
+                if (!resuelto) {
+                    resolve(null);
+                }
+            };
+
+            btnConfirmar.addEventListener("click", alConfirmar);
+            modalEl.addEventListener("hidden.bs.modal", alOcultar);
+
+            modal.show();
+        });
+    },
+
     // Aviso no bloqueante en la esquina de la pantalla. tipo: success | danger | warning | info.
     toast(mensaje, tipo = "success") {
         let contenedor = document.getElementById("toastContainerUI");
@@ -440,14 +547,14 @@ const UI = {
         };
 
         const toastEl = document.createElement("div");
-        toastEl.className = `toast align-items-center text-white bg-${tipo} border-0`;
+        toastEl.className = `toast align-items-center border-0 tone-${tipo}`;
         toastEl.setAttribute("role", "alert");
         toastEl.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="bi ${iconos[tipo] || iconos.info}"></i> ${mensaje}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
         contenedor.appendChild(toastEl);

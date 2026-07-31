@@ -335,6 +335,7 @@ CREATE TABLE `ticket` (
   `categoria` varchar(20) NOT NULL DEFAULT 'Otro',
   `estado` varchar(20) DEFAULT 'Abierto',
   `fecha_apertura` datetime DEFAULT current_timestamp(),
+  `fecha_resolucion` datetime DEFAULT NULL,
   `fecha_cierre` datetime DEFAULT NULL,
   PRIMARY KEY (`id_ticket`),
   KEY `FK_Ticket_Usuario` (`id_usuario`),

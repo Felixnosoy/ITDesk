@@ -35,5 +35,17 @@ const Codigos = {
 
     equipo(e) {
         return `EQ-${this._año(e.fecha_registro)}-${this._pad(e.id_equipo)}`;
+    },
+
+    // A diferencia de ticket()/factura()/etc., un reporte no es una fila en
+    // la base de datos — no hay id que leer. Se arma un identificador de
+    // documento igual de legible a partir del momento de generación, solo
+    // para el encabezado del reporte impreso (no se guarda ni se reutiliza).
+    // "prefijo" va completo (ej. "RPT-TCK", "NOT") — cada salida del sistema
+    // usa su propia familia de codigo, no todas son "RPT-".
+    reporte(prefijo) {
+        const ahora = new Date();
+        const marca = String(ahora.getTime()).slice(-6);
+        return `${prefijo}-${ahora.getFullYear()}-${marca}`;
     }
 };

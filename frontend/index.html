@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ITDESK | Sistema de Gestión de Soporte Técnico</title>
     <meta name="description" content="Sistema de Gestión de Soporte Técnico para empresas de tecnología.">
@@ -13,9 +13,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <!-- Fuente -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
 <body>
@@ -54,36 +58,41 @@
     </nav>
 
     <!-- ================= HERO ================= -->
-    <section class="bg-light py-5">
+    <section class="landing-hero">
         <div class="container">
-            <div class="row align-items-center">
+            <div class="row align-items-center g-5">
                 <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold">Sistema de Gestión de Soporte Técnico</h1>
-                    <p class="lead mt-4">
-                        ITDESK es una plataforma diseñada para empresas de tecnología que
-                        permite registrar incidencias, administrar tickets de soporte,
-                        asignar técnicos y realizar el seguimiento completo de cada
-                        reparación de manera rápida, organizada y segura.
+                    <span class="eyebrow">Gestión de soporte técnico</span>
+                    <h1 class="hero-title mt-2">Cada ticket, bajo control, de principio a fin.</h1>
+                    <p class="hero-lead mt-3">
+                        ITDESK centraliza el registro de incidencias, la asignación de técnicos
+                        y el seguimiento de cada reparación — para empresas de tecnología que
+                        necesitan orden, trazabilidad y velocidad.
                     </p>
-                    <a href="#contacto" class="btn btn-primary btn-lg me-2">
-                        <i class="bi bi-geo-alt-fill"></i> ¿Cómo abrir un ticket?
-                    </a>
-                    <a href="#servicios" class="btn btn-outline-primary btn-lg">Conocer más</a>
+                    <div class="mt-4 d-flex flex-wrap gap-2">
+                        <a href="#contacto" class="btn btn-primary btn-lg">
+                            <i class="bi bi-geo-alt-fill"></i> ¿Cómo abrir un ticket?
+                        </a>
+                        <a href="#servicios" class="btn btn-outline-secondary btn-lg">Conocer más</a>
+                    </div>
                 </div>
-                <div class="col-lg-6 text-center">
-                    <img src="img/portada.png" class="img-fluid" alt="Soporte Técnico">
+                <div class="col-lg-6">
+                    <div class="hero-media">
+                        <img src="img/portada.png" class="img-fluid" alt="Panel de ITDESK">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ================= NOSOTROS ================= -->
-    <section id="nosotros" class="py-5">
+    <section id="nosotros" class="landing-section">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">¿Quiénes Somos?</h2>
+                <span class="eyebrow">Quiénes somos</span>
+                <h2 class="fw-bold mt-2">Una plataforma pensada para el soporte técnico real</h2>
             </div>
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-lg-6">
                     <p>
                         En ITDESK ofrecemos una solución integral para la gestión del soporte
@@ -98,14 +107,13 @@
                     </p>
                 </div>
                 <div class="col-lg-6">
-                    <div class="card shadow">
+                    <div class="card card-info h-100">
+                        <div class="card-header">Misión</div>
                         <div class="card-body">
-                            <h4>Misión</h4>
                             <p>Proporcionar una plataforma eficiente para administrar el soporte técnico y garantizar
                                 una atención rápida y organizada.</p>
-                            <hr>
-                            <h4>Visión</h4>
-                            <p>Convertirnos en una solución de referencia para la gestión de servicios de soporte
+                            <h4 class="mt-4">Visión</h4>
+                            <p class="mb-0">Convertirnos en una solución de referencia para la gestión de servicios de soporte
                                 técnico empresarial.</p>
                         </div>
                     </div>
@@ -115,46 +123,47 @@
     </section>
 
     <!-- ================= SERVICIOS ================= -->
-    <section id="servicios" class="py-5 bg-light">
+    <section id="servicios" class="landing-section landing-section-alt">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">Nuestros Servicios</h2>
-                <p>Funcionalidades principales del sistema ITDESK.</p>
+                <span class="eyebrow">Qué incluye</span>
+                <h2 class="fw-bold mt-2">Nuestros Servicios</h2>
+                <p class="mb-0">Funcionalidades principales del sistema ITDESK.</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-6 col-lg-3">
-                    <div class="card shadow h-100 text-center">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-journal-text display-4 text-primary"></i>
+                            <span class="card-stat-icon tone-accent"><i class="bi bi-journal-text"></i></span>
                             <h4 class="mt-3">Registro de Tickets</h4>
-                            <p>Registro de incidencias de computadoras, impresoras y equipos tecnológicos.</p>
+                            <p class="mb-0">Registro de incidencias de computadoras, impresoras y equipos tecnológicos.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card shadow h-100 text-center">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-person-workspace display-4 text-primary"></i>
+                            <span class="card-stat-icon tone-info"><i class="bi bi-person-workspace"></i></span>
                             <h4 class="mt-3">Técnicos</h4>
-                            <p>Asignación y seguimiento de técnicos responsables de cada ticket.</p>
+                            <p class="mb-0">Asignación y seguimiento de técnicos responsables de cada ticket.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card shadow h-100 text-center">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-pc-display display-4 text-primary"></i>
+                            <span class="card-stat-icon tone-warning"><i class="bi bi-pc-display"></i></span>
                             <h4 class="mt-3">Equipos</h4>
-                            <p>Gestión de computadoras, impresoras y demás equipos electrónicos.</p>
+                            <p class="mb-0">Gestión de computadoras, impresoras y demás equipos electrónicos.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card shadow h-100 text-center">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-graph-up display-4 text-primary"></i>
+                            <span class="card-stat-icon tone-success"><i class="bi bi-graph-up"></i></span>
                             <h4 class="mt-3">Reportes</h4>
-                            <p>Estadísticas, historial de tickets y seguimiento del rendimiento.</p>
+                            <p class="mb-0">Estadísticas, historial de tickets y seguimiento del rendimiento.</p>
                         </div>
                     </div>
                 </div>
@@ -163,56 +172,57 @@
     </section>
 
     <!-- ================= PROCESO ================= -->
-    <section id="proceso" class="py-5">
+    <section id="proceso" class="landing-section">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">¿Cómo Funciona ITDESK?</h2>
-                <p class="text-muted">Nuestro proceso garantiza una atención organizada y eficiente para cada incidencia
+                <span class="eyebrow">Cómo funciona</span>
+                <h2 class="fw-bold mt-2">De la incidencia a la solución</h2>
+                <p class="mb-0">Nuestro proceso garantiza una atención organizada y eficiente para cada incidencia
                     reportada.</p>
             </div>
-            <div class="row text-center g-4">
-                <div class="col-md-2">
-                    <div class="card shadow h-100">
+            <div class="row g-4">
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-pencil-square display-4 text-primary"></i>
-                            <h5 class="mt-3">1. Reporte en Recepción</h5>
-                            <p>El cliente reporta la incidencia en persona y recepción registra el ticket.</p>
+                            <span class="card-stat-icon tone-accent">1</span>
+                            <h5 class="mt-3">Reporte en Recepción</h5>
+                            <p class="mb-0">El cliente reporta la incidencia en persona y recepción registra el ticket.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="card shadow h-100">
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-person-check display-4 text-success"></i>
-                            <h5 class="mt-3">2. Asignación</h5>
-                            <p>El administrador asigna un técnico.</p>
+                            <span class="card-stat-icon tone-info">2</span>
+                            <h5 class="mt-3">Asignación</h5>
+                            <p class="mb-0">El administrador asigna un técnico.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="card shadow h-100">
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-search display-4 text-warning"></i>
-                            <h5 class="mt-3">3. Diagnóstico</h5>
-                            <p>El técnico analiza la falla del equipo.</p>
+                            <span class="card-stat-icon tone-warning">3</span>
+                            <h5 class="mt-3">Diagnóstico</h5>
+                            <p class="mb-0">El técnico analiza la falla del equipo.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card shadow h-100">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-tools display-4 text-danger"></i>
-                            <h5 class="mt-3">4. Reparación</h5>
-                            <p>Se realiza la reparación y se actualiza el estado.</p>
+                            <span class="card-stat-icon tone-danger">4</span>
+                            <h5 class="mt-3">Reparación</h5>
+                            <p class="mb-0">Se realiza la reparación y se actualiza el estado.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card shadow h-100">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <i class="bi bi-check-circle display-4 text-primary"></i>
-                            <h5 class="mt-3">5. Ticket Cerrado</h5>
-                            <p>El cliente recibe la confirmación del servicio.</p>
+                            <span class="card-stat-icon tone-success">5</span>
+                            <h5 class="mt-3">Ticket Cerrado</h5>
+                            <p class="mb-0">El cliente recibe la confirmación del servicio.</p>
                         </div>
                     </div>
                 </div>
@@ -221,84 +231,108 @@
     </section>
 
     <!-- ================= ESTADÍSTICAS ================= -->
-    <section class="estadisticas landing-section">
+    <section class="landing-section landing-section-alt">
         <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <h1>0</h1>
-                    <p>Tickets Registrados</p>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="card card-stat h-100">
+                        <div class="card-body text-center">
+                            <div class="card-stat-value">0</div>
+                            <div class="card-stat-label">Tickets Registrados</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h1>0</h1>
-                    <p>Clientes Activos</p>
+                <div class="col-6 col-md-3">
+                    <div class="card card-stat h-100">
+                        <div class="card-body text-center">
+                            <div class="card-stat-value">0</div>
+                            <div class="card-stat-label">Clientes Activos</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h1>0</h1>
-                    <p>Técnicos Especializados</p>
+                <div class="col-6 col-md-3">
+                    <div class="card card-stat h-100">
+                        <div class="card-body text-center">
+                            <div class="card-stat-value">0</div>
+                            <div class="card-stat-label">Técnicos Especializados</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h1>%</h1>
-                    <p>Casos Resueltos</p>
+                <div class="col-6 col-md-3">
+                    <div class="card card-stat h-100">
+                        <div class="card-body text-center">
+                            <div class="card-stat-value">%</div>
+                            <div class="card-stat-label">Casos Resueltos</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ================= BENEFICIOS ================= -->
-    <section class="py-5">
+    <section class="landing-section">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">¿Por qué elegir ITDESK?</h2>
+                <span class="eyebrow">Beneficios</span>
+                <h2 class="fw-bold mt-2">¿Por qué elegir ITDESK?</h2>
             </div>
-            <div class="row">
+            <div class="row align-items-center g-5">
                 <div class="col-lg-6">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item">✔ Registro rápido de incidencias.</li>
-                        <li class="list-group-item">✔ Seguimiento en tiempo real.</li>
-                        <li class="list-group-item">✔ Asignación eficiente de técnicos.</li>
-                        <li class="list-group-item">✔ Historial completo de reparaciones.</li>
-                        <li class="list-group-item">✔ Reportes administrativos.</li>
-                        <li class="list-group-item">✔ Plataforma segura y fácil de utilizar.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Registro rápido de incidencias.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Seguimiento en tiempo real.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Asignación eficiente de técnicos.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Historial completo de reparaciones.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Reportes administrativos.</li>
+                        <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Plataforma segura y fácil de utilizar.</li>
                     </ul>
                 </div>
                 <div class="col-lg-6">
-                    <img src="img/benecifios.png" class="img-fluid rounded shadow" alt="Beneficios">
+                    <div class="hero-media">
+                        <img src="img/benecifios.png" class="img-fluid" alt="Beneficios">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ================= CONTACTO ================= -->
-    <section id="contacto" class="py-5 bg-light">
+    <section id="contacto" class="landing-section landing-section-alt">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="fw-bold">¿Cómo abrir un ticket?</h2>
-                <p>Por seguridad, los tickets se registran en recepción luego de reportar el equipo en persona —
+                <span class="eyebrow">Contacto</span>
+                <h2 class="fw-bold mt-2">¿Cómo abrir un ticket?</h2>
+                <p class="mb-0">Por seguridad, los tickets se registran en recepción luego de reportar el equipo en persona —
                     no existe un formulario de autoservicio.</p>
             </div>
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-lg-6">
-                    <div class="card shadow h-100">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h4><i class="bi bi-1-circle-fill text-primary"></i> Visítanos o llámanos</h4>
+                            <h4><span class="card-stat-icon tone-accent d-inline-flex" style="width:28px;height:28px;font-size:.85rem;">1</span> Visítanos o llámanos</h4>
                             <p>Trae el equipo a nuestras instalaciones o contáctanos para coordinar la recepción.</p>
-                            <h4 class="mt-4"><i class="bi bi-2-circle-fill text-primary"></i> Recepción registra tu ticket</h4>
+                            <h4 class="mt-4"><span class="card-stat-icon tone-accent d-inline-flex" style="width:28px;height:28px;font-size:.85rem;">2</span> Recepción registra tu ticket</h4>
                             <p>Nuestro equipo crea tu cuenta (si no la tenías) y abre el ticket con el detalle del
                                 equipo y la falla reportada.</p>
-                            <h4 class="mt-4"><i class="bi bi-3-circle-fill text-primary"></i> Da seguimiento en línea</h4>
-                            <p>Inicia sesión con tus credenciales para ver el estado y el avance de tu reparación.</p>
+                            <h4 class="mt-4"><span class="card-stat-icon tone-accent d-inline-flex" style="width:28px;height:28px;font-size:.85rem;">3</span> Da seguimiento en línea</h4>
+                            <p class="mb-0">Inicia sesión con tus credenciales para ver el estado y el avance de tu reparación.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4>Información de contacto</h4>
-                    <p><i class="bi bi-geo-alt-fill"></i> Santo Domingo, República Dominicana</p>
-                    <p><i class="bi bi-envelope-fill"></i> soporte@itdesk.com</p>
-                    <p><i class="bi bi-telephone-fill"></i> (809) 555-1234</p>
-                    <p><i class="bi bi-clock-fill"></i> Lunes a Viernes | 8:00 AM - 6:00 PM</p>
-                    <a href="login.html" class="btn btn-outline-primary mt-2">
-                        <i class="bi bi-box-arrow-in-right"></i> Ya tengo cuenta, iniciar sesión
-                    </a>
+                    <div class="card card-info h-100">
+                        <div class="card-header">Información de contacto</div>
+                        <div class="card-body">
+                            <p><i class="bi bi-geo-alt-fill me-2"></i> Santo Domingo, República Dominicana</p>
+                            <p><i class="bi bi-envelope-fill me-2"></i> soporte@itdesk.com</p>
+                            <p><i class="bi bi-telephone-fill me-2"></i> (809) 555-1234</p>
+                            <p class="mb-0"><i class="bi bi-clock-fill me-2"></i> Lunes a Viernes | 8:00 AM - 6:00 PM</p>
+                            <a href="login.html" class="btn btn-outline-primary mt-3">
+                                <i class="bi bi-box-arrow-in-right"></i> Ya tengo cuenta, iniciar sesión
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

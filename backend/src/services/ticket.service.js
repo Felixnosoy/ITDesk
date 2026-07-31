@@ -21,6 +21,7 @@ const COLUMNAS_TICKET = `
     t.categoria,
     t.estado,
     t.fecha_apertura,
+    t.fecha_resolucion,
     t.fecha_cierre
 `
 
@@ -309,10 +310,18 @@ const cambiarEstadoTicket = async (id, estado, opciones = {}) => {
         }
     }
 
+    // fecha_resolucion marca cuando el ticket llego a "Resuelto" (para medir
+    // tiempo de reparacion real en el Reporte de Rendimiento de Tecnicos) —
+    // distinta de fecha_cierre, que es un paso administrativo aparte y puede
+    // pasar mucho despues. Si el ticket vuelve a "En proceso" se limpia, para
+    // que la columna siempre refleje si el ticket esta Resuelto ahora mismo
+    // (un Cerrado la conserva, porque cerrarTicket no la toca).
     await pool.query(
         `
         UPDATE ticket
-        SET estado = ?
+        SET
+            estado = ?,
+            fecha_resolucion = ${estadoNormalizado === ESTADOS_TICKET.RESUELTO ? "CURRENT_TIMESTAMP()" : "NULL"}
         WHERE id_ticket = ?
         `,
         [estadoNormalizado, id]

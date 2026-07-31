@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-
 /*==========================
     ITDESK - STYLE.CSS
     Consume los tokens definidos en tokens.css (cargado antes que este
     archivo en cada página). Ninguna regla de acá debería tener un color,
     radio o sombra "suelto" — si hace falta uno nuevo, se agrega como token.
+    La fuente (Inter) se carga desde el <head> de cada HTML via <link>, no
+    con @import acá — un @import al inicio de la hoja bloquea el render.
 ===========================*/
 
 * {
@@ -33,7 +33,7 @@ NAVBAR (chrome de marca: fijo en ambos temas)
 
 .navbar {
     background: var(--azul) !important;
-    box-shadow: var(--shadow-2);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
 .navbar-brand {
@@ -163,9 +163,11 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-link.active {
-    background: rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .08);
     color: #fff;
     font-weight: 600;
+    border-left: 2px solid var(--accent-500);
+    padding-left: 10px;
 }
 
 .sidebar-link-danger {
@@ -244,6 +246,38 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 
 .sidebar-actions .sidebar-link {
     flex: 1;
+}
+
+/* Sidebar colapsado (Tecnico/Recepcionista por defecto) — solo iconos, sin
+   texto. Acotado a >=992px: el drawer movil (.sidebar.open, media query mas
+   abajo) siempre muestra la version completa, colapsar no tiene sentido ahi. */
+@media (min-width: 992px) {
+    .sidebar.collapsed {
+        width: 72px;
+    }
+
+    .sidebar.collapsed .sidebar-brand span,
+    .sidebar.collapsed .sidebar-link span,
+    .sidebar.collapsed .sidebar-user-info {
+        display: none;
+    }
+
+    .sidebar.collapsed .sidebar-brand,
+    .sidebar.collapsed .sidebar-link {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed .sidebar-footer {
+        align-items: center;
+    }
+
+    .sidebar.collapsed .sidebar-actions {
+        flex-direction: column;
+    }
+
+    .sidebar.collapsed .sidebar-actions .sidebar-link {
+        flex: none;
+    }
 }
 
 .app-main {
@@ -330,6 +364,26 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     z-index: 1;
 }
 
+/* Badge de no leidas (sobre la campanita) y punto de no-leido (por item del
+   panel) — antes vivian como estilos inline en layout.js. */
+.notif-count {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    font-size: .6rem;
+    padding: 2px 5px;
+    background: var(--danger) !important;
+}
+
+.notif-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-600);
+    margin-top: 4px;
+    flex: none;
+}
+
 @media (max-width: 991.98px) {
     .app-shell {
         display: block;
@@ -394,6 +448,54 @@ HERO (chrome de marca: fijo en ambos temas)
 }
 
 /*==========================
+LANDING (index.html) — hero y franjas propias. index.html es la unica
+pantalla no protegida por layout.js, asi que no comparte .page-head/
+.card-stat con el resto de la app, pero reutiliza sus mismas piezas donde
+tiene sentido (card, card-info, card-stat-icon, eyebrow) en vez de crear un
+lenguaje visual aparte.
+===========================*/
+.landing-hero {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(var(--accent-600-rgb), .07), transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(var(--accent-600-rgb), .05), transparent 45%),
+        var(--surface-0);
+    padding: var(--space-8) 0;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--ink-900);
+    text-wrap: balance;
+}
+
+.hero-lead {
+    color: var(--ink-500);
+    font-size: 1.05rem;
+    max-width: 46ch;
+}
+
+.hero-media {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-2);
+    padding: var(--space-3);
+}
+
+.hero-media img {
+    border-radius: var(--radius-md);
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+}
+
+/*==========================
 UTILIDADES DE BOOTSTRAP RETEMATIZADAS
 (Bootstrap las trae con colores fijos y !important — se sobreescriben para
 que tambien respondan a los tokens claro/oscuro)
@@ -428,6 +530,10 @@ SECCIONES / TIPOGRAFÍA
    protegidas, ese padding no es para eso (ver Fase 2.5, Hallazgo 1). */
 .landing-section {
     padding: var(--space-7) 0;
+}
+
+.landing-section-alt {
+    background: var(--surface-2);
 }
 
 h1, h2, h3, h4, h5 {
@@ -466,6 +572,73 @@ p {
     color: var(--accent-600);
 }
 
+.eyebrow.tone-info { color: var(--info); }
+.eyebrow.tone-warning { color: var(--warning); }
+.eyebrow.tone-success { color: var(--success); }
+
+/*==========================
+MINI-STAT (metricas secundarias fuera del grid de card-stat — lista
+compacta o tira horizontal, sin caja/sombra propia). Reutilizado en los 3
+dashboards con tabla para no repetir la misma fila de N cards identicas en
+cada uno (Fase 3, redisenio por rol).
+===========================*/
+.mini-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.mini-stat-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-500);
+    font-size: var(--fs-small);
+    font-weight: 500;
+}
+
+.mini-stat-value {
+    font-weight: 700;
+    color: var(--ink-900);
+    font-variant-numeric: tabular-nums;
+}
+
+.mini-stat-list .mini-stat {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.mini-stat-list .mini-stat:last-child {
+    border-bottom: none;
+}
+
+.mini-stat-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+}
+
+/* Dashboard cliente: la card de #seccionDestacada (renderSeccionDestacada en
+   cliente.js) es el heroe real de la pantalla — mas aire y tipografia mas
+   grande que una card comun, sin tocar el JS que la arma. */
+#seccionDestacada .card-body {
+    padding: var(--space-6) var(--space-5);
+}
+
+#seccionDestacada h5 {
+    font-size: 1.25rem;
+}
+
+/* Paso activo/completado del wizard de recepcion — ver recepcion.js:marcarPaso */
+.card.is-active {
+    border-left: 3px solid var(--accent-600);
+}
+
+.card.is-done {
+    opacity: .8;
+}
+
 /*==========================
 CARDS
 ===========================*/
@@ -473,21 +646,22 @@ CARDS
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface-1);
-    box-shadow: var(--shadow-1);
-    transition: var(--transition-base);
+    transition: border-color var(--transition-base);
     color: var(--texto);
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-2);
+    border-color: var(--ink-300);
 }
 
+/* Header "quieto": el navy queda para chrome fijo (sidebar/topbar/footer) y
+   momentos interactivos, no como relleno decorativo de cada card/modal —
+   ver tokens.css. */
 .card-header {
-    background: var(--azul) !important;
-    color: white !important;
+    background: var(--surface-1);
+    color: var(--ink-900);
     font-weight: 600;
-    border-bottom: none;
+    border-bottom: 1px solid var(--border);
 }
 
 /* los h1-h5 de arriba fijan color por elemento, lo que le gana a la
@@ -570,13 +744,12 @@ CARDS
    de la pantalla (Fase 2.5, Hallazgo 3). Anula el utilitario .shadow de
    Bootstrap si quedo en el HTML. */
 .card-info {
-    box-shadow: none !important;
     border: 1px solid var(--border);
 }
 
 .card-info .card-header {
-    background: var(--surface-2) !important;
-    color: var(--ink-900) !important;
+    background: var(--surface-2);
+    color: var(--ink-900);
     border-bottom: 1px solid var(--border);
 }
 
@@ -589,23 +762,17 @@ CARDS
 BOTONES
 ===========================*/
 .btn {
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     transition: var(--transition-fast);
     font-weight: 600;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-}
-
 .btn:active {
-    transform: translateY(0);
     filter: brightness(.94);
 }
 
 .btn:disabled,
 .btn.disabled {
-    transform: none;
     opacity: .55;
     cursor: not-allowed;
 }
@@ -749,7 +916,7 @@ FORMULARIOS
 
 .form-control.is-invalid:focus,
 .form-select.is-invalid:focus {
-    box-shadow: 0 0 0 .2rem rgba(220, 38, 38, .15);
+    box-shadow: 0 0 0 .2rem rgba(var(--danger-rgb), .15);
 }
 
 .form-control.is-valid,
@@ -776,28 +943,26 @@ TABLAS
 }
 
 .table thead {
-    background: var(--azul);
-    color: white;
+    background: var(--surface-2);
+    color: var(--ink-700);
 }
 
 /* Bootstrap pinta el fondo/color por celda via variables propias
    (--bs-table-bg) con una regla mas especifica que ".table thead" — se
-   fuerza aca para que el header siempre quede navy con texto blanco. */
+   fuerza aca para que el header siempre quede en la superficie recesada,
+   quieto, no como un bloque de color decorativo. */
 .table > thead > tr > th {
-    background-color: var(--azul) !important;
-    color: #fff !important;
+    background-color: var(--surface-2) !important;
+    color: var(--ink-700) !important;
     font-size: var(--fs-caption);
     letter-spacing: .04em;
     text-transform: uppercase;
     font-weight: 600;
-    border-bottom: none;
+    border-bottom: 1px solid var(--border);
 }
 
 /*==========================
-ENCABEZADOS ORDENABLES (js/ordenar.js) — el <th> ya es navy con texto
-blanco fijo en los dos temas (ver regla de arriba), asi que el estado
-hover/activo se resuelve con opacidad/fondo semitransparente, no con un
-color de texto distinto (uno oscuro seria invisible sobre navy).
+ENCABEZADOS ORDENABLES (js/ordenar.js)
 ===========================*/
 .th-ordenable {
     cursor: pointer;
@@ -807,11 +972,11 @@ color de texto distinto (uno oscuro seria invisible sobre navy).
 }
 
 .th-ordenable:hover {
-    background-color: rgba(255, 255, 255, .1) !important;
+    background-color: var(--surface-1) !important;
 }
 
 .th-ordenable:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--accent-600);
     outline-offset: -2px;
 }
 
@@ -842,7 +1007,7 @@ color de texto distinto (uno oscuro seria invisible sobre navy).
 }
 
 .table-hover > tbody > tr:hover > * {
-    background-color: var(--accent-100);
+    background-color: var(--surface-2);
 }
 
 /* Cabecera fija al hacer scroll en tablas largas (sin topbar fijo en
@@ -874,6 +1039,78 @@ color de texto distinto (uno oscuro seria invisible sobre navy).
 }
 
 /*==========================
+TABLERO KANBAN (dashboard-tecnico.html) — drag and drop nativo, ver
+js/tecnico.js. La columna "Abierto" no acepta drop (el backend no soporta
+volver a ese estado, ver ticket.service.js) — se marca en rojo si se intenta
+soltar ahi en vez de aceptarlo silenciosamente.
+===========================*/
+.kanban-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.kanban-column-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: var(--fs-small);
+    color: var(--ink-700);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
+}
+
+.kanban-column-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 80px;
+}
+
+.kanban-column.drag-over {
+    background: var(--accent-100);
+    border-color: var(--accent-600);
+}
+
+.kanban-column[data-drop="false"].drag-over {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+}
+
+.kanban-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    cursor: grab;
+    transition: border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.kanban-card:hover {
+    border-color: var(--ink-300);
+}
+
+.kanban-card:active {
+    cursor: grabbing;
+}
+
+.kanban-card.dragging {
+    opacity: .5;
+}
+
+.kanban-card.fila-reciente {
+    border-color: var(--accent-600);
+    box-shadow: 0 0 0 1px var(--accent-600);
+}
+
+/*==========================
 BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
 ===========================*/
 .badge {
@@ -885,8 +1122,8 @@ BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 11px;
-    border-radius: 999px;
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
     font-size: var(--fs-caption);
     font-weight: 600;
     line-height: 1.5;
@@ -922,14 +1159,6 @@ ICONOS
     color: var(--accent-600);
 }
 
-.card i {
-    transition: var(--transition-base);
-}
-
-.card:hover i {
-    transform: scale(1.08);
-}
-
 /*==========================
 PESTAÑAS (nav-tabs) — Bootstrap asume una tarjeta blanca por defecto
 ===========================*/
@@ -956,32 +1185,6 @@ PESTAÑAS (nav-tabs) — Bootstrap asume una tarjeta blanca por defecto
 }
 
 /*==========================
-PESTAÑAS DENTRO DE UN HEADER DE CARD OSCURO (detalle de ticket)
-===========================*/
-.card-header.bg-itdesk .nav-tabs {
-    border-bottom: none;
-}
-
-.card-header.bg-itdesk .nav-tabs .nav-link {
-    color: rgba(255, 255, 255, .65);
-    border: none;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    padding: 8px 16px;
-    font-size: .88rem;
-    font-weight: 500;
-    transition: var(--transition-fast);
-}
-
-.card-header.bg-itdesk .nav-tabs .nav-link:hover {
-    color: #fff;
-}
-
-.card-header.bg-itdesk .nav-tabs .nav-link.active {
-    color: var(--azul);
-    background: var(--surface-1);
-}
-
-/*==========================
 MODALES / DROPDOWNS / TOASTS (Bootstrap con colores fijos por defecto)
 ===========================*/
 .modal-content {
@@ -993,6 +1196,11 @@ MODALES / DROPDOWNS / TOASTS (Bootstrap con colores fijos por defecto)
 
 .modal-header {
     border-bottom-color: var(--border);
+}
+
+.modal-title {
+    font-weight: 600;
+    color: var(--ink-900);
 }
 
 .modal-footer {
@@ -1138,7 +1346,7 @@ agranda en el lightbox (.lightbox-*, UI.mostrarImagen en ui.js).
 }
 
 .lightbox-content {
-    background: rgba(7, 13, 24, .96);
+    background: rgba(10, 13, 24, .96);
     border: none;
 }
 
@@ -1175,7 +1383,7 @@ ESTRELLAS DE CALIFICACION (encuesta de satisfaccion, ticket-cliente.html)
 }
 
 .modal-backdrop {
-    --bs-backdrop-bg: #070D18;
+    --bs-backdrop-bg: #0A0D18;
 }
 
 .dropdown-menu {
@@ -1199,9 +1407,31 @@ ESTRELLAS DE CALIFICACION (encuesta de satisfaccion, ticket-cliente.html)
     border-top-color: var(--border);
 }
 
+/* Toast propio: borde de acento a la izquierda en vez de la alerta solida
+   de color de Bootstrap (bg-success/bg-danger con texto blanco) — el tono
+   se aplica via clase (ver UI.toast en ui.js), no via bg-* crudo. */
 .toast {
+    background: var(--surface-1);
+    color: var(--ink-900);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ink-300);
     box-shadow: var(--shadow-2);
 }
+
+.toast .toast-body {
+    color: var(--ink-900);
+}
+
+.toast .bi { color: var(--ink-500); }
+
+.toast.tone-success { border-left-color: var(--success); }
+.toast.tone-success .bi { color: var(--success); }
+.toast.tone-danger { border-left-color: var(--danger); }
+.toast.tone-danger .bi { color: var(--danger); }
+.toast.tone-warning { border-left-color: var(--warning); }
+.toast.tone-warning .bi { color: var(--warning); }
+.toast.tone-info { border-left-color: var(--info); }
+.toast.tone-info .bi { color: var(--info); }
 
 /*==========================
 LOGIN
@@ -1214,15 +1444,14 @@ LOGIN
     display: flex;
     align-items: center;
     background:
-        radial-gradient(circle at 12% 15%, rgba(var(--accent-600-rgb), .12), transparent 42%),
-        radial-gradient(circle at 88% 85%, rgba(var(--accent-600-rgb), .08), transparent 46%),
+        radial-gradient(circle at 12% 15%, rgba(var(--accent-600-rgb), .06), transparent 40%),
+        radial-gradient(circle at 88% 85%, rgba(var(--accent-600-rgb), .05), transparent 44%),
         var(--surface-0);
 }
 
 .login-card {
     background: var(--surface-1);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-3);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
 }
 
@@ -1262,7 +1491,7 @@ RESPONSIVE
     }
 
     .hero h1 {
-        font-size: 2.2rem;
+        font-size: 1.5rem;
     }
 
     .navbar-brand {
@@ -1299,6 +1528,7 @@ ICONO HEADSET LOGIN
    practicamente invisible sobre la card oscura en modo oscuro (Fase 2.5,
    verificacion visual). Debe ser tematico como el resto del contenido. */
 .login-icon {
+    font-size: 1.75rem;
     color: var(--ink-900);
     transition: var(--transition-base);
 }
@@ -1534,6 +1764,23 @@ INDICADOR DE PASOS (WIZARD RECEPCION)
     min-width: 24px;
 }
 
+/* Variante compacta — mini-timeline dentro de una tarjeta de ticket
+   (dashboard-cliente.html), mismo componente que el wizard de recepcion. */
+.step-indicator.sm {
+    margin-bottom: 0;
+    gap: 4px;
+}
+
+.step-indicator.sm .step-circle {
+    width: 20px;
+    height: 20px;
+    font-size: .65rem;
+}
+
+.step-indicator.sm .step-line {
+    min-width: 12px;
+}
+
 /*==========================
 TABLA RESPONSIVE -> TARJETAS EN MOVIL
 ===========================*/
@@ -1571,6 +1818,14 @@ TABLA RESPONSIVE -> TARJETAS EN MOVIL
         color: var(--ink-900);
         margin-right: 10px;
     }
+}
+
+/* Fila de tabla clickeable (Reportes de Equipos y de Clientes — click en una
+   fila muestra su detalle abajo). El resto de las tablas del sistema usan
+   un <a> adentro de una celda en vez de la fila entera; estas son las
+   unicas que necesitan la fila completa como target. */
+.reporte-fila-clickeable {
+    cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1684,6 +1939,51 @@ sin importar si el usuario tenia modo oscuro activado en pantalla.
 
 .doc-footer > div {
     margin-bottom: 4px;
+}
+
+/* Reporte de Tickets Registrados (Imprimir.reporteTickets, js/imprimir.js) —
+   mismas piezas que .doc-header/.doc-tabla/.doc-footer de arriba, mas estas
+   3 clases nuevas para su layout propio: rango de fechas bajo el titulo,
+   panel de filtros a 2 columnas, y la linea de totales al pie de la tabla. */
+.doc-rango-fechas {
+    font-size: 12px;
+    color: #444;
+    margin-top: 4px;
+}
+
+.doc-meta-cols {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.doc-meta-col-right {
+    text-align: right;
+}
+
+.doc-totales-linea {
+    font-size: 12px;
+    font-weight: 700;
+    border-top: 1px solid #000;
+    padding-top: 8px;
+    margin-bottom: 12px;
+}
+
+.doc-destacado {
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid #000;
+    padding: 6px;
+    margin-bottom: 10px;
+}
+
+.doc-generado {
+    display: flex;
+    gap: 32px;
 }
 
 @media print {

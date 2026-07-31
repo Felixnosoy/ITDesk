@@ -8,21 +8,61 @@ let clienteSeleccionado = null;
 
 document.addEventListener("DOMContentLoaded", () => marcarPaso("cliente"));
 
+// Atajos Alt+1/2/3: saltan directo al campo principal del paso correspondiente
+// (solo si ese paso ya esta visible) — reduce clicks en un flujo de captura
+// rapida donde la recepcionista repite esto decenas de veces por turno.
+const ATAJOS_PASO = {
+    "1": ["cardCliente", "buscarCliente"],
+    "2": ["cardEquipo", "selectEquipoExistente"],
+    "3": ["cardTicket", "tkTitulo"]
+};
+
+document.addEventListener("keydown", (evento) => {
+    if (!evento.altKey) {
+        return;
+    }
+    const objetivo = ATAJOS_PASO[evento.key];
+    if (!objetivo) {
+        return;
+    }
+    const [idCard, idCampo] = objetivo;
+    const card = document.getElementById(idCard);
+    if (card && !card.classList.contains("d-none")) {
+        evento.preventDefault();
+        document.getElementById(idCampo)?.focus();
+    }
+});
+
 function marcarPaso(paso) {
     // paso: "cliente" | "equipo" | "ticket"
     const orden = ["cliente", "equipo", "ticket"];
     const indiceActual = orden.indexOf(paso);
 
     orden.forEach((nombre, indice) => {
-        const el = document.getElementById(`step${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`);
-        if (!el) {
-            return;
+        const capitalizado = `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`;
+
+        const el = document.getElementById(`step${capitalizado}`);
+        if (el) {
+            el.classList.remove("active", "done");
+            if (indice < indiceActual) {
+                el.classList.add("done");
+            } else if (indice === indiceActual) {
+                el.classList.add("active");
+            }
         }
-        el.classList.remove("active", "done");
-        if (indice < indiceActual) {
-            el.classList.add("done");
-        } else if (indice === indiceActual) {
-            el.classList.add("active");
+
+        // Misma logica sobre la card del paso — asi el paso activo se nota
+        // en la tarjeta misma (no solo en el circulo de arriba) y los pasos
+        // ya completados se ven visualmente "cerrados" en vez de quedar
+        // apiladas tres cards con el mismo peso visual.
+        const card = document.getElementById(`card${capitalizado}`);
+        if (card) {
+            card.classList.remove("is-active", "is-done");
+            if (indice < indiceActual) {
+                card.classList.add("is-done");
+            } else if (indice === indiceActual) {
+                card.classList.add("is-active");
+            }
         }
     });
 }
@@ -135,6 +175,7 @@ async function seleccionarCliente(usuario) {
     marcarPaso("equipo");
 
     await cargarEquiposDelCliente();
+    document.getElementById("selectEquipoExistente")?.focus();
 }
 
 // mantenerAlerta: true cuando el reset es automatico tras crear un ticket
@@ -226,6 +267,7 @@ function seleccionarEquipoExistente() {
         cardTicket.classList.remove("d-none");
         cardTicket.dataset.idEquipo = id;
         marcarPaso("ticket");
+        document.getElementById("tkTitulo")?.focus();
     } else {
         formNuevo.classList.remove("d-none");
         cardTicket.classList.add("d-none");
@@ -267,6 +309,7 @@ async function crearEquipoRecepcion(event) {
         cardTicket.classList.remove("d-none");
         cardTicket.dataset.idEquipo = equipo.id_equipo;
         marcarPaso("ticket");
+        document.getElementById("tkTitulo")?.focus();
 
     } catch (error) {
         UI.toast(error.message, "danger");
@@ -306,6 +349,20 @@ async function crearTicketRecepcion(event) {
         alerta.scrollIntoView({ behavior: "smooth" });
 
         agregarActividad("bi-ticket-perforated", `${Codigos.ticket(ticket)} creado`, ticket.titulo);
+
+        // Aviso al cliente de que su ticket ya quedo registrado — nunca debe
+        // bloquear el flujo de recepcion si falla (mismo patron fire-and-forget
+        // que notificarCliente en ticket-tecnico.js).
+        apiFetch("/notificacion", {
+            method: "POST",
+            body: JSON.stringify({
+                id_ticket: ticket.id_ticket,
+                id_usuario: ticket.id_usuario,
+                tipo: "Registro",
+                mensaje: `Tu ticket ${Codigos.ticket(ticket)} fue registrado: ${ticket.titulo}.`
+            })
+        }).catch(() => {});
+
         document.getElementById("formTicketRecepcion").reset();
         actualizarContadorDescripcion();
 

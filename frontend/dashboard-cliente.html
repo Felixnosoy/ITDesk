@@ -3,13 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); } })();</script>
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Cliente | ITDESK</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
 <body data-protegido="Cliente">
@@ -28,69 +31,36 @@
                 <div class="mb-4" id="seccionDestacada"></div>
 
                 <!-- ESTADISTICAS -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card card-stat shadow-sm">
-                            <div class="card-body">
-                                <div class="card-stat-head">
-                                    <span class="card-stat-icon tone-accent"><i class="bi bi-ticket-perforated"></i></span>
-                                    <span class="card-stat-label">Tickets Registrados</span>
-                                </div>
-                                <div class="card-stat-value" id="totalTickets">0</div>
-                            </div>
-                        </div>
+                <div class="mini-stat-strip mb-4">
+                    <div class="mini-stat">
+                        <span class="mini-stat-label"><i class="bi bi-ticket-perforated"></i> Tickets registrados</span>
+                        <span class="mini-stat-value" id="totalTickets">0</span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card card-stat shadow-sm">
-                            <div class="card-body">
-                                <div class="card-stat-head">
-                                    <span class="card-stat-icon tone-warning"><i class="bi bi-tools"></i></span>
-                                    <span class="card-stat-label">En Proceso</span>
-                                </div>
-                                <div class="card-stat-value" id="ticketsProceso">0</div>
-                            </div>
-                        </div>
+                    <div class="mini-stat">
+                        <span class="mini-stat-label"><i class="bi bi-tools"></i> En proceso</span>
+                        <span class="mini-stat-value" id="ticketsProceso">0</span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card card-stat shadow-sm">
-                            <div class="card-body">
-                                <div class="card-stat-head">
-                                    <span class="card-stat-icon tone-success"><i class="bi bi-check-circle"></i></span>
-                                    <span class="card-stat-label">Tickets Resueltos</span>
-                                </div>
-                                <div class="card-stat-value" id="ticketsResueltos">0</div>
-                            </div>
-                        </div>
+                    <div class="mini-stat">
+                        <span class="mini-stat-label"><i class="bi bi-check-circle"></i> Resueltos</span>
+                        <span class="mini-stat-value" id="ticketsResueltos">0</span>
                     </div>
                 </div>
 
-                <!-- TABLA DE TICKETS -->
+                <!-- TICKETS ACTIVOS -->
                 <div class="mb-5">
-                    <div class="card shadow">
-                        <div class="card-header bg-itdesk text-white">
-                            <h4 class="mb-0">Tickets activos</h4>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h4 class="mb-0">Tus tickets</h4>
+                        <div style="max-width: 200px;">
+                            <label class="visually-hidden" for="ordenListaCliente">Ordenar por</label>
+                            <select class="form-select form-select-sm" id="ordenListaCliente">
+                                <option value=":asc">Más reciente</option>
+                                <option value="estado:asc">Estado</option>
+                                <option value="titulo:asc">Título</option>
+                            </select>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle table-mobile-cards">
-                                    <thead>
-                                        <tr>
-                                            <th data-sort="id_ticket">ID</th>
-                                            <th data-sort="equipo_tipo">Equipo</th>
-                                            <th data-sort="titulo">Título</th>
-                                            <th data-sort="categoria">Categoría</th>
-                                            <th data-sort="estado">Estado</th>
-                                            <th>Detalle</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tablaTickets">
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">Cargando tickets...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="row g-3" id="listaTickets">
+                        <div class="col-12 text-center text-muted py-4">Cargando tickets...</div>
                     </div>
                 </div>
 

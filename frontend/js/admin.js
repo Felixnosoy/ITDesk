@@ -176,8 +176,10 @@ async function cargarTicketsAdmin(asignaciones) {
             // "Abierto" = todavia sin tecnico asignado (asignar siempre mueve
             // el ticket a "En proceso" en este flujo, ver admin.js:asignarTecnico).
             const sinAsignar = tickets.filter(t => t.estado === "Abierto").length;
-            document.getElementById("ticketsSinAsignar").textContent =
-                sinAsignar > 0 ? `${sinAsignar} sin asignar` : "Todos asignados";
+            const elSinAsignar = document.getElementById("ticketsSinAsignar");
+            elSinAsignar.textContent = sinAsignar > 0 ? `${sinAsignar} sin asignar` : "Todos asignados";
+            elSinAsignar.classList.toggle("tone-warning", sinAsignar > 0);
+            elSinAsignar.classList.toggle("tone-success", sinAsignar === 0);
         }
         if (document.getElementById("ticketsResueltos")) {
             document.getElementById("ticketsResueltos").textContent =
@@ -390,6 +392,21 @@ async function confirmarAsignacion(event) {
                     id_usuario: Number(id_usuario),
                     tipo: "Asignación",
                     mensaje: `Te marcaron como especialista del ticket ${Codigos.ticket(ticket)}: ${ticket.titulo}`
+                })
+            }).catch(() => {});
+        }
+
+        // aviso al cliente, solo la primera vez (mismo criterio que el PATCH
+        // de estado de arriba: reasignar un ticket que ya estaba en proceso
+        // no es una novedad para el cliente).
+        if (ticket && ticket.estado === "Abierto") {
+            apiFetch("/notificacion", {
+                method: "POST",
+                body: JSON.stringify({
+                    id_ticket,
+                    id_usuario: ticket.id_usuario,
+                    tipo: "Estado",
+                    mensaje: `Tu ticket ${Codigos.ticket(ticket)} ya tiene un técnico trabajando en él — pasó a "En proceso".`
                 })
             }).catch(() => {});
         }

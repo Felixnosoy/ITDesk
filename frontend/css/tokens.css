@@ -8,35 +8,42 @@ componente debería tener un hex "suelto" fuera de este archivo.
 Estructura: primitivos -> semánticos -> alias heredados (para no romper
 el CSS ya escrito que usa --azul/--gris/--fondo/etc). El tema oscuro
 redefine SOLO los tokens, nunca los componentes.
+
+Sistema visual "Royal Blue / Navy / Blanco", plano y minimalista
+(referencia Linear/GitHub/Carbon): navy y azul de marca reservados a
+chrome fijo (sidebar/topbar/footer) y a momentos interactivos (botón
+primario, foco, estado activo) — no se usan como relleno decorativo de
+headers de card/modal. Elevación resuelta con borde de 1px en vez de
+sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
 =========================================================== */
 
 :root {
     /* ---------- MARCA (fija: navbar, footer, hero, headers de card) ---------- */
-    --azul: #0A192F;
-    --azul2: #112240;
+    --azul: #0B1440;
+    --azul2: #121B4F;
 
     /* ---------- TEXTO (primitivos, claro) ---------- */
-    --ink-900: #0F172A;
-    --ink-700: #334155;
-    --ink-500: #5F6E84;
-    --ink-300: #94A3B8;
-    /* --ink-300 no alcanza 4.5:1 sobre --surface-1 (2.56:1) — el
-       placeholder de formularios usa este token propio en vez de --ink-300,
-       que sigue usandose tal cual en los otros 8 lugares no-texto donde no
-       aplica el estandar (bordes, iconos deshabilitados). */
-    --placeholder: #5F6E84;
+    --ink-900: #10152B;
+    --ink-700: #3C4257;
+    --ink-500: #6B7285;
+    --ink-300: #A2A8B8;
+    /* --ink-300 no alcanza 4.5:1 sobre --surface-1 — el placeholder de
+       formularios usa este token propio en vez de --ink-300, que sigue
+       usandose tal cual en los otros lugares no-texto donde no aplica el
+       estandar (bordes, iconos deshabilitados). */
+    --placeholder: #6B7285;
 
     /* ---------- SUPERFICIES (claro) ---------- */
-    --surface-0: #F7F9FC;
+    --surface-0: #F4F5F9;
     --surface-1: #FFFFFF;
-    --surface-2: #F1F5FA;
-    --border: #E2E8F0;
+    --surface-2: #ECEEF4;
+    --border: #DEE1EA;
 
-    /* ---------- ACENTO DE MARCA (temático) ---------- */
-    --accent-600: #1D4ED8;
-    --accent-600-rgb: 29, 78, 216;
-    --accent-500: #2563EB;
-    --accent-100: #DBEAFE;
+    /* ---------- ACENTO DE MARCA (temático) — royal blue real ---------- */
+    --accent-600: #2C3FE0;
+    --accent-600-rgb: 44, 63, 224;
+    --accent-500: #4356EC;
+    --accent-100: #E7E9FC;
 
     /* ---------- SEMÁNTICOS (temático) ---------- */
     --success: #0C7E53;
@@ -45,17 +52,18 @@ redefine SOLO los tokens, nunca los componentes.
     --warning-bg: #FEF3E2;
     --danger: #D12424;
     --danger-bg: #FDECEC;
+    --danger-rgb: 209, 36, 36;
     --info: #0A73A3;
     --info-bg: #E5F6FD;
 
     /* ---------- TIPOGRAFÍA ---------- */
-    --font-base: 'Poppins', sans-serif;
-    --fs-display: 2.5rem;
-    --fs-h1: 2rem;
-    --fs-h2: 1.5rem;
-    --fs-h3: 1.25rem;
-    --fs-h4: 1.05rem;
-    --fs-body: 1rem;
+    --font-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --fs-display: 1.75rem;
+    --fs-h1: 1.375rem;
+    --fs-h2: 1.125rem;
+    --fs-h3: 1rem;
+    --fs-h4: .9375rem;
+    --fs-body: .9375rem;
     --fs-small: .875rem;
     --fs-caption: .75rem;
 
@@ -70,20 +78,20 @@ redefine SOLO los tokens, nunca los componentes.
     --space-8: 64px;
 
     /* ---------- RADIOS ---------- */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
 
     /* ---------- MOVIMIENTO ---------- */
-    --transition-fast: 120ms ease;
-    --transition-base: 200ms ease;
-    --transition-slow: 280ms ease;
+    --transition-fast: 100ms ease;
+    --transition-base: 150ms ease;
+    --transition-slow: 220ms ease;
 
-    /* ---------- ELEVACIÓN ---------- */
-    --shadow-1: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 12px rgba(15, 23, 42, .06);
-    --shadow-2: 0 4px 10px rgba(15, 23, 42, .08), 0 12px 28px rgba(15, 23, 42, .10);
-    --shadow-3: 0 10px 24px rgba(15, 23, 42, .14), 0 24px 48px rgba(15, 23, 42, .16);
+    /* ---------- ELEVACIÓN (solo overlays reales: modal/dropdown/notif/toast) ---------- */
+    --shadow-1: 0 1px 2px rgba(16, 21, 43, .05);
+    --shadow-2: 0 4px 16px rgba(16, 21, 43, .10);
+    --shadow-3: 0 16px 40px rgba(16, 21, 43, .18);
 
     /* ---------- ALIAS HEREDADOS (compatibilidad con CSS ya escrito) ---------- */
     --azul3: var(--accent-600);
@@ -106,21 +114,21 @@ redefine SOLO los tokens, nunca los componentes.
    dar continuidad visual — solo cambian las superficies de contenido. */
 @media (prefers-color-scheme: dark) {
     :root {
-        --ink-900: #F1F5F9;
-        --ink-700: #CBD5E1;
-        --ink-500: #93A2B8;
-        --ink-300: #64748B;
-        --placeholder: #7B899C;
+        --ink-900: #EDEEF4;
+        --ink-700: #B7BBCC;
+        --ink-500: #868CA3;
+        --ink-300: #565C78;
+        --placeholder: #868CA3;
 
-        --surface-0: #070D18;
-        --surface-1: #101A2C;
-        --surface-2: #17233A;
-        --border: #22304A;
+        --surface-0: #0A0D18;
+        --surface-1: #12162A;
+        --surface-2: #191F38;
+        --border: #262C48;
 
-        --accent-600: #5B8DFF;
-        --accent-600-rgb: 91, 141, 255;
-        --accent-500: #4C7EF0;
-        --accent-100: #16233D;
+        --accent-600: #7C8CF5;
+        --accent-600-rgb: 124, 140, 245;
+        --accent-500: #93A0F7;
+        --accent-100: #1B2454;
 
         --success: #34D399;
         --success-bg: #10281F;
@@ -128,6 +136,7 @@ redefine SOLO los tokens, nunca los componentes.
         --warning-bg: #2C2210;
         --danger: #F87171;
         --danger-bg: #2C1414;
+        --danger-rgb: 248, 113, 113;
         --info: #38BDF8;
         --info-bg: #122A36;
 
@@ -136,21 +145,21 @@ redefine SOLO los tokens, nunca los componentes.
 }
 
 :root[data-theme="dark"] {
-    --ink-900: #F1F5F9;
-    --ink-700: #CBD5E1;
-    --ink-500: #93A2B8;
-    --ink-300: #64748B;
-    --placeholder: #7B899C;
+    --ink-900: #EDEEF4;
+    --ink-700: #B7BBCC;
+    --ink-500: #868CA3;
+    --ink-300: #565C78;
+    --placeholder: #868CA3;
 
-    --surface-0: #070D18;
-    --surface-1: #101A2C;
-    --surface-2: #17233A;
-    --border: #22304A;
+    --surface-0: #0A0D18;
+    --surface-1: #12162A;
+    --surface-2: #191F38;
+    --border: #262C48;
 
-    --accent-600: #5B8DFF;
-    --accent-600-rgb: 91, 141, 255;
-    --accent-500: #4C7EF0;
-    --accent-100: #16233D;
+    --accent-600: #7C8CF5;
+    --accent-600-rgb: 124, 140, 245;
+    --accent-500: #93A0F7;
+    --accent-100: #1B2454;
 
     --success: #34D399;
     --success-bg: #10281F;
@@ -158,6 +167,7 @@ redefine SOLO los tokens, nunca los componentes.
     --warning-bg: #2C2210;
     --danger: #F87171;
     --danger-bg: #2C1414;
+    --danger-rgb: 248, 113, 113;
     --info: #38BDF8;
     --info-bg: #122A36;
 
@@ -165,21 +175,21 @@ redefine SOLO los tokens, nunca los componentes.
 }
 
 :root[data-theme="light"] {
-    --ink-900: #0F172A;
-    --ink-700: #334155;
-    --ink-500: #5F6E84;
-    --ink-300: #94A3B8;
-    --placeholder: #5F6E84;
+    --ink-900: #10152B;
+    --ink-700: #3C4257;
+    --ink-500: #6B7285;
+    --ink-300: #A2A8B8;
+    --placeholder: #6B7285;
 
-    --surface-0: #F7F9FC;
+    --surface-0: #F4F5F9;
     --surface-1: #FFFFFF;
-    --surface-2: #F1F5FA;
-    --border: #E2E8F0;
+    --surface-2: #ECEEF4;
+    --border: #DEE1EA;
 
-    --accent-600: #1D4ED8;
-    --accent-600-rgb: 29, 78, 216;
-    --accent-500: #2563EB;
-    --accent-100: #DBEAFE;
+    --accent-600: #2C3FE0;
+    --accent-600-rgb: 44, 63, 224;
+    --accent-500: #4356EC;
+    --accent-100: #E7E9FC;
 
     --success: #0C7E53;
     --success-bg: #E7F7EF;
@@ -187,6 +197,7 @@ redefine SOLO los tokens, nunca los componentes.
     --warning-bg: #FEF3E2;
     --danger: #D12424;
     --danger-bg: #FDECEC;
+    --danger-rgb: 209, 36, 36;
     --info: #0A73A3;
     --info-bg: #E5F6FD;
 

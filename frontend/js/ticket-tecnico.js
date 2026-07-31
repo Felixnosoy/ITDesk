@@ -1073,6 +1073,12 @@ async function agregarNota(event) {
     const usuario = Auth.getUsuario();
     const estado = document.getElementById("notaEstado").value;
     const observaciones = document.getElementById("notaObservaciones").value.trim();
+    // Capturado ANTES de tocar nada — cambiarEstadoConGate() cambia el
+    // estado en el backend pero no reasigna ticketActual (eso solo pasa en
+    // recargarTicket(), al final), asi que esto sigue siendo el estado viejo
+    // hasta ese momento. Sirve para distinguir Finalizacion/Reapertura de
+    // una Actualizacion comun mas abajo.
+    const estadoAnterior = ticketActual.estado;
 
     if (!observaciones) {
         UI.toast("Escribe una observación para el cliente.", "warning");
@@ -1114,7 +1120,13 @@ async function agregarNota(event) {
             }
         });
 
-        notificarCliente("Actualización", observaciones);
+        if (estado === "Resuelto" && estadoAnterior !== "Resuelto") {
+            notificarCliente("Finalización", `Tu ticket ${Codigos.ticket(ticketActual)} fue marcado como resuelto. ${observaciones}`);
+        } else if (estado === "En proceso" && estadoAnterior === "Resuelto") {
+            notificarCliente("Reapertura", `Tu ticket ${Codigos.ticket(ticketActual)} fue reabierto y sigue en proceso. ${observaciones}`);
+        } else {
+            notificarCliente("Actualización", observaciones);
+        }
         document.getElementById("formNuevaNota").reset();
         limpiarAdjuntoPreview("notaArchivoPreview");
         UI.toast("Actualización publicada. El cliente ya puede verla.");
