@@ -289,7 +289,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 
 .app-content {
     flex: 1;
-    padding: 32px 40px;
+    padding: 16px 24px;
 }
 
 .app-footer {
@@ -454,24 +454,40 @@ pantalla no protegida por layout.js, asi que no comparte .page-head/
 tiene sentido (card, card-info, card-stat-icon, eyebrow) en vez de crear un
 lenguaje visual aparte.
 ===========================*/
+/* Navy plano en vez de blobs radiales: mismo "on-brand" que ya usa el
+   sidebar (#fff / rgba(255,255,255,X)) en vez de inventar un token nuevo —
+   ver .sidebar-link para el mismo patron. */
 .landing-hero {
-    background:
-        radial-gradient(circle at 10% 10%, rgba(var(--accent-600-rgb), .07), transparent 45%),
-        radial-gradient(circle at 90% 90%, rgba(var(--accent-600-rgb), .05), transparent 45%),
-        var(--surface-0);
+    background: var(--azul);
+    border-bottom: 1px solid var(--azul2);
     padding: var(--space-8) 0;
+}
+
+.landing-hero .eyebrow {
+    color: rgba(255, 255, 255, .72);
+}
+
+.landing-hero .btn-outline-secondary {
+    color: #fff;
+    border-color: rgba(255, 255, 255, .4);
+}
+
+.landing-hero .btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, .08);
+    border-color: #fff;
+    color: #fff;
 }
 
 .hero-title {
     font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -.02em;
-    color: var(--ink-900);
+    color: #fff;
     text-wrap: balance;
 }
 
 .hero-lead {
-    color: var(--ink-500);
+    color: rgba(255, 255, 255, .68);
     font-size: 1.05rem;
     max-width: 46ch;
 }
@@ -551,16 +567,42 @@ p {
     color: var(--ink-500);
 }
 
+/* Antes: eyebrow + h2 + parrafo apilados (3 lineas de "bienvenida" antes de
+   llegar al contenido real). Reducido a 1 linea — el usuario ya sabe en que
+   pantalla esta, no hace falta explicarselo cada vez que entra. Estructura:
+   .page-head (fila, separa texto de acciones) > .page-head-text (h2 + p
+   inline, unidos por un separador) [+ botones/acciones opcionales]. */
 .page-head {
-    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: var(--space-4);
+}
+
+.page-head-text {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    min-width: 0;
 }
 
 .page-head h2 {
-    margin-bottom: 4px;
+    margin: 0;
 }
 
 .page-head p {
-    margin-bottom: 0;
+    margin: 0;
+    font-size: var(--fs-small);
+    color: var(--ink-500);
+}
+
+.page-head p:not(:empty)::before {
+    content: "—";
+    margin-right: 10px;
+    color: var(--ink-300);
 }
 
 .eyebrow {
@@ -942,6 +984,15 @@ TABLAS
     color: var(--texto);
 }
 
+/* Densidad de aplicacion: el padding por defecto de Bootstrap (.5rem) es de
+   sitio web, no de herramienta de trabajo — una fila de ~34px deja ver mas
+   tickets a la vez sin scroll. Mismo selector que usa bootstrap.min.css
+   para pisar su padding sin necesitar !important. */
+.table > :not(caption) > * > * {
+    padding: 6px 10px;
+    font-variant-numeric: tabular-nums;
+}
+
 .table thead {
     background: var(--surface-2);
     color: var(--ink-700);
@@ -1114,7 +1165,8 @@ soltar ahi en vez de aceptarlo silenciosamente.
 BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
 ===========================*/
 .badge {
-    padding: 8px 12px;
+    padding: 2px 7px;
+    font-size: var(--fs-caption);
     font-weight: 500;
 }
 
@@ -1122,10 +1174,10 @@ BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 3px 9px;
+    padding: 2px 7px;
     border-radius: var(--radius-sm);
     font-size: var(--fs-caption);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.5;
     white-space: nowrap;
 }
@@ -1436,17 +1488,13 @@ ESTRELLAS DE CALIFICACION (encuesta de satisfaccion, ticket-cliente.html)
 /*==========================
 LOGIN
 ===========================*/
-/* Fondo con un leve tinte de marca en vez de gris plano — la primera
-   pantalla que ve cualquiera no deberia sentirse como un tutorial de
-   Bootstrap (Fase 2.5, Hallazgo 6). */
+/* Fondo plano, sin gradiente radial decorativo — esa clase de "blob" es
+   justo lo que hace que una pantalla se vea generada por plantilla. */
 .login-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background:
-        radial-gradient(circle at 12% 15%, rgba(var(--accent-600-rgb), .06), transparent 40%),
-        radial-gradient(circle at 88% 85%, rgba(var(--accent-600-rgb), .05), transparent 44%),
-        var(--surface-0);
+    background: var(--surface-0);
 }
 
 .login-card {
