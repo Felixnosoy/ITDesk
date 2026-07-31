@@ -245,7 +245,7 @@ async function renderDocumentosRelacionados(id_ticket) {
         filas.push(`
             <div class="py-2 border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-file-earmark-text"></i> Cotización ${Codigos.cotizacion(cotizacion)}</span>
+                    <span><i class="bi bi-file-earmark-text"></i> Cotización <span class="codigo">${Codigos.cotizacion(cotizacion)}</span></span>
                     <span class="text-end">${UI.badge(cotizacion.estado, UI.MAPA_ESTADO_COTIZACION)}<br>
                         <small class="text-muted">RD$ ${Number(cotizacion.total).toFixed(2)}</small></span>
                 </div>
@@ -283,7 +283,7 @@ async function renderDocumentosRelacionados(id_ticket) {
         filas.push(`
             <div class="py-2 ${cotizacion ? "" : "border-bottom"}">
                 <div class="d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-receipt"></i> ${Codigos.factura(factura)}</span>
+                    <span><i class="bi bi-receipt"></i> <span class="codigo">${Codigos.factura(factura)}</span></span>
                     <span class="text-end">${UI.badge(factura.estado, UI.MAPA_ESTADO_FACTURA)}<br>
                         <small class="text-muted">RD$ ${Number(factura.total).toFixed(2)}</small></span>
                 </div>
@@ -588,7 +588,7 @@ function renderCliente(cliente) {
 
     el.innerHTML = `
         <dl class="row mb-0">
-            <dt class="col-5">Código</dt><dd class="col-7">${Codigos.cliente(cliente)}</dd>
+            <dt class="col-5">Código</dt><dd class="col-7"><span class="codigo">${Codigos.cliente(cliente)}</span></dd>
             <dt class="col-5">Nombre</dt><dd class="col-7">${cliente.nombre} ${cliente.apellido}</dd>
             <dt class="col-5">Correo</dt><dd class="col-7">${cliente.correo}</dd>
             <dt class="col-5">Teléfono</dt><dd class="col-7">${cliente.telefono || "—"}</dd>
@@ -612,7 +612,7 @@ function renderEquipo(ticket, equipo) {
 
     el.innerHTML = `
         <dl class="row mb-0">
-            ${equipo ? `<dt class="col-5">Código</dt><dd class="col-7">${Codigos.equipo(equipo)}</dd>` : ""}
+            ${equipo ? `<dt class="col-5">Código</dt><dd class="col-7"><span class="codigo">${Codigos.equipo(equipo)}</span></dd>` : ""}
             <dt class="col-5">Tipo</dt><dd class="col-7">${tipo}</dd>
             <dt class="col-5">Marca</dt><dd class="col-7">${marca}</dd>
             <dt class="col-5">Modelo</dt><dd class="col-7">${modelo}</dd>

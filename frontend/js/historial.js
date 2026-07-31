@@ -45,7 +45,7 @@ function actualizarTablaHistorial() {
     UI.paginarRender(datos, (visibles) => {
         tabla.innerHTML = visibles.map(ticket => `
             <tr>
-                <td data-label="ID">${Codigos.ticket(ticket)}</td>
+                <td data-label="ID"><span class="codigo">${Codigos.ticket(ticket)}</span></td>
                 <td data-label="Equipo">${ticket.equipo_tipo} ${ticket.equipo_marca}</td>
                 <td data-label="Título">${ticket.titulo}</td>
                 <td data-label="Estado">${UI.badgeEstado(ticket.estado)}</td>

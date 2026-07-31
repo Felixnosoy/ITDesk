@@ -249,7 +249,7 @@ function renderTablaTicketsAdmin(ordenados, asignacionActivaPorTicket = {}) {
         if (ticket.estado === "Cerrado") {
             return `
                 <tr>
-                    <td data-label="ID"><a href="detalle-ticket.html?id=${ticket.id_ticket}">${Codigos.ticket(ticket)}</a></td>
+                    <td data-label="ID"><a href="detalle-ticket.html?id=${ticket.id_ticket}" class="codigo">${Codigos.ticket(ticket)}</a></td>
                     <td data-label="Cliente">${ticket.cliente}</td>
                     <td data-label="Equipo">${ticket.equipo_tipo} ${ticket.equipo_marca}</td>
                     <td data-label="Título">${ticket.titulo}</td>
@@ -313,7 +313,7 @@ function abrirModalAsignarTecnico(id_ticket) {
     idTicketAsignarActual = id_ticket;
 
     document.getElementById("asignarTicketInfo").innerHTML = `
-        <div><strong>${Codigos.ticket(ticket)}</strong> — ${ticket.titulo}</div>
+        <div><strong class="codigo">${Codigos.ticket(ticket)}</strong> — ${ticket.titulo}</div>
         <div class="text-muted">${ticket.cliente} · ${ticket.equipo_tipo} ${ticket.equipo_marca}</div>
         ${activa ? `<div class="mt-1"><i class="bi bi-person-check-fill text-success"></i> Actualmente: ${activa.tecnico}</div>` : ""}
     `;

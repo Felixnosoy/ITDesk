@@ -287,7 +287,7 @@ async function seleccionarCliente(usuario) {
 
     document.getElementById("cardClienteSeleccionado").classList.remove("d-none");
     document.getElementById("infoClienteSeleccionado").innerHTML = `
-        <strong>${usuario.nombre} ${usuario.apellido}</strong> <span class="text-muted">· ${Codigos.cliente(usuario)}</span>
+        <strong>${usuario.nombre} ${usuario.apellido}</strong> <span class="text-muted">· <span class="codigo">${Codigos.cliente(usuario)}</span></span>
         <div class="text-muted small">${usuario.correo} ${usuario.telefono ? "· " + usuario.telefono : ""}</div>
     `;
 
@@ -437,7 +437,7 @@ async function crearEquipoRecepcion(event) {
         }));
 
         UI.toast("Equipo registrado correctamente.");
-        agregarActividad("bi-pc-display", `${equipo.tipo} ${equipo.marca} ${equipo.modelo}`, `${Codigos.equipo(equipo)} · N.° ${equipo.numero_serie}`);
+        agregarActividad("bi-pc-display", `${equipo.tipo} ${equipo.marca} ${equipo.modelo}`, `<span class="codigo">${Codigos.equipo(equipo)}</span> · N.° ${equipo.numero_serie}`);
         document.getElementById("formNuevoEquipo").reset();
         await cargarEquiposDelCliente();
 
@@ -484,10 +484,10 @@ async function crearTicketRecepcion(event) {
 
         const alerta = document.getElementById("alertTicketCreado");
         alerta.classList.remove("d-none");
-        alerta.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${Codigos.ticket(ticket)} creado correctamente para ${clienteSeleccionado.nombre} ${clienteSeleccionado.apellido}.`;
+        alerta.innerHTML = `<i class="bi bi-check-circle-fill"></i> <span class="codigo">${Codigos.ticket(ticket)}</span> creado correctamente para ${clienteSeleccionado.nombre} ${clienteSeleccionado.apellido}.`;
         alerta.scrollIntoView({ behavior: "smooth" });
 
-        agregarActividad("bi-ticket-perforated", `${Codigos.ticket(ticket)} creado`, ticket.titulo);
+        agregarActividad("bi-ticket-perforated", `<span class="codigo">${Codigos.ticket(ticket)}</span> creado`, ticket.titulo);
 
         // Aviso al cliente de que su ticket ya quedo registrado — nunca debe
         // bloquear el flujo de recepcion si falla (mismo patron fire-and-forget

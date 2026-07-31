@@ -234,7 +234,7 @@ function renderCotizacion(cotizacion, linea) {
     document.getElementById("cuerpoCotizacion").innerHTML = `
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
             <div>
-                <h5 class="mb-1">${Codigos.cotizacion(cotizacion)}</h5>
+                <h5 class="mb-1"><span class="codigo">${Codigos.cotizacion(cotizacion)}</span></h5>
                 <p class="text-muted small mb-0">${UI.formatearFecha(cotizacion.fecha_creacion)}</p>
             </div>
             ${UI.badge(cotizacion.estado, UI.MAPA_ESTADO_COTIZACION)}

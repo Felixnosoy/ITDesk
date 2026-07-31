@@ -265,7 +265,7 @@ function renderTablaReporteTickets(visibles) {
         return `
             <tr>
                 <td data-label="No.">${i + 1}</td>
-                <td data-label="Ticket"><a href="detalle-ticket.html?id=${t.id_ticket}">${Codigos.ticket(t)}</a></td>
+                <td data-label="Ticket"><a href="detalle-ticket.html?id=${t.id_ticket}" class="codigo">${Codigos.ticket(t)}</a></td>
                 <td data-label="Cliente">${t.cliente}</td>
                 <td data-label="Equipo">${t.equipo_tipo} ${t.equipo_marca}</td>
                 <td data-label="Serial">${t.equipo_numero_serie || "—"}</td>
@@ -642,7 +642,7 @@ function renderTablaReporteNotificaciones(visibles) {
         return `
             <tr>
                 <td data-label="No.">${i + 1}</td>
-                <td data-label="Ticket">${ticket ? `<a href="detalle-ticket.html?id=${n.id_ticket}">${Codigos.ticket(ticket)}</a>` : n.ticket_titulo}</td>
+                <td data-label="Ticket">${ticket ? `<a href="detalle-ticket.html?id=${n.id_ticket}" class="codigo">${Codigos.ticket(ticket)}</a>` : n.ticket_titulo}</td>
                 <td data-label="Destinatario">${n.usuario}</td>
                 <td data-label="Tipo">${UI.badgeTipoNotificacion(n.tipo)}</td>
                 <td data-label="Estado">${ticket ? UI.badgeEstado(ticket.estado) : "—"}</td>
@@ -810,7 +810,7 @@ function renderTablaReporteResueltos(visibles) {
         return `
             <tr>
                 <td data-label="No.">${i + 1}</td>
-                <td data-label="Ticket"><a href="detalle-ticket.html?id=${t.id_ticket}">${Codigos.ticket(t)}</a></td>
+                <td data-label="Ticket"><a href="detalle-ticket.html?id=${t.id_ticket}" class="codigo">${Codigos.ticket(t)}</a></td>
                 <td data-label="Cliente">${t.cliente}</td>
                 <td data-label="Equipo">${t.equipo_tipo} ${t.equipo_marca}</td>
                 <td data-label="Técnico">${activa ? activa.tecnico : "Sin asignar"}</td>
@@ -971,7 +971,7 @@ function renderTablaReporteEquipos(visibles) {
     tbody.innerHTML = visibles.map((e, i) => `
         <tr class="reporte-fila-clickeable" role="button" data-id-equipo="${e.id_equipo}">
             <td data-label="No.">${i + 1}</td>
-            <td data-label="Código">${Codigos.equipo(e)}</td>
+            <td data-label="Código"><span class="codigo">${Codigos.equipo(e)}</span></td>
             <td data-label="Tipo">${e.tipo}</td>
             <td data-label="Marca">${e.marca}</td>
             <td data-label="Modelo">${e.modelo}</td>
@@ -1002,7 +1002,7 @@ function mostrarDetalleEquipo(id_equipo) {
             ${UI.badgeEstadoEquipo(equipo.estado)}
         </div>
         <div class="row small">
-            <div class="col-md-6"><strong>Código:</strong> ${Codigos.equipo(equipo)}</div>
+            <div class="col-md-6"><strong>Código:</strong> <span class="codigo">${Codigos.equipo(equipo)}</span></div>
             <div class="col-md-6"><strong>Cliente:</strong> ${equipo.cliente}</div>
             <div class="col-md-4"><strong>Tipo:</strong> ${equipo.tipo}</div>
             <div class="col-md-4"><strong>Marca:</strong> ${equipo.marca}</div>
@@ -1152,7 +1152,7 @@ function renderTablaReporteFacturas(visibles) {
     tbody.innerHTML = visibles.map((f, i) => `
         <tr>
             <td data-label="No.">${i + 1}</td>
-            <td data-label="Factura">${Codigos.factura(f)}</td>
+            <td data-label="Factura"><span class="codigo">${Codigos.factura(f)}</span></td>
             <td data-label="Ticket">${primerTicketDeFactura(f) || "—"}</td>
             <td data-label="Cliente">${f.cliente}</td>
             <td data-label="Fecha">${UI.formatearFechaCorta(f.fecha_emision)}</td>
@@ -1326,7 +1326,7 @@ function renderTablaReporteClientes(visibles) {
     tbody.innerHTML = visibles.map((c, i) => `
         <tr class="reporte-fila-clickeable" role="button" data-id-usuario="${c.id_usuario}">
             <td data-label="No.">${i + 1}</td>
-            <td data-label="Código">${Codigos.cliente(c)}</td>
+            <td data-label="Código"><span class="codigo">${Codigos.cliente(c)}</span></td>
             <td data-label="Nombre">${c.nombre} ${c.apellido}</td>
             <td data-label="Correo">${c.correo}</td>
             <td data-label="Teléfono">${c.telefono || "—"}</td>
@@ -1356,7 +1356,7 @@ function mostrarDetalleCliente(id_usuario) {
             ${UI.badgeEstadoUsuario(cliente.estado)}
         </div>
         <div class="row small">
-            <div class="col-md-6"><strong>Código:</strong> ${Codigos.cliente(cliente)}</div>
+            <div class="col-md-6"><strong>Código:</strong> <span class="codigo">${Codigos.cliente(cliente)}</span></div>
             <div class="col-md-6"><strong>Nombre:</strong> ${cliente.nombre} ${cliente.apellido}</div>
             <div class="col-md-6"><strong>Correo:</strong> ${cliente.correo}</div>
             <div class="col-md-6"><strong>Teléfono:</strong> ${cliente.telefono || "—"}</div>

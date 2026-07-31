@@ -469,6 +469,174 @@ const Layout = {
         document.addEventListener("keydown", atraparFoco);
     },
 
+    // Barra superior fija de escritorio (oculta bajo 992px, ver style.css —
+    // en mobile el acceso sigue siendo el drawer de renderTopbarMobile).
+    // titulo sale de data-footer del <body>, que ya existe en la mayoria de
+    // las paginas para el pie — no se agrega un atributo nuevo solo para esto.
+    renderTopbarDesktop(rol, tituloPagina) {
+        const contenedor = document.getElementById("topbar-desktop-placeholder");
+        if (!contenedor) {
+            return;
+        }
+
+        contenedor.outerHTML = `
+            <header class="topbar-desktop" id="topbar-desktop-placeholder">
+                <span class="topbar-titulo">${tituloPagina}</span>
+                <div class="topbar-buscador-wrap position-relative">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <label class="visually-hidden" for="buscadorGlobal">Buscar en todo el sistema</label>
+                        <input type="text" id="buscadorGlobal" class="form-control" autocomplete="off"
+                            placeholder="Buscar ticket, cliente, documento, teléfono..."
+                            role="combobox" aria-expanded="false" aria-autocomplete="list"
+                            aria-controls="panelBuscadorGlobal">
+                    </div>
+                    <div class="typeahead-panel d-none" id="panelBuscadorGlobal" role="listbox" aria-label="Resultados de búsqueda"></div>
+                </div>
+            </header>
+        `;
+
+        this._inicializarBusquedaGlobal(rol);
+    },
+
+    // La carga de datos es perezosa (recien al primer foco/tecla, no al
+    // cargar la pagina) para no sumarle una peticion mas a cada carga de
+    // pantalla solo por si el usuario llega a usar el buscador. Cliente
+    // busca solo sobre sus propios tickets (/ticket/mis, lo unico que su rol
+    // puede pedir); el resto busca sobre todos los tickets + telefono/
+    // documento del cliente (cruzado con /usuarios, tambien ya permitido).
+    _cacheBusquedaGlobal: null,
+
+    async _cargarCacheBusquedaGlobal(rol) {
+        if (this._cacheBusquedaGlobal) {
+            return this._cacheBusquedaGlobal;
+        }
+        try {
+            if (rol === "Cliente") {
+                const tickets = await apiFetch("/ticket/mis");
+                this._cacheBusquedaGlobal = tickets;
+            } else {
+                const [tickets, usuarios] = await Promise.all([
+                    apiFetch("/ticket"),
+                    apiFetch("/usuarios").catch(() => [])
+                ]);
+                const usuariosPorId = new Map(usuarios.map(u => [u.id_usuario, u]));
+                this._cacheBusquedaGlobal = tickets.map(t => {
+                    const u = usuariosPorId.get(t.id_usuario);
+                    return {
+                        ...t,
+                        cliente_telefono: u?.telefono || "",
+                        cliente_documento: u?.num_documento || "",
+                        cliente_correo: u?.correo || ""
+                    };
+                });
+            }
+        } catch (error) {
+            this._cacheBusquedaGlobal = [];
+        }
+        return this._cacheBusquedaGlobal;
+    },
+
+    _inicializarBusquedaGlobal(rol) {
+        const input = document.getElementById("buscadorGlobal");
+        const panel = document.getElementById("panelBuscadorGlobal");
+        if (!input || !panel) {
+            return;
+        }
+
+        let indiceResaltado = -1;
+        let temporizador = null;
+
+        const paginaDestino = rol === "Cliente" ? "ticket-cliente.html" : "detalle-ticket.html";
+
+        const cerrar = () => {
+            panel.classList.add("d-none");
+            panel.innerHTML = "";
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+            indiceResaltado = -1;
+        };
+
+        const marcarResaltado = (items) => {
+            items.forEach((item, indice) => item.classList.toggle("resaltado", indice === indiceResaltado));
+            const activo = items[indiceResaltado];
+            if (activo) {
+                activo.scrollIntoView({ block: "nearest" });
+                input.setAttribute("aria-activedescendant", activo.id);
+            } else {
+                input.removeAttribute("aria-activedescendant");
+            }
+        };
+
+        const buscar = async (termino) => {
+            if (!termino) {
+                cerrar();
+                return;
+            }
+
+            const datos = await this._cargarCacheBusquedaGlobal(rol);
+            const campos = ["titulo", "cliente", "cliente_telefono", "cliente_documento", "cliente_correo", t => Codigos.ticket(t)];
+            const encontrados = Search.filtrar(datos, termino, campos).slice(0, 8);
+
+            indiceResaltado = -1;
+
+            if (encontrados.length === 0) {
+                panel.innerHTML = `<div class="p-3 text-muted small">Ningún resultado para "${termino}".</div>`;
+            } else {
+                panel.innerHTML = encontrados.map((t, indice) => `
+                    <button type="button" class="typeahead-item" id="busquedaGlobalItem${indice}" role="option" data-id="${t.id_ticket}">
+                        <span class="codigo">${Codigos.ticket(t)}</span>
+                        <div class="small fw-semibold">${t.titulo}</div>
+                        <div class="text-muted small">${t.cliente}</div>
+                    </button>
+                `).join("");
+
+                panel.querySelectorAll(".typeahead-item").forEach(item => {
+                    item.addEventListener("click", () => {
+                        window.location.href = `${paginaDestino}?id=${item.dataset.id}`;
+                    });
+                });
+            }
+
+            panel.classList.remove("d-none");
+            input.setAttribute("aria-expanded", "true");
+        };
+
+        input.addEventListener("input", () => {
+            clearTimeout(temporizador);
+            temporizador = setTimeout(() => buscar(input.value.trim()), 250);
+        });
+
+        input.addEventListener("keydown", (evento) => {
+            const items = [...panel.querySelectorAll(".typeahead-item")];
+            if (panel.classList.contains("d-none") || items.length === 0) {
+                return;
+            }
+            if (evento.key === "ArrowDown") {
+                evento.preventDefault();
+                indiceResaltado = Math.min(indiceResaltado + 1, items.length - 1);
+                marcarResaltado(items);
+            } else if (evento.key === "ArrowUp") {
+                evento.preventDefault();
+                indiceResaltado = Math.max(indiceResaltado - 1, 0);
+                marcarResaltado(items);
+            } else if (evento.key === "Enter") {
+                if (indiceResaltado >= 0) {
+                    evento.preventDefault();
+                    items[indiceResaltado].click();
+                }
+            } else if (evento.key === "Escape") {
+                cerrar();
+            }
+        });
+
+        document.addEventListener("click", (evento) => {
+            if (!panel.classList.contains("d-none") && !panel.contains(evento.target) && evento.target !== input) {
+                cerrar();
+            }
+        });
+    },
+
     renderFooter(texto) {
         const contenedor = document.getElementById("footer-placeholder");
 
@@ -509,6 +677,7 @@ const Layout = {
 
         this.renderSidebar(usuario.rol, usuario);
         this.renderTopbarMobile(usuario.rol);
+        this.renderTopbarDesktop(usuario.rol, body.dataset.footer || "ITDESK");
         this.renderFooter(body.dataset.footer || "Sistema de Gestión de Soporte Técnico");
 
         const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ""}`.trim();

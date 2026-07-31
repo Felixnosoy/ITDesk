@@ -53,7 +53,7 @@ function actualizarTablaCotizaciones() {
     UI.paginarRender(datos, (visibles) => {
         tabla.innerHTML = visibles.map(c => `
             <tr>
-                <td data-label="N.°">${Codigos.cotizacion(c)}</td>
+                <td data-label="N.°"><span class="codigo">${Codigos.cotizacion(c)}</span></td>
                 <td data-label="Fecha">${UI.formatearFechaCorta(c.fecha_creacion)}</td>
                 <td data-label="Estado">${UI.badge(c.estado, UI.MAPA_ESTADO_COTIZACION)}</td>
                 <td data-label="Total" class="text-end tabular-nums">RD$ ${Number(c.total).toFixed(2)}</td>
@@ -96,7 +96,7 @@ function actualizarTablaFacturas() {
     UI.paginarRender(datos, (visibles) => {
         tabla.innerHTML = visibles.map(f => `
             <tr>
-                <td data-label="N.°">${Codigos.factura(f)}</td>
+                <td data-label="N.°"><span class="codigo">${Codigos.factura(f)}</span></td>
                 <td data-label="Fecha">${UI.formatearFechaCorta(f.fecha_emision)}</td>
                 <td data-label="Estado">${UI.badge(f.estado, UI.MAPA_ESTADO_FACTURA)}</td>
                 <td data-label="Total" class="text-end tabular-nums">RD$ ${Number(f.total).toFixed(2)}</td>

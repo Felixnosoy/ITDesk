@@ -111,7 +111,7 @@ function renderListaTicketsCliente() {
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start gap-2">
                             <div>
-                                <span class="text-muted small">${Codigos.ticket(ticket)}</span>
+                                <span class="codigo text-muted small">${Codigos.ticket(ticket)}</span>
                                 <h5 class="mb-0">${ticket.titulo}</h5>
                             </div>
                             ${UI.badgeCategoria(ticket.categoria)}
@@ -173,7 +173,7 @@ async function renderSeccionDestacada(tickets) {
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                     <div>
                         <span class="eyebrow">Reparación en curso</span>
-                        <h5 class="mb-1 mt-1">${Codigos.ticket(activo)} — ${activo.titulo}</h5>
+                        <h5 class="mb-1 mt-1"><span class="codigo">${Codigos.ticket(activo)}</span> — ${activo.titulo}</h5>
                         <p class="mb-0 text-muted">${activo.equipo_tipo} ${activo.equipo_marca} ${activo.equipo_modelo}</p>
                     </div>
                     ${UI.badgeEstado(activo.estado)}

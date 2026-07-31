@@ -93,7 +93,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar {
-    width: 260px;
+    width: 232px;
     flex: none;
     background: var(--azul);
     display: flex;
@@ -163,11 +163,10 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-link.active {
-    background: rgba(255, 255, 255, .08);
     color: #fff;
     font-weight: 600;
-    border-left: 2px solid var(--accent-500);
-    padding-left: 10px;
+    border-left: 3px solid var(--accent-500);
+    padding-left: 9px;
 }
 
 .sidebar-link-danger {
@@ -290,6 +289,41 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 .app-content {
     flex: 1;
     padding: 16px 24px;
+}
+
+/* Topbar fija de escritorio (layout.js:renderTopbarDesktop) — oculta bajo
+   992px a proposito: en mobile el acceso sigue siendo el drawer del
+   sidebar (renderTopbarMobile), no se duplica chrome en pantallas chicas. */
+.topbar-desktop {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .topbar-desktop {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        height: 48px;
+        padding: 0 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+        background: var(--surface-1);
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+.topbar-titulo {
+    flex: none;
+    font-weight: 600;
+    font-size: var(--fs-small);
+    color: var(--ink-700);
+    white-space: nowrap;
+}
+
+.topbar-buscador-wrap {
+    flex: 1;
+    max-width: 420px;
 }
 
 /* Modo embebido (?embed=1, ver layout.js): sidebar/topbar/footer nunca se
@@ -729,10 +763,15 @@ CARDS
 /* Header "quieto": el navy queda para chrome fijo (sidebar/topbar/footer) y
    momentos interactivos, no como relleno decorativo de cada card/modal —
    ver tokens.css. */
+/* Mas chato y denso que el default de Bootstrap (.5rem 1rem) — se repite 7
+   veces seguidas en reportes.html (titulo + filtros + accion primaria por
+   seccion), y con el padding de folleto cada uno pesaba como si fuera la
+   unica cosa en la pantalla. */
 .card-header {
     background: var(--surface-1);
     color: var(--ink-900);
     font-weight: 600;
+    padding: 10px 16px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -1188,12 +1227,20 @@ mantienen siempre en una fila, con scroll horizontal si no caben.
 .kanban-card {
     background: var(--surface-1);
     border: 1px solid var(--border);
+    border-left: 3px solid transparent;
     border-radius: var(--radius-md);
     padding: var(--space-3);
     min-width: 0;
     cursor: grab;
     transition: border-color var(--transition-fast), opacity var(--transition-fast);
 }
+
+/* Elemento distintivo (1.2): la banda de prioridad reemplaza al badge en
+   filas/tarjetas de lista — el badge se queda solo en el detalle del
+   ticket, donde hay lugar de sobra y no compite con otra informacion. */
+.kanban-card.kanban-card-prioridad-Alta { border-left-color: var(--danger); }
+.kanban-card.kanban-card-prioridad-Media { border-left-color: var(--warning); }
+.kanban-card.kanban-card-prioridad-Baja { border-left-color: var(--info); }
 
 /* Un titulo/cliente/equipo largo y sin espacios (numero de serie, por
    ejemplo) empujaba la tarjeta mas alla de su columna — nada en esta clase

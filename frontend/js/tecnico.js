@@ -192,11 +192,9 @@ function renderTarjetaKanban(ticket) {
     const equipoTexto = `${ticket.cliente} · ${ticket.equipo_tipo} ${ticket.equipo_marca}`;
 
     return `
-        <div class="kanban-card ${esReciente ? "fila-reciente" : ""}" draggable="true" data-id-ticket="${ticket.id_ticket}">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-                <span class="codigo text-muted">${Codigos.ticket(ticket)}</span>
-                ${UI.badgePrioridad(ticket.prioridad)}
-            </div>
+        <div class="kanban-card kanban-card-prioridad-${ticket.prioridad} ${esReciente ? "fila-reciente" : ""}"
+            draggable="true" data-id-ticket="${ticket.id_ticket}" title="Prioridad ${ticket.prioridad}">
+            <span class="codigo text-muted d-block mb-1">${Codigos.ticket(ticket)}</span>
             <p class="fw-semibold mb-1 text-truncate" title="${ticket.titulo}">${ticket.titulo}</p>
             <p class="text-muted small mb-2 text-truncate" title="${equipoTexto}">${equipoTexto}</p>
             <div class="d-flex justify-content-between align-items-center gap-2" style="min-width:0;">
