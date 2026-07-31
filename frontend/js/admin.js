@@ -80,12 +80,17 @@ async function cargarResumenAdmin() {
     }
 
     let asignaciones = [];
+    // null (no []) a proposito: distingue "todavia no se pudo traer" de
+    // "se trajo y esta vacio", para que cargarTicketsAdmin sepa si tiene
+    // que reintentar el fetch o puede reusar este resultado tal cual.
+    let usuarios = null;
 
     try {
-        const [usuarios, asignacionesCargadas] = await Promise.all([
+        const [usuariosCargados, asignacionesCargadas] = await Promise.all([
             apiFetch("/usuarios"),
             apiFetch("/asignacion")
         ]);
+        usuarios = usuariosCargados;
         asignaciones = asignacionesCargadas;
 
         document.getElementById("totalUsuarios").textContent = usuarios.length;
@@ -97,7 +102,7 @@ async function cargarResumenAdmin() {
         document.getElementById("totalTecnicos").textContent = "—";
     }
 
-    await cargarTicketsAdmin(asignaciones);
+    await cargarTicketsAdmin(asignaciones, usuarios);
     cargarActividadReciente(asignaciones);
 
     Ordenar.conectar(document.getElementById("tablaTicketsAdmin")?.closest("table"), (campo, direccion) => {
@@ -153,7 +158,12 @@ function cargarActividadReciente(asignaciones) {
     }).join("");
 }
 
-async function cargarTicketsAdmin(asignaciones) {
+// usuariosCache: cuando cargarResumenAdmin ya trajo /usuarios en su propia
+// carga, lo pasa aca para no pedirlo dos veces en el mismo load de la
+// pantalla (mismo criterio que ya se aplicaba a /asignacion, ver el
+// comentario de cargarActividadReciente). En la llamada independiente
+// (ej. tras asignarTecnico) no llega nada y se pide fresco, como siempre.
+async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
     const tabla = document.getElementById("tablaTicketsAdmin");
     if (!tabla) {
         return;
@@ -169,7 +179,7 @@ async function cargarTicketsAdmin(asignaciones) {
     try {
         const [tickets, usuarios, equipos] = await Promise.all([
             apiFetch("/ticket"),
-            apiFetch("/usuarios"),
+            usuariosCache || apiFetch("/usuarios"),
             apiFetch("/equipo").catch(() => [])
         ]);
 
