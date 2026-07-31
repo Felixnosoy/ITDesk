@@ -1313,6 +1313,60 @@ antes de esta vista.
 }
 
 /*==========================
+TYPEAHEAD (buscador de cliente en recepcion.html) — panel anclado al input,
+patron combobox accesible (ver recepcion.js: role=listbox/option,
+aria-activedescendant). No es un dropdown de Bootstrap: el highlight de
+teclado necesita control directo sobre que item esta "activo".
+===========================*/
+.typeahead-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    margin-top: 4px;
+    max-height: 340px;
+    overflow-y: auto;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2);
+}
+
+.typeahead-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: none;
+    cursor: pointer;
+    color: var(--ink-900);
+}
+
+.typeahead-item:last-child {
+    border-bottom: 0;
+}
+
+.typeahead-item:hover,
+.typeahead-item.resaltado {
+    background: var(--surface-2);
+}
+
+.typeahead-item mark {
+    background: var(--accent-100);
+    color: var(--accent-600);
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.typeahead-item-nuevo {
+    color: var(--accent-600);
+    font-weight: 600;
+}
+
+/*==========================
 BADGES (estado / prioridad / rol — ver UI.badge en ui.js)
 ===========================*/
 .badge {

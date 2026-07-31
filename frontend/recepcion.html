@@ -60,17 +60,19 @@
                                 </button>
                             </div>
                             <div class="card-body" id="clienteCardBody">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <label class="visually-hidden" for="buscarCliente">Buscar cliente</label>
-                                    <input type="text" id="buscarCliente" class="form-control"
-                                        placeholder="Buscar por nombre, correo, teléfono, documento o código..."
-                                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); buscarCliente(); }">
-                                    <button class="btn btn-primary" type="button" onclick="buscarCliente()">
-                                        Buscar
-                                    </button>
+                                <div class="position-relative mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <label class="visually-hidden" for="buscarCliente">Buscar cliente</label>
+                                        <input type="text" id="buscarCliente" class="form-control" autocomplete="off"
+                                            placeholder="Buscar por nombre, correo, teléfono, documento o código..."
+                                            role="combobox" aria-expanded="false" aria-autocomplete="list"
+                                            aria-controls="listaClientesTypeahead">
+                                    </div>
+                                    <div class="typeahead-panel d-none" id="listaClientesTypeahead"
+                                        role="listbox" aria-label="Clientes encontrados"></div>
                                 </div>
-                                <div id="resultadoBusqueda" class="mb-3"></div>
+                                <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaCliente"></span>
                             </div>
                         </div>
 
