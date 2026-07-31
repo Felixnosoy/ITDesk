@@ -498,6 +498,15 @@ const Layout = {
             return;
         }
 
+        // Modo embebido (?embed=1): la pagina se carga dentro de un <iframe>
+        // (panel de detalle del tecnico, ver tecnico.js) — se salta el
+        // sidebar/topbar/footer para no duplicar el chrome de la app adentro
+        // del panel. La autenticacion de arriba corre igual sin excepcion.
+        if (new URLSearchParams(window.location.search).get("embed") === "1") {
+            body.classList.add("modo-embebido");
+            return;
+        }
+
         this.renderSidebar(usuario.rol, usuario);
         this.renderTopbarMobile(usuario.rol);
         this.renderFooter(body.dataset.footer || "Sistema de Gestión de Soporte Técnico");

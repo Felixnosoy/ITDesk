@@ -292,6 +292,17 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     padding: 16px 24px;
 }
 
+/* Modo embebido (?embed=1, ver layout.js): sidebar/topbar/footer nunca se
+   renderizan (Layout.init corta antes), pero el breadcrumb y el padding
+   siguen pensados para pantalla completa sin este ajuste. */
+.modo-embebido .app-content {
+    padding: 14px 16px;
+}
+
+.modo-embebido nav[aria-label="breadcrumb"] {
+    display: none;
+}
+
 .app-footer {
     background: transparent;
     color: var(--ink-300);
@@ -1113,11 +1124,25 @@ TABLERO KANBAN (dashboard-tecnico.html) — drag and drop nativo, ver
 js/tecnico.js. La columna "Abierto" no acepta drop (el backend no soporta
 volver a ese estado, ver ticket.service.js) — se marca en rojo si se intenta
 soltar ahi en vez de aceptarlo silenciosamente.
+
+.kanban-grid reemplaza el grid de Bootstrap (antes col-md-6 col-lg-3
+inyectado desde JS): con las columnas de Bootstrap, el tablero de 4 estados
+se partia en 2 filas de 2 entre 768-992px, rompiendo la lectura izquierda-
+a-derecha del flujo. Con grid propio + overflow-x, las 4 columnas se
+mantienen siempre en una fila, con scroll horizontal si no caben.
 ===========================*/
+.kanban-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(240px, 1fr));
+    gap: var(--space-3);
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
 .kanban-column {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-width: 0;
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -1137,11 +1162,17 @@ soltar ahi en vez de aceptarlo silenciosamente.
     border-bottom: 1px solid var(--border);
 }
 
+/* Sin esto, una columna con muchos tickets crecia sin limite y estiraba
+   toda la pagina — las 4 columnas quedaban de alturas distintas y el
+   tablero perdia la forma. */
 .kanban-column-body {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     min-height: 80px;
+    max-height: calc(100vh - 260px);
+    overflow-y: auto;
+    min-width: 0;
 }
 
 .kanban-column.drag-over {
@@ -1159,8 +1190,16 @@ soltar ahi en vez de aceptarlo silenciosamente.
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-3);
+    min-width: 0;
     cursor: grab;
     transition: border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+/* Un titulo/cliente/equipo largo y sin espacios (numero de serie, por
+   ejemplo) empujaba la tarjeta mas alla de su columna — nada en esta clase
+   se encogia porque min-width:0 no alcanza sin truncar el texto tambien. */
+.kanban-card .text-truncate {
+    display: block;
 }
 
 .kanban-card:hover {
@@ -1178,6 +1217,99 @@ soltar ahi en vez de aceptarlo silenciosamente.
 .kanban-card.fila-reciente {
     border-color: var(--accent-600);
     box-shadow: 0 0 0 1px var(--accent-600);
+}
+
+/*==========================
+MAESTRO-DETALLE (dashboard-tecnico.html, vista Lista por defecto) — lista
+densa a la izquierda, panel de detalle embebido (iframe a detalle-ticket.html
+?embed=1) a la derecha. Los dos hacen scroll propio; la pagina no. Bajo
+1024px el panel no existe (ver tecnico.js): un click navega directo, como
+antes de esta vista.
+===========================*/
+.master-detail {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-3);
+    height: calc(100vh - 260px);
+    min-height: 420px;
+}
+
+.master-detail-lista {
+    width: 380px;
+    flex: none;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+}
+
+.master-detail-panel {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+}
+
+.master-detail-panel iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.master-detail-panel .empty-state {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ticket-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.ticket-fila:hover {
+    background: var(--surface-2);
+}
+
+.ticket-fila.activa {
+    background: var(--accent-100);
+}
+
+.ticket-fila-prioridad-Alta { border-left-color: var(--danger); }
+.ticket-fila-prioridad-Media { border-left-color: var(--warning); }
+.ticket-fila-prioridad-Baja { border-left-color: var(--info); }
+
+.ticket-fila-info {
+    min-width: 0;
+    flex: 1;
+}
+
+@media (max-width: 1024px) {
+    .master-detail {
+        display: block;
+        height: auto;
+        min-height: 0;
+    }
+
+    .master-detail-lista {
+        width: 100%;
+        overflow-y: visible;
+    }
+
+    .master-detail-panel {
+        display: none;
+    }
 }
 
 /*==========================

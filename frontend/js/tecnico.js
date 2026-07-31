@@ -2,14 +2,16 @@
 // ITDESK - TECNICO (dashboard-tecnico.html)
 //========================================
 // La gestion del ticket (diagnostico, notas, cierre) vive en
-// detalle-ticket.html / ticket-tecnico.js. Esta pantalla es un tablero
-// Kanban: lista, busca, y permite mover un ticket de columna arrastrandolo
-// (ver manejarDropTicket) — pero las reglas de negocio de esos cambios de
-// estado son las mismas que ya existen en ticket-tecnico.js/backend, no se
-// inventa ninguna nueva aca.
+// detalle-ticket.html / ticket-tecnico.js — esta pantalla nunca reescribe
+// esa logica, la reutiliza (ver panelDetalleTecnico mas abajo, que carga
+// detalle-ticket.html?embed=1 en un iframe). Dos vistas sobre la misma
+// cola: Lista (maestro-detalle, por defecto) y Kanban (drag and drop,
+// secundaria) — la eleccion se guarda en localStorage.
 
 let ticketsTecnico = [];
 let terminoTecnico = "";
+let vistaActivaTecnico = "lista";
+let ticketSeleccionadoId = null;
 
 // Columnas del tablero, en orden. "Abierto" no acepta drop (el backend no
 // soporta volver a ese estado via PATCH /ticket/:id/estado — ver
@@ -72,31 +74,47 @@ async function cargarTicketsTecnico() {
 
         actualizarStatsTecnico(ticketsTecnico);
         renderMiRendimiento(ticketsTecnico);
-        renderTablero();
+        renderVistas();
 
     } catch (error) {
-        tablero.innerHTML = `
-            <div class="col-12">
-                <div class="empty-state">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <p class="mb-0 text-danger">${error.message}</p>
-                </div>
+        const mensaje = `
+            <div class="empty-state">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <p class="mb-0 text-danger">${error.message}</p>
             </div>
         `;
+        document.getElementById("listaTicketsTecnico").innerHTML = mensaje;
+        tablero.innerHTML = mensaje;
     }
+}
+
+// Renderiza las 2 vistas siempre (no solo la visible): son datos livianos
+// para un solo tecnico, y asi cambiar de vista es instantaneo, sin
+// re-render ni riesgo de mostrar una vista desactualizada.
+function renderVistas() {
+    renderListaTecnico();
+    renderTablero();
 }
 
 function renderSkeletonTablero() {
     const tablero = document.getElementById("tableroTecnico");
     tablero.innerHTML = COLUMNAS_KANBAN.map(col => `
-        <div class="col-md-6 col-lg-3">
-            <div class="kanban-column">
-                <div class="kanban-column-head"><i class="bi ${col.icono}"></i> ${col.titulo}</div>
-                <span class="skeleton-line" style="height:70px;"></span>
-                <span class="skeleton-line mt-2" style="height:70px;"></span>
-            </div>
+        <div class="kanban-column">
+            <div class="kanban-column-head"><i class="bi ${col.icono}"></i> ${col.titulo}</div>
+            <span class="skeleton-line" style="height:70px;"></span>
+            <span class="skeleton-line mt-2" style="height:70px;"></span>
         </div>
     `).join("");
+
+    const lista = document.getElementById("listaTicketsTecnico");
+    if (lista) {
+        lista.innerHTML = Array.from({ length: 5 }).map(() => `
+            <div class="p-3 border-bottom">
+                <span class="skeleton-line" style="height:14px;width:60%;"></span>
+                <span class="skeleton-line mt-2" style="height:12px;width:80%;"></span>
+            </div>
+        `).join("");
+    }
 }
 
 const CAMPOS_BUSQUEDA_TECNICO = [
@@ -120,14 +138,15 @@ function ticketsFiltrados() {
 function renderTablero() {
     const filtrados = ticketsFiltrados();
     const tablero = document.getElementById("tableroTecnico");
+    if (!tablero) {
+        return;
+    }
 
     if (ticketsTecnico.length === 0) {
         tablero.innerHTML = `
-            <div class="col-12">
-                <div class="empty-state">
-                    <i class="bi bi-inbox"></i>
-                    <p class="mb-0">No hay tickets en la cola todavía.</p>
-                </div>
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p class="mb-0">No hay tickets en la cola todavía.</p>
             </div>
         `;
         return;
@@ -135,31 +154,30 @@ function renderTablero() {
 
     if (filtrados.length === 0) {
         tablero.innerHTML = `
-            <div class="col-12">
-                <div class="empty-state">
-                    <i class="bi bi-search"></i>
-                    <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
-                </div>
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
             </div>
         `;
         return;
     }
 
+    // sin wrapper col-md-6 col-lg-3: .kanban-grid ya arma las 4 columnas
+    // por su cuenta (display:grid), y con Bootstrap se partia en 2 filas
+    // de 2 entre 768-992px.
     tablero.innerHTML = COLUMNAS_KANBAN.map(col => {
         const ticketsColumna = filtrados
             .filter(t => t.estado === col.estado)
             .sort((a, b) => (ORDEN_PRIORIDAD_COLA[a.prioridad] ?? 9) - (ORDEN_PRIORIDAD_COLA[b.prioridad] ?? 9));
 
         return `
-            <div class="col-md-6 col-lg-3">
-                <div class="kanban-column" data-estado="${col.estado}" data-drop="${col.dropHabilitado}">
-                    <div class="kanban-column-head">
-                        <span><i class="bi ${col.icono}"></i> ${col.titulo}</span>
-                        <span class="badge-pill tone-neutral">${ticketsColumna.length}</span>
-                    </div>
-                    <div class="kanban-column-body">
-                        ${ticketsColumna.map(renderTarjetaKanban).join("") || `<p class="text-muted small text-center py-3 mb-0">Vacío</p>`}
-                    </div>
+            <div class="kanban-column" data-estado="${col.estado}" data-drop="${col.dropHabilitado}">
+                <div class="kanban-column-head">
+                    <span><i class="bi ${col.icono}"></i> ${col.titulo}</span>
+                    <span class="badge-pill tone-neutral">${ticketsColumna.length}</span>
+                </div>
+                <div class="kanban-column-body">
+                    ${ticketsColumna.map(renderTarjetaKanban).join("") || `<p class="text-muted small text-center py-3 mb-0">Vacío</p>`}
                 </div>
             </div>
         `;
@@ -171,18 +189,19 @@ function renderTablero() {
 function renderTarjetaKanban(ticket) {
     const accion = PROXIMA_ACCION[ticket.estado] || PROXIMA_ACCION.Cerrado;
     const esReciente = String(ticket.id_ticket) === sessionStorage.getItem("ultimoTicketVisto");
+    const equipoTexto = `${ticket.cliente} · ${ticket.equipo_tipo} ${ticket.equipo_marca}`;
 
     return `
         <div class="kanban-card ${esReciente ? "fila-reciente" : ""}" draggable="true" data-id-ticket="${ticket.id_ticket}">
             <div class="d-flex justify-content-between align-items-start gap-2">
-                <span class="text-muted small">${Codigos.ticket(ticket)}</span>
+                <span class="codigo text-muted">${Codigos.ticket(ticket)}</span>
                 ${UI.badgePrioridad(ticket.prioridad)}
             </div>
-            <p class="fw-semibold mb-1">${ticket.titulo}</p>
-            <p class="text-muted small mb-2">${ticket.cliente} · ${ticket.equipo_tipo} ${ticket.equipo_marca}</p>
-            <div class="d-flex justify-content-between align-items-center gap-2">
+            <p class="fw-semibold mb-1 text-truncate" title="${ticket.titulo}">${ticket.titulo}</p>
+            <p class="text-muted small mb-2 text-truncate" title="${equipoTexto}">${equipoTexto}</p>
+            <div class="d-flex justify-content-between align-items-center gap-2" style="min-width:0;">
                 ${ticket.especialista
-                    ? `<span class="badge-pill tone-neutral"><i class="bi bi-person-check-fill"></i> ${ticket.especialista}</span>`
+                    ? `<span class="badge-pill tone-neutral text-truncate" style="max-width:65%;" title="${ticket.especialista}"><i class="bi bi-person-check-fill"></i> ${ticket.especialista}</span>`
                     : `<span class="text-muted small">Sin asignar</span>`}
                 ${UI.badgeCategoria(ticket.categoria)}
             </div>
@@ -327,6 +346,131 @@ async function cambiarEstadoConGateKanban(ticket, estadoDestino, opciones = {}) 
     }
 }
 
+//========================================
+// VISTA LISTA (maestro-detalle, default) — Fase 4
+//========================================
+
+function tiempoTranscurrido(fechaIso) {
+    if (!fechaIso) {
+        return "—";
+    }
+    const minutos = Math.floor((Date.now() - new Date(fechaIso).getTime()) / 60000);
+    if (minutos < 1) {
+        return "recién";
+    }
+    if (minutos < 60) {
+        return `hace ${minutos} min`;
+    }
+    const horas = Math.floor(minutos / 60);
+    if (horas < 24) {
+        return `hace ${horas} h`;
+    }
+    return `hace ${Math.floor(horas / 24)} d`;
+}
+
+function crearFilaLista(ticket) {
+    const activa = Number(ticketSeleccionadoId) === ticket.id_ticket ? "activa" : "";
+    const especialista = ticket.especialista || "Sin asignar";
+
+    return `
+        <div class="ticket-fila ticket-fila-prioridad-${ticket.prioridad} ${activa}"
+            data-id-ticket="${ticket.id_ticket}" role="button" tabindex="0">
+            <div class="ticket-fila-info">
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                    <span class="codigo">${Codigos.ticket(ticket)}</span>
+                    ${UI.badgeEstado(ticket.estado)}
+                </div>
+                <p class="text-truncate small fw-semibold mb-0 mt-1" title="${ticket.titulo}">${ticket.titulo}</p>
+                <p class="text-truncate small text-muted mb-0" title="${ticket.cliente}">${ticket.cliente}</p>
+                <div class="d-flex justify-content-between align-items-center gap-2 mt-1">
+                    <span class="small text-muted">${tiempoTranscurrido(ticket.fecha_apertura)}</span>
+                    <span class="small text-muted text-truncate" style="max-width:130px;" title="${especialista}">${especialista}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderListaTecnico() {
+    const cont = document.getElementById("listaTicketsTecnico");
+    if (!cont) {
+        return;
+    }
+
+    const filtrados = ticketsFiltrados();
+
+    if (ticketsTecnico.length === 0) {
+        cont.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p class="mb-0">No hay tickets en la cola todavía.</p>
+            </div>
+        `;
+        return;
+    }
+
+    if (filtrados.length === 0) {
+        cont.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const ordenados = [...filtrados].sort((a, b) =>
+        (ORDEN_PRIORIDAD_COLA[a.prioridad] ?? 9) - (ORDEN_PRIORIDAD_COLA[b.prioridad] ?? 9)
+    );
+
+    cont.innerHTML = ordenados.map(crearFilaLista).join("");
+
+    cont.querySelectorAll(".ticket-fila").forEach(fila => {
+        const idTicket = Number(fila.dataset.idTicket);
+        fila.addEventListener("click", () => seleccionarTicketLista(idTicket));
+        fila.addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter" || evento.key === " ") {
+                evento.preventDefault();
+                seleccionarTicketLista(idTicket);
+            }
+        });
+    });
+}
+
+// Bajo 1024px el panel de detalle no existe (.master-detail-panel queda
+// display:none, ver style.css) — un click navega directo, igual que
+// funcionaba antes de que existiera esta vista. Arriba de eso, se carga el
+// detalle en un iframe embebido (?embed=1) sin salir de la cola.
+function seleccionarTicketLista(idTicket) {
+    if (!window.matchMedia("(min-width: 1025px)").matches) {
+        window.location.href = `detalle-ticket.html?id=${idTicket}`;
+        return;
+    }
+
+    ticketSeleccionadoId = idTicket;
+
+    document.querySelectorAll("#listaTicketsTecnico .ticket-fila").forEach(fila => {
+        fila.classList.toggle("activa", Number(fila.dataset.idTicket) === idTicket);
+    });
+
+    document.getElementById("panelDetalleTecnico").innerHTML =
+        `<iframe src="detalle-ticket.html?id=${idTicket}&embed=1" title="Detalle del ticket"></iframe>`;
+}
+
+// La preferencia se guarda para que el tecnico no tenga que elegir Lista de
+// nuevo cada vez que entra — Kanban sigue disponible entero, solo deja de
+// ser la vista por defecto (T7: con muchos tickets se ve mas de una vez a
+// la lista densa que en tarjetas).
+function aplicarVistaTecnico(vista) {
+    vistaActivaTecnico = vista;
+    localStorage.setItem("vistaTecnico", vista);
+
+    document.getElementById("vistaListaTecnico")?.classList.toggle("d-none", vista !== "lista");
+    document.getElementById("tableroTecnico")?.classList.toggle("d-none", vista !== "kanban");
+    document.getElementById("btnVistaLista")?.classList.toggle("active", vista === "lista");
+    document.getElementById("btnVistaKanban")?.classList.toggle("active", vista === "kanban");
+}
+
 function actualizarStatsTecnico(tickets) {
     document.getElementById("statsAsignados").textContent = tickets.length;
     document.getElementById("statsEnProceso").textContent =
@@ -367,11 +511,16 @@ function renderMiRendimiento(tickets) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    aplicarVistaTecnico(localStorage.getItem("vistaTecnico") === "kanban" ? "kanban" : "lista");
+
+    document.getElementById("btnVistaLista")?.addEventListener("click", () => aplicarVistaTecnico("lista"));
+    document.getElementById("btnVistaKanban")?.addEventListener("click", () => aplicarVistaTecnico("kanban"));
+
     cargarTicketsTecnico();
 
     Search.conectar(document.getElementById("buscarTicketTecnico"), (termino) => {
         terminoTecnico = termino;
-        renderTablero();
+        renderVistas();
         return ticketsFiltrados().length;
     }, "resultadosBusquedaTicketTecnico");
 });
