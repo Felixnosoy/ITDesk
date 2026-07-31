@@ -173,6 +173,10 @@ function verCotizacion(id) {
     abrirModalDocumento(`Cotización #${id}`, async (body) => {
         const doc = await apiFetch(`/cotizacion/mis/${id}`);
         documentoActual = doc;
+        // el titulo arranca con el id crudo (unico dato disponible antes de
+        // la respuesta) y se corrige al codigo real una vez que carga —
+        // mismo patron que ya usa verFactura() debajo.
+        document.getElementById("modalDocumentoTitulo").textContent = Codigos.cotizacion(doc);
         body.innerHTML = renderLineasDocumento(doc, "cotizacion");
     });
 }

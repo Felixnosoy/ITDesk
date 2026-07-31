@@ -14,13 +14,21 @@ const COLUMNAS_AUDITORIA = `
     a.accion,
     a.descripcion,
     a.id_ticket,
+    t.fecha_apertura,
+    t.titulo AS ticket_titulo,
     a.fecha
 `;
 
+// LEFT JOIN (no INNER): hay eventos sin ticket asociado (USUARIO_CREADO,
+// CLAVE_RESETEADA, etc.) — con INNER esas filas desaparecerian del todo.
+// fecha_apertura hace falta para poder armar Codigos.ticket() en el
+// frontend (id_ticket solo no alcanza, ver codigos.js).
 const JOIN_AUDITORIA = `
     FROM auditoria a
     INNER JOIN usuario u
         ON a.id_usuario = u.id_usuario
+    LEFT JOIN ticket t
+        ON a.id_ticket = t.id_ticket
 `;
 
 const registrarEvento = async ({ id_usuario, accion, descripcion, id_ticket }) => {

@@ -36,15 +36,42 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <div class="input-group" style="max-width: 420px;">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <label class="visually-hidden" for="buscarAuditoria">Buscar en auditoría</label>
-                        <input type="text" id="buscarAuditoria" class="form-control"
-                            placeholder="Buscar por usuario, acción, ticket...">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small mb-1" for="buscarAuditoria">Buscar</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscarAuditoria" class="form-control"
+                                placeholder="Usuario, acción, ticket...">
+                        </div>
                     </div>
-                    <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaAuditoria"></span>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroUsuarioAuditoria">Usuario</label>
+                        <select class="form-select form-select-sm" id="filtroUsuarioAuditoria">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroAccionAuditoria">Acción</label>
+                        <select class="form-select form-select-sm" id="filtroAccionAuditoria">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroDesdeAuditoria">Desde</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroDesdeAuditoria">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="filtroHastaAuditoria">Hasta</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroHastaAuditoria">
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="btnLimpiarFiltrosAuditoria" title="Limpiar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
                 </div>
+                <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaAuditoria"></span>
 
                 <div>
                     <div class="card shadow">

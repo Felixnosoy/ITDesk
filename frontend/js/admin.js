@@ -136,7 +136,11 @@ function cargarActividadReciente(asignaciones) {
 
     contenedor.innerHTML = recientes.map(a => {
         const ticket = ticketsPorId.get(a.id_ticket);
-        const referencia = ticket ? Codigos.ticket(ticket) : `#${a.id_ticket}`;
+        // sin el ticket completo no hay fecha_apertura para armar el codigo
+        // real (Codigos.ticket lo necesita) — en vez de inventar una fecha
+        // sustituta, se muestra el id crudo pero SIN pintarlo como si fuera
+        // un codigo real (sin clase .codigo), para no mentir el formato.
+        const referencia = ticket ? `<span class="codigo">${Codigos.ticket(ticket)}</span>` : `ticket #${a.id_ticket}`;
         return `
             <div class="d-flex align-items-start gap-2 pb-2 mb-2 border-bottom">
                 <i class="bi bi-person-check-fill text-primary mt-1"></i>

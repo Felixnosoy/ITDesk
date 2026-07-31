@@ -605,6 +605,25 @@ p {
     color: var(--ink-300);
 }
 
+/* Elemento distintivo del sistema: todo lo que sale de Codigos.* (TCK-,
+   FAC-, COT-, CLI-, EQ-...) se pinta igual en toda la app, para que se lea
+   como identificador tecnico y no como texto de relleno. */
+.codigo {
+    font-family: var(--font-mono);
+    font-size: var(--fs-caption);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+a.codigo {
+    color: var(--accent-600);
+    text-decoration: none;
+}
+
+a.codigo:hover {
+    text-decoration: underline;
+}
+
 .eyebrow {
     display: inline-block;
     font-size: var(--fs-caption);
