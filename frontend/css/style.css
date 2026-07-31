@@ -169,6 +169,46 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     padding-left: 9px;
 }
 
+/* Grupo de sidebar con submenu (ej. Reportes para Administrador) — el
+   boton nunca navega, solo expande/colapsa; el estado se persiste en
+   localStorage con la misma convencion plana que sidebarColapsado/tema. */
+.sidebar-group-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.sidebar-group-toggle .sidebar-group-chevron {
+    font-size: .75rem;
+    width: auto;
+    transition: transform var(--transition-fast);
+}
+
+.sidebar-group.abierto .sidebar-group-chevron {
+    transform: rotate(180deg);
+}
+
+.sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-slow);
+}
+
+.sidebar-group.abierto .sidebar-submenu {
+    max-height: 360px;
+}
+
+.sidebar-submenu .sidebar-link {
+    font-size: .82rem;
+    padding: 7px 12px;
+}
+
 .sidebar-link-danger {
     color: var(--chrome-danger-texto);
 }
@@ -2130,7 +2170,8 @@ TABLA RESPONSIVE -> TARJETAS EN MOVIL
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .card, .btn, body, .sidebar, .sidebar-link, .theme-toggle, .nav-tabs .nav-link {
+    .card, .btn, body, .sidebar, .sidebar-link, .theme-toggle, .nav-tabs .nav-link,
+    .sidebar-submenu, .sidebar-group-chevron {
         transition: none;
     }
 }

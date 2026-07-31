@@ -27,7 +27,20 @@ const NAV_POR_ROL = {
         links: [
             { href: "dashboard-admin.html", label: "Inicio", icono: "bi-house-fill" },
             { href: "usuarios.html", label: "Usuarios", icono: "bi-people-fill" },
-            { href: "reportes.html", label: "Reportes", icono: "bi-bar-chart-fill" },
+            {
+                label: "Reportes", icono: "bi-bar-chart-fill",
+                hijos: [
+                    { href: "reportes.html", label: "Resumen", icono: "bi-grid-1x2-fill" },
+                    { href: "reporte-tickets.html", label: "Tickets registrados", icono: "bi-ticket-perforated" },
+                    { href: "reporte-rendimiento.html", label: "Rendimiento de técnicos", icono: "bi-person-check" },
+                    { href: "reporte-notificaciones.html", label: "Notificaciones", icono: "bi-bell" },
+                    { href: "reporte-resueltos.html", label: "Tickets resueltos", icono: "bi-check-circle" },
+                    { href: "reporte-equipos.html", label: "Equipos registrados", icono: "bi-pc-display" },
+                    { href: "reporte-facturas.html", label: "Facturas", icono: "bi-receipt" },
+                    { href: "reporte-clientes.html", label: "Clientes", icono: "bi-people" },
+                    { href: "reporte-estadisticas.html", label: "Estadísticas", icono: "bi-graph-up" }
+                ]
+            },
             { href: "auditoria.html", label: "Auditoría", icono: "bi-clipboard-data-fill" }
         ]
     },
@@ -290,6 +303,42 @@ const Layout = {
         const colapsado = colapsablePorRol && (prefColapsado === null ? true : prefColapsado === "1");
 
         const links = config.links.map(link => {
+            // Grupo con submenu (ej. "Reportes" para Administrador): se pinta
+            // como boton (nunca navega solo) + lista de hijos colapsable. El
+            // resto de los elementos de links[] son enlaces planos como
+            // siempre. No hay logica de flyout para sidebar colapsado: hoy
+            // ningun rol con grupos (Administrador) colapsa a solo-iconos
+            // (colapsablePorRol es solo Tecnico, que no tiene grupos) — si
+            // eso cambia en el futuro, esta parte necesita revisarse.
+            if (link.hijos) {
+                const grupoActivo = link.hijos.some(h => h.href === paginaActual);
+                const llaveAbierto = `sidebarGrupo_${link.label}`;
+                const abierto = grupoActivo || localStorage.getItem(llaveAbierto) === "1";
+
+                const hijosHtml = link.hijos.map(h => {
+                    const activo = h.href === paginaActual;
+                    return `
+                        <a class="sidebar-link ${activo ? "active" : ""}" href="${h.href}" title="${h.label}" ${activo ? 'aria-current="page"' : ""}>
+                            <i class="bi ${h.icono}"></i>
+                            <span>${h.label}</span>
+                        </a>
+                    `;
+                }).join("");
+
+                return `
+                    <div class="sidebar-group ${abierto ? "abierto" : ""}">
+                        <button type="button" class="sidebar-link sidebar-group-toggle" aria-expanded="${abierto}" data-grupo="${link.label}">
+                            <i class="bi ${link.icono}"></i>
+                            <span>${link.label}</span>
+                            <i class="bi bi-chevron-down sidebar-group-chevron"></i>
+                        </button>
+                        <div class="sidebar-submenu">
+                            ${hijosHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
             const activo = link.href === paginaActual;
             return `
                 <a class="sidebar-link ${activo ? "active" : ""}" href="${link.href}" title="${link.label}" ${activo ? 'aria-current="page"' : ""}>
@@ -358,6 +407,15 @@ const Layout = {
         `;
 
         document.getElementById("sidebarAvatar").textContent = iniciales(usuario.nombre, usuario.apellido);
+
+        document.querySelectorAll(".sidebar-group-toggle").forEach(boton => {
+            boton.addEventListener("click", () => {
+                const grupo = boton.closest(".sidebar-group");
+                const abierto = grupo.classList.toggle("abierto");
+                boton.setAttribute("aria-expanded", String(abierto));
+                localStorage.setItem(`sidebarGrupo_${boton.dataset.grupo}`, abierto ? "1" : "0");
+            });
+        });
 
         if (colapsablePorRol) {
             const btnColapsar = document.getElementById("btnColapsarSidebar");
