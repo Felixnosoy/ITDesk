@@ -12,6 +12,12 @@ let ticketsTecnico = [];
 let terminoTecnico = "";
 let vistaActivaTecnico = "lista";
 let ticketSeleccionadoId = null;
+let soloMiEspecialidad = false;
+let incluirCerrados = false;
+// Solo se auto-selecciona el primer ticket una vez, al entrar a la pantalla
+// — no en cada re-render por busqueda/toggle, para no pisarle al tecnico
+// una seleccion que ya hizo a mano.
+let autoSeleccionInicialHecha = false;
 
 // Columnas del tablero, en orden. "Abierto" no acepta drop (el backend no
 // soporta volver a ese estado via PATCH /ticket/:id/estado — ver
@@ -131,8 +137,22 @@ const CAMPOS_BUSQUEDA_TECNICO = [
     "especialista"
 ];
 
+// Alcance compartido por Lista y Kanban: busqueda de texto + "solo donde soy
+// especialista". El filtro de cerrados (ticketsFiltradosLista, mas abajo) es
+// aparte porque solo aplica a la vista Lista — en el Kanban "Cerrado" es una
+// columna legitima del tablero.
 function ticketsFiltrados() {
-    return Search.filtrar(ticketsTecnico, terminoTecnico, CAMPOS_BUSQUEDA_TECNICO);
+    const filtrados = Search.filtrar(ticketsTecnico, terminoTecnico, CAMPOS_BUSQUEDA_TECNICO);
+    if (!soloMiEspecialidad) {
+        return filtrados;
+    }
+    const usuario = JSON.parse(sessionStorage.getItem("usuario") || "null");
+    return filtrados.filter(t => t.especialista_id === usuario?.id_usuario);
+}
+
+function ticketsFiltradosLista() {
+    const base = ticketsFiltrados();
+    return incluirCerrados ? base : base.filter(t => t.estado !== "Cerrado" && t.estado !== "Resuelto");
 }
 
 function renderTablero() {
@@ -395,7 +415,12 @@ function renderListaTecnico() {
         return;
     }
 
-    const filtrados = ticketsFiltrados();
+    const filtrados = ticketsFiltradosLista();
+    // La auto-seleccion (1.3) se decide una sola vez, en el primer render
+    // que tiene datos — sin importar si esos datos terminan vacios por el
+    // filtro de estado (ver rama de abajo). Asi no se reintenta cada vez
+    // que el tecnico cambia un toggle o escribe en el buscador.
+    const debeAutoSeleccionar = !autoSeleccionInicialHecha && ticketsTecnico.length > 0;
 
     if (ticketsTecnico.length === 0) {
         cont.innerHTML = `
@@ -408,18 +433,29 @@ function renderListaTecnico() {
     }
 
     if (filtrados.length === 0) {
-        cont.innerHTML = `
+        autoSeleccionInicialHecha = autoSeleccionInicialHecha || debeAutoSeleccionar;
+        cont.innerHTML = terminoTecnico ? `
             <div class="empty-state">
                 <i class="bi bi-search"></i>
                 <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
+            </div>
+        ` : `
+            <div class="empty-state">
+                <i class="bi bi-check2-circle"></i>
+                <p class="mb-0">No tienes tickets pendientes con estos filtros.</p>
+                <p class="small text-muted mb-0">Activá "Incluir cerrados" para ver el historial.</p>
             </div>
         `;
         return;
     }
 
-    const ordenados = [...filtrados].sort((a, b) =>
-        (ORDEN_PRIORIDAD_COLA[a.prioridad] ?? 9) - (ORDEN_PRIORIDAD_COLA[b.prioridad] ?? 9)
-    );
+    // Prioridad primero; dentro de cada prioridad, el mas viejo primero
+    // (fecha_apertura ascendente) — no hay campo de SLA en el modelo, la
+    // antiguedad es el mejor proxy disponible de "necesita atencion ya".
+    const ordenados = [...filtrados].sort((a, b) => {
+        const porPrioridad = (ORDEN_PRIORIDAD_COLA[a.prioridad] ?? 9) - (ORDEN_PRIORIDAD_COLA[b.prioridad] ?? 9);
+        return porPrioridad !== 0 ? porPrioridad : new Date(a.fecha_apertura) - new Date(b.fecha_apertura);
+    });
 
     cont.innerHTML = ordenados.map(crearFilaLista).join("");
 
@@ -433,6 +469,16 @@ function renderListaTecnico() {
             }
         });
     });
+
+    if (debeAutoSeleccionar) {
+        autoSeleccionInicialHecha = true;
+        // Bajo 1025px el panel de detalle no existe (seleccionarTicketLista
+        // navega directo ahi) — una seleccion automatica sin interaccion del
+        // tecnico no debe disparar esa navegacion.
+        if (window.matchMedia("(min-width: 1025px)").matches) {
+            seleccionarTicketLista(ordenados[0].id_ticket);
+        }
+    }
 }
 
 // Bajo 1024px el panel de detalle no existe (.master-detail-panel queda
@@ -467,6 +513,10 @@ function aplicarVistaTecnico(vista) {
     document.getElementById("tableroTecnico")?.classList.toggle("d-none", vista !== "kanban");
     document.getElementById("btnVistaLista")?.classList.toggle("active", vista === "lista");
     document.getElementById("btnVistaKanban")?.classList.toggle("active", vista === "kanban");
+    // "Incluir cerrados" solo tiene efecto en la vista Lista (en Kanban,
+    // Cerrado ya es una columna que siempre se ve) — se oculta en Kanban
+    // para no ofrecer un control que ahi no hace nada.
+    document.getElementById("wrapIncluirCerrados")?.classList.toggle("d-none", vista !== "lista");
 }
 
 function actualizarStatsTecnico(tickets) {
@@ -515,6 +565,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnVistaKanban")?.addEventListener("click", () => aplicarVistaTecnico("kanban"));
 
     cargarTicketsTecnico();
+
+    document.getElementById("chkSoloEspecialista")?.addEventListener("change", (evento) => {
+        soloMiEspecialidad = evento.target.checked;
+        renderVistas();
+    });
+
+    document.getElementById("chkIncluirCerrados")?.addEventListener("change", (evento) => {
+        incluirCerrados = evento.target.checked;
+        renderListaTecnico();
+    });
 
     Search.conectar(document.getElementById("buscarTicketTecnico"), (termino) => {
         terminoTecnico = termino;

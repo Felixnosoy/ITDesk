@@ -765,6 +765,35 @@ cada uno (Fase 3, redisenio por rol).
     gap: var(--space-5);
 }
 
+/* Agrupa mini-stat bajo una etiqueta (ej. "Cola del taller" vs "Tu
+   rendimiento" en dashboard-tecnico.html) cuando conviven dos alcances
+   distintos de datos en la misma tira, para que no se lean como una sola
+   lista indiferenciada de 5 numeros. */
+.mini-stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.mini-stat-group + .mini-stat-group {
+    padding-left: var(--space-5);
+    border-left: 1px solid var(--border);
+}
+
+.mini-stat-group-label {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-500);
+}
+
+.mini-stat-group-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+}
+
 /* Dashboard cliente: la card de #seccionDestacada (renderSeccionDestacada en
    cliente.js) es el heroe real de la pantalla — mas aire y tipografia mas
    grande que una card comun, sin tocar el JS que la arma. */

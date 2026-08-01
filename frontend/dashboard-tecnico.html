@@ -26,34 +26,44 @@
                 <div class="page-head">
                     <div class="page-head-text">
                         <h2>Cola de trabajo</h2>
-                        <p>Ordenada por lo que necesita atención primero.</p>
+                        <p id="subtituloColaTecnico">Ordenada por prioridad y antigüedad. Los tickets cerrados o resueltos quedan fuera hasta que los pidas.</p>
                     </div>
                 </div>
 
                 <div class="mini-stat-strip mb-4">
-                    <div class="mini-stat">
-                        <span class="mini-stat-label"><i class="bi bi-list-check"></i> Tickets en cola</span>
-                        <span class="mini-stat-value" id="statsAsignados">0</span>
+                    <div class="mini-stat-group">
+                        <span class="mini-stat-group-label">Cola del taller</span>
+                        <div class="mini-stat-group-items">
+                            <div class="mini-stat">
+                                <span class="mini-stat-label"><i class="bi bi-list-check"></i> Tickets en cola</span>
+                                <span class="mini-stat-value" id="statsAsignados">0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-label"><i class="bi bi-hourglass-split"></i> En proceso</span>
+                                <span class="mini-stat-value" id="statsEnProceso">0</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-label"><i class="bi bi-check-circle"></i> Finalizados</span>
+                                <span class="mini-stat-value" id="statsFinalizados">0</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mini-stat">
-                        <span class="mini-stat-label"><i class="bi bi-hourglass-split"></i> En proceso</span>
-                        <span class="mini-stat-value" id="statsEnProceso">0</span>
-                    </div>
-                    <div class="mini-stat">
-                        <span class="mini-stat-label"><i class="bi bi-check-circle"></i> Finalizados</span>
-                        <span class="mini-stat-value" id="statsFinalizados">0</span>
-                    </div>
-                    <div class="mini-stat">
-                        <span class="mini-stat-label"><i class="bi bi-stopwatch"></i> Mi tiempo promedio</span>
-                        <span class="mini-stat-value" id="statsTiempoProm">—</span>
-                    </div>
-                    <div class="mini-stat">
-                        <span class="mini-stat-label"><i class="bi bi-graph-up-arrow"></i> Mi eficiencia</span>
-                        <span class="mini-stat-value" id="statsEficiencia">—</span>
+                    <div class="mini-stat-group">
+                        <span class="mini-stat-group-label">Tu rendimiento</span>
+                        <div class="mini-stat-group-items">
+                            <div class="mini-stat">
+                                <span class="mini-stat-label"><i class="bi bi-stopwatch"></i> Tiempo promedio</span>
+                                <span class="mini-stat-value" id="statsTiempoProm">—</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-label"><i class="bi bi-graph-up-arrow"></i> Eficiencia</span>
+                                <span class="mini-stat-value" id="statsEficiencia">—</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="btn-group btn-group-sm" role="group" aria-label="Cambiar vista de la cola">
                         <button type="button" class="btn btn-outline-secondary" id="btnVistaLista">
                             <i class="bi bi-list-ul"></i> Lista
@@ -62,11 +72,21 @@
                             <i class="bi bi-kanban"></i> Kanban
                         </button>
                     </div>
-                    <div class="input-group input-group-sm" style="max-width: 320px;">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <label class="visually-hidden" for="buscarTicketTecnico">Buscar tickets</label>
-                        <input type="text" id="buscarTicketTecnico" class="form-control"
-                            placeholder="Buscar por código, cliente, equipo...">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="chkSoloEspecialista">
+                            <label class="form-check-label small" for="chkSoloEspecialista">Solo donde soy especialista</label>
+                        </div>
+                        <div class="form-check form-switch mb-0" id="wrapIncluirCerrados">
+                            <input class="form-check-input" type="checkbox" id="chkIncluirCerrados">
+                            <label class="form-check-label small" for="chkIncluirCerrados">Incluir cerrados</label>
+                        </div>
+                        <div class="input-group input-group-sm" style="max-width: 320px;">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <label class="visually-hidden" for="buscarTicketTecnico">Buscar tickets</label>
+                            <input type="text" id="buscarTicketTecnico" class="form-control"
+                                placeholder="Buscar por código, cliente, equipo...">
+                        </div>
                     </div>
                     <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaTicketTecnico"></span>
                 </div>

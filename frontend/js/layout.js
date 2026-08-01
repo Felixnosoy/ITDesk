@@ -47,7 +47,7 @@ const NAV_POR_ROL = {
     Tecnico: {
         marca: { href: "dashboard-tecnico.html", texto: "ITDESK", icono: "bi-tools" },
         links: [
-            { href: "dashboard-tecnico.html", label: "Mis tickets", icono: "bi-house-fill" },
+            { href: "dashboard-tecnico.html", label: "Cola del taller", icono: "bi-house-fill" },
             { href: "auditoria.html", label: "Auditoría", icono: "bi-clipboard-data-fill" }
         ]
     },
