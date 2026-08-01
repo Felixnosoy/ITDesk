@@ -992,6 +992,23 @@ CARDS
     padding: 18px 20px;
 }
 
+/* KPI accionable (ej. "Sin asignar" en dashboard-admin.html, Bloque 5) —
+   role="button" en un <div>, asi que necesita su propio estado de foco/hover
+   ya que no es un <a>/<button> nativo. */
+.card-stat-clickable {
+    cursor: pointer;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card-stat-clickable:hover {
+    border-color: var(--accent-600);
+}
+
+.card-stat-clickable:focus-visible {
+    outline: 2px solid var(--accent-600);
+    outline-offset: 2px;
+}
+
 .card-stat-head {
     display: flex;
     align-items: center;
@@ -1551,6 +1568,15 @@ antes de esta vista.
 .ticket-fila-prioridad-Alta { border-left-color: var(--danger); }
 .ticket-fila-prioridad-Media { border-left-color: var(--warning); }
 .ticket-fila-prioridad-Baja { border-left-color: var(--info); }
+
+/* Mismas clases de arriba, reusadas en <tr> de tabla real (tabla de tickets
+   del administrador, Bloque 5) — .ticket-fila (div) ya trae su propio
+   border-left base, un <tr> no, asi que se agrega aca. box-shadow en vez
+   de border-left porque Bootstrap usa border-collapse:collapse en .table,
+   que no garantiza pintar un border-left propio de la fila. */
+.table tbody tr.ticket-fila-prioridad-Alta { box-shadow: inset 3px 0 0 0 var(--danger); }
+.table tbody tr.ticket-fila-prioridad-Media { box-shadow: inset 3px 0 0 0 var(--warning); }
+.table tbody tr.ticket-fila-prioridad-Baja { box-shadow: inset 3px 0 0 0 var(--info); }
 
 .ticket-fila-info {
     min-width: 0;

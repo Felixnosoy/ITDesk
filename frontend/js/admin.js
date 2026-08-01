@@ -110,6 +110,21 @@ function renderSparklineKpi(idContenedor, tickets, campoFecha) {
     contenedor.innerHTML = sparklineSvg(conteoPorDiaUltimos7(tickets, campoFecha));
 }
 
+// KPI "Sin asignar" accionable (Bloque 5) — reusa el buscador de texto que
+// ya filtra la tabla de abajo (estado es uno de los campos indexados en
+// actualizarTablaTicketsAdmin) en vez de armar un mecanismo de filtro
+// nuevo. "Abierto" es el mismo criterio que ya usa el conteo del KPI.
+function filtrarPorSinAsignar() {
+    const input = document.getElementById("buscarTicketAdmin");
+    if (!input) {
+        return;
+    }
+    input.value = "Abierto";
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+    document.getElementById("tablaTicketsAdmin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 async function cargarResumenAdmin() {
     if (!document.getElementById("totalUsuarios")) {
         return;
@@ -117,7 +132,7 @@ async function cargarResumenAdmin() {
 
     const tabla = document.getElementById("tablaTicketsAdmin");
     if (tabla) {
-        UI.renderSkeleton(tabla, 8);
+        UI.renderSkeleton(tabla, 7);
     }
 
     let asignaciones = [];
@@ -213,7 +228,7 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
     if (asignaciones === undefined) {
         // llamada independiente (ej. tras asignarTecnico) — no viene de
         // cargarResumenAdmin, asi que aca si hace falta pedirlas.
-        UI.renderSkeleton(tabla, 8);
+        UI.renderSkeleton(tabla, 7);
         asignaciones = await apiFetch("/asignacion").catch(() => []);
     }
 
@@ -231,11 +246,12 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
         if (document.getElementById("ticketsSinAsignar")) {
             // "Abierto" = todavia sin tecnico asignado (asignar siempre mueve
             // el ticket a "En proceso" en este flujo, ver admin.js:asignarTecnico).
+            // KPI propio y accionable (Bloque 5) — el numero solo, la tarjeta
+            // ya lo explica con su icono/etiqueta; el detalle "N sin asignar"
+            // vs "Todos asignados" vivia en el texto porque antes era un
+            // badge escondido dentro de otra tarjeta, ya no hace falta.
             const sinAsignar = tickets.filter(t => t.estado === "Abierto").length;
-            const elSinAsignar = document.getElementById("ticketsSinAsignar");
-            elSinAsignar.textContent = sinAsignar > 0 ? `${sinAsignar} sin asignar` : "Todos asignados";
-            elSinAsignar.classList.toggle("tone-warning", sinAsignar > 0);
-            elSinAsignar.classList.toggle("tone-success", sinAsignar === 0);
+            document.getElementById("ticketsSinAsignar").textContent = sinAsignar;
         }
         if (document.getElementById("ticketsResueltos")) {
             const resueltos = tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado");
@@ -244,7 +260,7 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
         }
 
         if (tickets.length === 0) {
-            UI.renderEmptyState(tabla, 8, "Todavía no hay tickets registrados.", "bi-ticket-perforated");
+            UI.renderEmptyState(tabla, 7, "Todavía no hay tickets registrados.", "bi-ticket-perforated");
             ticketsAdmin = [];
             return;
         }
@@ -286,7 +302,7 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
         actualizarTablaTicketsAdmin();
 
     } catch (error) {
-        UI.renderErrorRow(tabla, 8, error.message);
+        UI.renderErrorRow(tabla, 7, error.message);
     }
 }
 
@@ -294,20 +310,24 @@ function renderTablaTicketsAdmin(ordenados, asignacionActivaPorTicket = {}) {
     const tabla = document.getElementById("tablaTicketsAdmin");
 
     if (ordenados.length === 0) {
-        UI.renderEmptyState(tabla, 8, "Ningún ticket coincide con la búsqueda.", "bi-search");
+        UI.renderEmptyState(tabla, 7, "Ningún ticket coincide con la búsqueda.", "bi-search");
         return;
     }
 
     tabla.innerHTML = ordenados.map(ticket => {
+        // Prioridad/Categoria/Estado competian como 3 badges de color en la
+        // misma fila (Bloque 5) — prioridad pasa a la banda de 3px que ya
+        // usa la cola del tecnico (ticket-fila-prioridad-*, ver tecnico.js),
+        // categoria a texto simple sin color ni icono, y solo estado se
+        // queda como badge (un badge por fila, no tres).
         if (ticket.estado === "Cerrado") {
             return `
-                <tr>
+                <tr class="ticket-fila-prioridad-${ticket.prioridad}">
                     <td data-label="ID"><a href="detalle-ticket.html?id=${ticket.id_ticket}" class="codigo">${Codigos.ticket(ticket)}</a></td>
                     <td data-label="Cliente">${ticket.cliente}</td>
                     <td data-label="Equipo">${ticket.equipo_tipo} ${ticket.equipo_marca}</td>
                     <td data-label="Título">${ticket.titulo}</td>
-                    <td data-label="Prioridad">${UI.badgePrioridad(ticket.prioridad)}</td>
-                    <td data-label="Categoría">${UI.badgeCategoria(ticket.categoria)}</td>
+                    <td data-label="Categoría">${ticket.categoria}</td>
                     <td data-label="Estado">${UI.badgeEstado(ticket.estado)}</td>
                     <td data-label="Especialista">—</td>
                 </tr>
@@ -322,6 +342,10 @@ function renderTablaTicketsAdmin(ordenados, asignacionActivaPorTicket = {}) {
         // tecnicos de trabajar en el mismo ticket.
         const activa = asignacionActivaPorTicket[ticket.id_ticket];
 
+        // btn-outline en los dos casos (antes "Asignar" era btn-primary
+        // solido, repetido en cada fila) — el relleno solido se reserva
+        // para la accion primaria de la pantalla, que no es una accion por
+        // fila (Bloque 5).
         const accion = activa
             ? `
                 <div class="small mb-1"><i class="bi bi-person-check-fill text-success"></i> ${activa.tecnico}</div>
@@ -330,19 +354,18 @@ function renderTablaTicketsAdmin(ordenados, asignacionActivaPorTicket = {}) {
                 </button>
             `
             : `
-                <button class="btn btn-primary btn-sm" onclick="abrirModalAsignarTecnico(${ticket.id_ticket})">
+                <button class="btn btn-outline-primary btn-sm" onclick="abrirModalAsignarTecnico(${ticket.id_ticket})">
                     <i class="bi bi-person-plus-fill"></i> Asignar
                 </button>
             `;
 
         return `
-            <tr>
+            <tr class="ticket-fila-prioridad-${ticket.prioridad}">
                 <td data-label="ID"><a href="detalle-ticket.html?id=${ticket.id_ticket}">${Codigos.ticket(ticket)}</a></td>
                 <td data-label="Cliente">${ticket.cliente}</td>
                 <td data-label="Equipo">${ticket.equipo_tipo} ${ticket.equipo_marca}</td>
                 <td data-label="Título">${ticket.titulo}</td>
-                <td data-label="Prioridad">${UI.badgePrioridad(ticket.prioridad)}</td>
-                <td data-label="Categoría">${UI.badgeCategoria(ticket.categoria)}</td>
+                <td data-label="Categoría">${ticket.categoria}</td>
                 <td data-label="Estado">${UI.badgeEstado(ticket.estado)}</td>
                 <td data-label="Especialista">${accion}</td>
             </tr>
@@ -679,4 +702,15 @@ async function eliminarUsuarioAdmin(id_usuario) {
 document.addEventListener("DOMContentLoaded", () => {
     cargarResumenAdmin();
     cargarUsuariosGestion();
+
+    // .card-stat-clickable usa role="button" (es un <div>, no un <a>/<button>)
+    // — Enter/Espacio no la activan solos, hace falta cablearlo a mano.
+    document.querySelectorAll(".card-stat-clickable[role='button']").forEach(tarjeta => {
+        tarjeta.addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter" || evento.key === " ") {
+                evento.preventDefault();
+                tarjeta.click();
+            }
+        });
+    });
 });
