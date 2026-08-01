@@ -115,7 +115,7 @@ function renderTablaReporteResueltos(visibles) {
                 <td data-label="Equipo">${t.equipo_tipo} ${t.equipo_marca}</td>
                 <td data-label="Técnico">${activa ? activa.tecnico : "Sin asignar"}</td>
                 <td data-label="Fecha cierre">${UI.formatearFechaCorta(t.fecha_cierre)}</td>
-                <td data-label="Duración">${horas !== null ? Math.round(horas) + " hrs" : "—"}</td>
+                <td data-label="Duración">${horas !== null ? Math.round(horas) + " hrs" : '<span class="valor-vacio">Sin datos aún</span>'}</td>
             </tr>
         `;
     }).join("");
@@ -141,8 +141,8 @@ function renderTotalesResueltos(resumen) {
     }
     cont.innerHTML = `
         <span><strong class="text-body">${resumen.total}</strong> resueltos</span>
-        <span>Duración promedio: ${resumen.duracionPromedio !== null ? resumen.duracionPromedio.toFixed(1) + " hrs" : "—"}</span>
-        <span>Calificación promedio: ${resumen.calificacionPromedio !== null ? resumen.calificacionPromedio.toFixed(1) + " ★" : "—"}</span>
+        <span>Duración promedio: ${resumen.duracionPromedio !== null ? resumen.duracionPromedio.toFixed(1) + " hrs" : '<span class="valor-vacio">Sin datos aún</span>'}</span>
+        <span>Calificación promedio: ${resumen.calificacionPromedio !== null ? resumen.calificacionPromedio.toFixed(1) + " ★" : '<span class="valor-vacio">Sin datos aún</span>'}</span>
     `;
 }
 

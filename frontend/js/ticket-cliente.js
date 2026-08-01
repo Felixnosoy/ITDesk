@@ -360,7 +360,7 @@ async function enviarEncuesta(event) {
     event.preventDefault();
 
     if (!calificacionElegida) {
-        UI.toast("Elegí al menos una estrella.", "warning");
+        UI.toast("Selecciona al menos una estrella.", "warning");
         return;
     }
 

@@ -554,8 +554,10 @@ function renderMiRendimiento(tickets) {
     const tiempoProm = tiempos.length ? tiempos.reduce((a, b) => a + b, 0) / tiempos.length : null;
     const eficiencia = asignados > 0 ? Math.round((resueltos / asignados) * 100) : null;
 
-    elTiempo.textContent = tiempoProm !== null ? `${tiempoProm.toFixed(1)} hrs` : "—";
-    elEficiencia.textContent = eficiencia !== null ? `${eficiencia}%` : "—";
+    elTiempo.textContent = tiempoProm !== null ? `${tiempoProm.toFixed(1)} hrs` : "Sin datos aún";
+    elTiempo.classList.toggle("valor-vacio", tiempoProm === null);
+    elEficiencia.textContent = eficiencia !== null ? `${eficiencia}%` : "Sin datos aún";
+    elEficiencia.classList.toggle("valor-vacio", eficiencia === null);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

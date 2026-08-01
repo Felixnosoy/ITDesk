@@ -25,8 +25,9 @@ async function cargarReportes() {
         document.getElementById("repTicketsProceso").textContent = enProceso;
         document.getElementById("repTicketsResueltos").textContent = resueltos;
 
-        document.getElementById("repSatisfaccion").textContent =
-            promedioSatisfaccion !== null ? `${promedioSatisfaccion.toFixed(1)} / 5` : "—";
+        const elSatisfaccion = document.getElementById("repSatisfaccion");
+        elSatisfaccion.textContent = promedioSatisfaccion !== null ? `${promedioSatisfaccion.toFixed(1)} / 5` : "Sin datos aún";
+        elSatisfaccion.classList.toggle("valor-vacio", promedioSatisfaccion === null);
         document.getElementById("repSatisfaccionSub").textContent =
             encuestas.length > 0 ? `${encuestas.length} encuesta${encuestas.length === 1 ? "" : "s"}` : "Sin encuestas todavía";
 

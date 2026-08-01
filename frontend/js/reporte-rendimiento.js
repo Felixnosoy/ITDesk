@@ -136,8 +136,8 @@ function renderTablaRendimiento(filas) {
             <td data-label="Asignados">${f.asignados}</td>
             <td data-label="Resueltos">${f.resueltos}</td>
             <td data-label="Pendientes">${f.pendientes}</td>
-            <td data-label="T. Prom. (hrs)">${f.tiempoPromHoras !== null ? f.tiempoPromHoras.toFixed(1) : "—"}</td>
-            <td data-label="Eficiencia">${f.eficiencia !== null ? f.eficiencia + "%" : "—"}</td>
+            <td data-label="T. Prom. (hrs)">${f.tiempoPromHoras !== null ? f.tiempoPromHoras.toFixed(1) : '<span class="valor-vacio">Sin datos aún</span>'}</td>
+            <td data-label="Eficiencia">${f.eficiencia !== null ? f.eficiencia + "%" : '<span class="valor-vacio">Sin datos aún</span>'}</td>
         </tr>
     `).join("");
 }
@@ -148,7 +148,7 @@ function renderResumenRendimiento(resumen) {
         return;
     }
     cont.innerHTML = `
-        <span>Tiempo promedio global: <strong class="text-body">${resumen.tiempoPromedioGlobal !== null ? resumen.tiempoPromedioGlobal.toFixed(1) + " hrs" : "—"}</strong></span>
+        <span>Tiempo promedio global: <strong class="text-body">${resumen.tiempoPromedioGlobal !== null ? resumen.tiempoPromedioGlobal.toFixed(1) + " hrs" : '<span class="valor-vacio">Sin datos aún</span>'}</strong></span>
         <span>Total tickets período: <strong class="text-body">${resumen.totalTicketsPeriodo}</strong></span>
     `;
 }

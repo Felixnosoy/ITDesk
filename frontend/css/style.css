@@ -226,6 +226,14 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     gap: 6px;
 }
 
+/* Altura minima garantizada: cuando "Cerrar sesion" pasa a su propia fila
+   (ver .sidebar-actions mas abajo, con nombre de usuario largo o el trio de
+   iconos del tecnico) el pie no debe achicarse/agrandarse de golpe segun el
+   rol o el ancho de ventana. */
+.sidebar:not(.collapsed) .sidebar-footer {
+    min-height: 170px;
+}
+
 .sidebar-avatar {
     width: 32px;
     height: 32px;
@@ -280,11 +288,18 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 .sidebar-actions {
     display: flex;
     align-items: center;
+    /* con 3 iconos (tecnico: notificaciones + tema + colapsar) el enlace de
+       "Cerrar sesion" no siempre entra en la misma fila — que pase entero a
+       su propia fila (flex-wrap) en vez de partir el texto a la mitad. */
+    flex-wrap: wrap;
     gap: 6px;
+    min-height: 36px;
 }
 
 .sidebar-actions .sidebar-link {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
 }
 
 /* Sidebar colapsado (Tecnico/Recepcionista por defecto) — solo iconos, sin
@@ -698,11 +713,21 @@ p {
     font-size: var(--fs-caption);
     letter-spacing: -.02em;
     font-variant-numeric: tabular-nums;
+    /* se dicta por telefono y se copia — que no se parta en dos lineas
+       dentro de una celda angosta de tabla. */
+    white-space: nowrap;
 }
 
 a.codigo {
     color: var(--accent-600);
     text-decoration: none;
+}
+
+/* Columna de tabla que solo trae un .codigo (ej. "ID" en la tabla de
+   tickets del administrador) — ancho minimo para que la celda no se angoste
+   mas que el propio codigo, que ya no puede partirse en dos lineas. */
+.col-codigo {
+    min-width: 120px;
 }
 
 a.codigo:hover {
@@ -748,6 +773,22 @@ cada uno (Fase 3, redisenio por rol).
     font-weight: 700;
     color: var(--ink-900);
     font-variant-numeric: tabular-nums;
+}
+
+/* Metrica sin datos (ej. "Mi eficiencia" de un tecnico sin tickets resueltos
+   todavia) — un guion solo no distingue "cero", "sin datos" y "roto". Texto
+   explicito + color apagado para que se lea distinto de un valor real, no
+   solo "—" con el mismo peso que un numero. tokens.css no tiene un token de
+   texto terciario propio (--text-3): se usa --ink-500, ya establecido para
+   texto secundario/muted en el resto del sistema. */
+.valor-vacio {
+    color: var(--ink-500);
+}
+
+.mini-stat-value.valor-vacio,
+.card-stat-value.valor-vacio {
+    color: var(--ink-500);
+    font-weight: 500;
 }
 
 .mini-stat-list .mini-stat {
