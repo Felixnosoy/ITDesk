@@ -801,6 +801,23 @@ cada uno (Fase 3, redisenio por rol).
     padding: var(--space-6) var(--space-5);
 }
 
+/* Item flex que puede angostarse por debajo del ancho de su contenido — sin
+   esto, un texto sin espacios (ej. un modelo de equipo pegado sin separar)
+   fuerza el ancho de toda la fila flex, y de ahi el de la card y la pagina
+   (min-width:auto es el default de un flex item, no 0). Se combina siempre
+   con .text-break (utilidad de Bootstrap) en el texto que puede ser largo,
+   para que ademas de poder angostarse, el texto se parta dentro de la
+   palabra en vez de desbordar su propia caja. */
+.min-w-0 {
+    min-width: 0;
+}
+
+/* Selector "Ordenar por" de dashboard-cliente.html — antes vivia como
+   style="max-width:200px" inline en el HTML. */
+.selector-orden {
+    max-width: 200px;
+}
+
 #seccionDestacada h5 {
     font-size: 1.25rem;
 }
