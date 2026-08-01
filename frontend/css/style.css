@@ -130,6 +130,35 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     text-decoration: none;
 }
 
+/* Insignia de marca (Design System v2) — degradado del rol con icono en
+   blanco por defecto; tecnico usa su propio tratamiento mas abajo (chip
+   traslucido, no relleno solido, para no competir con el fondo casi negro). */
+.sidebar-brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-gradient, var(--accent-600));
+    color: #fff;
+    flex: none;
+    font-size: .85rem;
+}
+
+[data-rol="tecnico"] .sidebar-brand-mark {
+    background: rgba(34, 211, 238, .12);
+    color: var(--accent-600);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, .25);
+}
+
+/* Textura tecnica sutil, acotada al sidebar del tecnico (Design System v2) —
+   no se repite en el resto de la app, es parte de la identidad "consola". */
+[data-rol="tecnico"] .sidebar {
+    background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
 .sidebar-nav {
     flex: 1;
     padding: 8px 12px;
@@ -186,6 +215,12 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     font-weight: 600;
     border-left: 3px solid var(--accent-500);
     padding-left: 9px;
+}
+
+/* Glow tipo "luz de estado" en el item activo — solo tecnico (Design
+   System v2); el resto de los roles se queda con el border-left simple. */
+[data-rol="tecnico"] .sidebar-link.active {
+    box-shadow: var(--glow-active);
 }
 
 /* Grupo de sidebar con submenu (ej. Reportes para Administrador) — el
@@ -333,7 +368,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
         width: 72px;
     }
 
-    .sidebar.collapsed .sidebar-brand span,
+    .sidebar.collapsed .sidebar-brand span:not(.sidebar-brand-mark),
     .sidebar.collapsed .sidebar-link span,
     .sidebar.collapsed .sidebar-user-info {
         display: none;

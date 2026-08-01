@@ -360,7 +360,7 @@ const Layout = {
         contenedor.outerHTML = `
             <aside class="sidebar ${colapsado ? "collapsed" : ""}" id="sidebar-placeholder">
                 <a class="sidebar-brand" href="${config.marca.href}">
-                    <i class="bi ${config.marca.icono}"></i>
+                    <span class="sidebar-brand-mark"><i class="bi ${config.marca.icono}"></i></span>
                     <span>${config.marca.texto}</span>
                 </a>
 
