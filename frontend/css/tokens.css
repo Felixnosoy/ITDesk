@@ -38,6 +38,10 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
 
     /* ---------- TEXTO (primitivos, claro) ---------- */
     --ink-900: #10152B;
+    /* triplete rgb de --ink-900, para poder armar rgba(--ink-900, X) en
+       transparencias (ej. sidebar del cliente en [data-rol], que si sigue
+       el tema) — mismo patron que --accent-600-rgb mas abajo. */
+    --ink-900-rgb: 16, 21, 43;
     --ink-700: #3C4257;
     --ink-500: #6B7285;
     --ink-300: #A2A8B8;
@@ -132,6 +136,7 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
 @media (prefers-color-scheme: dark) {
     :root {
         --ink-900: #EDEEF4;
+        --ink-900-rgb: 237, 238, 244;
         --ink-700: #B7BBCC;
         --ink-500: #868CA3;
         --ink-300: #565C78;
@@ -163,6 +168,7 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
 
 :root[data-theme="dark"] {
     --ink-900: #EDEEF4;
+    --ink-900-rgb: 237, 238, 244;
     --ink-700: #B7BBCC;
     --ink-500: #868CA3;
     --ink-300: #565C78;
@@ -193,6 +199,7 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
 
 :root[data-theme="light"] {
     --ink-900: #10152B;
+    --ink-900-rgb: 16, 21, 43;
     --ink-700: #3C4257;
     --ink-500: #6B7285;
     --ink-300: #A2A8B8;
@@ -219,4 +226,66 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
     --info-bg: #E5F6FD;
 
     color-scheme: light;
+}
+
+/* ================= DIFERENCIACION POR ROL =================
+   data-rol lo pone Layout.init() en <body> (frontend/js/layout.js). Cada
+   bloque solo redefine lo que cambia: color de sidebar y densidad de
+   contenido — el resto del sistema (acento teal, tipografia base, radios)
+   se queda igual para los 4 roles.
+
+   Administrador/Tecnico/Recepcionista: sidebar de "chrome" fijo, no sigue
+   el tema claro/oscuro — mismo criterio que --azul/--chrome-texto (ver
+   comentario arriba del archivo).
+
+   Cliente es la excepcion a proposito: su sidebar usa tokens que SI siguen
+   el tema (--surface-1/--ink-900), porque ese rol se penso como producto de
+   consumo, no como panel de control — no tiene sentido forzarle un chrome
+   fijo. --sidebar-fg-rgb reusa --ink-900-rgb (arriba) para que las
+   transparencias del sidebar seudo-claro tambien seaan correctas en
+   ambos temas sin duplicar valores por tema aca. */
+[data-rol="cliente"] {
+    --sidebar-bg: var(--surface-1);
+    --sidebar-fg: var(--ink-900);
+    --sidebar-fg-rgb: var(--ink-900-rgb);
+    --sidebar-danger: var(--danger);
+    --contenido-max: 760px;
+    --fs-body: .9375rem;
+    --fila-alto: auto;
+}
+
+[data-rol="tecnico"] {
+    /* hex nuevo, fijo en ambos temas a proposito (ver nota arriba) — no
+       existia un primitivo "casi negro" en el sistema, este rol es el
+       primero que lo necesita. */
+    --sidebar-bg: #0E1116;
+    /* el prompt original pedia --ink-300 aca, pero ese token esta
+       documentado mas arriba como "no alcanza 4.5:1, no usar como texto" —
+       se cambia por un gris fijo con contraste real sobre #0E1116. */
+    --sidebar-fg: #C7CBD6;
+    --sidebar-fg-rgb: 199, 203, 214;
+    --sidebar-danger: var(--chrome-danger-texto);
+    --contenido-max: none;
+    --fs-body: .78125rem;
+    --fila-alto: 30px;
+}
+
+[data-rol="admin"] {
+    --sidebar-bg: var(--azul);
+    --sidebar-fg: var(--chrome-texto);
+    --sidebar-fg-rgb: 255, 255, 255;
+    --sidebar-danger: var(--chrome-danger-texto);
+    --contenido-max: 1600px;
+    --fs-body: .8125rem;
+    --fila-alto: 34px;
+}
+
+[data-rol="recepcion"] {
+    --sidebar-bg: var(--azul);
+    --sidebar-fg: var(--chrome-texto);
+    --sidebar-fg-rgb: 255, 255, 255;
+    --sidebar-danger: var(--chrome-danger-texto);
+    --contenido-max: 1200px;
+    --fs-body: .875rem;
+    --fila-alto: 34px;
 }

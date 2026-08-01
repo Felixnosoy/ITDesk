@@ -21,6 +21,9 @@ html {
 body {
     background: var(--fondo);
     color: var(--texto);
+    /* --fs-body varia por rol (ver tokens.css, [data-rol]) — paginas sin
+       data-rol (login, index) usan el valor por defecto de :root. */
+    font-size: var(--fs-body);
     transition: background-color var(--transition-base), color var(--transition-base);
 }
 
@@ -64,10 +67,13 @@ NAVBAR (chrome de marca: fijo en ambos temas)
     font-weight: bold;
 }
 
+/* .theme-toggle vive siempre dentro del pie del sidebar — usa las
+   variables de rol (--sidebar-fg-rgb), no blanco fijo, para que tambien
+   funcione sobre el sidebar claro del cliente. */
 .theme-toggle {
-    background: rgba(255, 255, 255, .08);
-    border: 1px solid rgba(255, 255, 255, .16);
-    color: var(--chrome-texto);
+    background: rgba(var(--sidebar-fg-rgb), .08);
+    border: 1px solid rgba(var(--sidebar-fg-rgb), .16);
+    color: var(--sidebar-fg);
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -79,8 +85,8 @@ NAVBAR (chrome de marca: fijo en ambos temas)
 }
 
 .theme-toggle:hover {
-    background: rgba(255, 255, 255, .16);
-    color: var(--chrome-texto);
+    background: rgba(var(--sidebar-fg-rgb), .16);
+    color: var(--sidebar-fg);
 }
 
 /*==========================
@@ -95,7 +101,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 .sidebar {
     width: 232px;
     flex: none;
-    background: var(--azul);
+    background: var(--sidebar-bg);
     display: flex;
     flex-direction: column;
     position: sticky;
@@ -106,12 +112,19 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     z-index: 1040;
 }
 
+/* Unico rol con sidebar "de contenido" (sigue el tema, ver tokens.css) en
+   vez de chrome fijo — el borde reemplaza el contraste que antes daba el
+   navy solido contra la pagina. */
+[data-rol="cliente"] .sidebar {
+    border-right: 1px solid var(--border);
+}
+
 .sidebar-brand {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 22px 20px 18px;
-    color: var(--chrome-texto) !important;
+    color: var(--sidebar-fg) !important;
     font-weight: 700;
     font-size: 1.15rem;
     text-decoration: none;
@@ -131,7 +144,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     gap: 12px;
     padding: 10px 12px;
     border-radius: var(--radius-md);
-    color: rgba(255, 255, 255, .68);
+    color: rgba(var(--sidebar-fg-rgb), .68);
     font-weight: 500;
     font-size: .92rem;
     text-decoration: none;
@@ -146,12 +159,18 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-link:hover {
-    background: rgba(255, 255, 255, .08);
-    color: var(--chrome-texto);
+    background: rgba(var(--sidebar-fg-rgb), .08);
+    color: var(--sidebar-fg);
 }
 
 .sidebar-link:focus-visible,
-.theme-toggle:focus-visible,
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--sidebar-fg);
+    outline-offset: 2px;
+}
+
+/* topbar-menu-btn es del drawer movil, que se queda navy fijo para los 4
+   roles (no forma parte de la diferenciacion por rol, ver Bloque 4) */
 .topbar-menu-btn:focus-visible {
     outline: 2px solid var(--chrome-texto);
     outline-offset: 2px;
@@ -163,7 +182,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-link.active {
-    color: var(--chrome-texto);
+    color: var(--sidebar-fg);
     font-weight: 600;
     border-left: 3px solid var(--accent-500);
     padding-left: 9px;
@@ -210,17 +229,21 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-link-danger {
-    color: var(--chrome-danger-texto);
+    color: var(--sidebar-danger);
 }
 
+/* mismo color en hover que en reposo (a diferencia del resto de los
+   sidebar-link) — el rojo claro fijo que usaban admin/tecnico/recepcion
+   como "hover mas brillante" no tiene contraste sobre el sidebar claro del
+   cliente, asi que se simplifica a un solo tono por rol para los 4. */
 .sidebar-link-danger:hover {
     background: rgba(220, 38, 38, .18);
-    color: var(--chrome-danger-texto-hover);
+    color: var(--sidebar-danger);
 }
 
 .sidebar-footer {
     padding: 12px;
-    border-top: 1px solid rgba(255, 255, 255, .1);
+    border-top: 1px solid rgba(var(--sidebar-fg-rgb), .1);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -238,8 +261,8 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, .14);
-    color: var(--chrome-texto);
+    background: rgba(var(--sidebar-fg-rgb), .14);
+    color: var(--sidebar-fg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -272,7 +295,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-user-name {
-    color: var(--chrome-texto);
+    color: var(--sidebar-fg);
     font-weight: 600;
     font-size: .85rem;
     white-space: nowrap;
@@ -281,7 +304,7 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 }
 
 .sidebar-user-role {
-    color: rgba(255, 255, 255, .55);
+    color: rgba(var(--sidebar-fg-rgb), .55);
     font-size: .74rem;
 }
 
@@ -343,7 +366,21 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 
 .app-content {
     flex: 1;
+    width: 100%;
+    /* --contenido-max varia por rol (tokens.css) — el cliente lee todo en
+       una columna angosta tipo email; el tecnico no tiene tope, necesita
+       aprovechar el ancho completo para su cola densa. */
+    max-width: var(--contenido-max, none);
+    margin-inline: auto;
     padding: 16px 24px;
+}
+
+/* Densidad de filas de tabla por rol (tokens.css, --fila-alto) — el
+   cliente ya no tiene tablas (Bloque 4), asi que "auto" ahi no hace nada;
+   admin/recepcion mantienen una fila comoda, tecnico (si llega a ver una
+   tabla en pantallas compartidas como auditoria.html) la ve mas compacta. */
+.table tbody tr {
+    height: var(--fila-alto, auto);
 }
 
 /* Topbar fija de escritorio (layout.js:renderTopbarDesktop) — oculta bajo
@@ -379,6 +416,36 @@ APP SHELL (sidebar + contenido) — pantallas protegidas por rol
 .topbar-buscador-wrap {
     flex: 1;
     max-width: 420px;
+    position: relative;
+}
+
+/* Cliente no tiene buscador global — el boton "Solicitar soporte" + su
+   nombre ocupan el lado derecho de la topbar en su lugar (Bloque 4). */
+.topbar-cliente-acciones {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Hint del atajo de teclado "/" para enfocar el buscador — solo Tecnico
+   (Bloque 4, cola densa, pensado para uso de teclado). */
+.topbar-buscador-atajo {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--fs-caption);
+    color: var(--ink-500);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    pointer-events: none;
+}
+
+.topbar-buscador-wrap:has(.topbar-buscador-atajo) #buscadorGlobal {
+    padding-right: 28px;
 }
 
 /* Modo embebido (?embed=1, ver layout.js): sidebar/topbar/footer nunca se
@@ -955,6 +1022,27 @@ CARDS
     font-size: var(--fs-small);
     font-weight: 600;
     color: var(--ink-500);
+}
+
+/* Microsparkline de 7 dias dentro de un KPI (Bloque 4, firma visual del
+   administrador) — SVG armado a mano en admin.js, sin libreria. */
+.sparkline-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+
+.sparkline {
+    width: 60px;
+    height: 20px;
+    flex: none;
+}
+
+.sparkline polyline {
+    fill: none;
+    stroke: var(--accent-600);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .card-stat-value {
@@ -2208,6 +2296,37 @@ INDICADOR DE PASOS (WIZARD RECEPCION)
     min-width: 12px;
 }
 
+/* Variante "hero" — rail grande de #seccionDestacada en dashboard-cliente.html
+   (Bloque 4, firma visual del cliente), con la etiqueta debajo del circulo
+   en vez de al lado. Se agrega como modificador nuevo, sin tocar el layout
+   base (.step-indicator .step, fila horizontal) porque ese ya lo usa el
+   wizard de recepcion.html con las etiquetas al lado — cambiarlo ahi habria
+   sido un efecto secundario no pedido en este bloque. */
+.step-indicator-hero {
+    align-items: flex-start;
+    margin-bottom: var(--space-4);
+}
+
+.step-indicator-hero .step {
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.step-indicator-hero .step-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+}
+
+.step-indicator-hero .step-line {
+    margin-top: 19px;
+}
+
+.step-indicator-hero .step-label {
+    font-size: var(--fs-small);
+    white-space: nowrap;
+}
+
 /*==========================
 TABLA RESPONSIVE -> TARJETAS EN MOVIL
 ===========================*/
@@ -2245,6 +2364,46 @@ TABLA RESPONSIVE -> TARJETAS EN MOVIL
         color: var(--ink-900);
         margin-right: 10px;
     }
+}
+
+/* Mismo diseño que table-mobile-cards de arriba, pero sin el media query —
+   siempre en modo tarjeta, para las tablas de Cliente (regla dura del
+   Bloque 4: el cliente nunca ve una tabla, en ningun ancho). Se duplica en
+   vez de ensanchar la media query de arriba porque table-mobile-cards se
+   usa tambien en tablas de otros roles que si deben verse como tabla en
+   desktop. */
+table.table-cards-siempre thead {
+    display: none;
+}
+
+table.table-cards-siempre,
+table.table-cards-siempre tbody,
+table.table-cards-siempre tr,
+table.table-cards-siempre td {
+    display: block;
+    width: 100%;
+}
+
+table.table-cards-siempre tr {
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 10px 14px;
+    box-shadow: var(--shadow-1);
+}
+
+table.table-cards-siempre td {
+    border: none;
+    padding: 6px 0;
+    text-align: right;
+}
+
+table.table-cards-siempre td[data-label]::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-right: 10px;
 }
 
 /* Fila de tabla clickeable (Reportes de Equipos y de Clientes — click en una

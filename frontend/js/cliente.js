@@ -14,6 +14,24 @@ const EXTRACTORES_ORDEN_CLIENTE = {
 // Los 3 nodos del mini-timeline por tarjeta — la lista de cliente ya excluye
 // "Cerrado" (ver mas abajo), asi que nunca hace falta un 4to nodo aca.
 const PASOS_TIMELINE_CLIENTE = ["Abierto", "En proceso", "Resuelto"];
+// Etiquetas de cara al cliente para el rail grande de #seccionDestacada —
+// distintas del nombre tecnico del estado (PASOS_TIMELINE_CLIENTE), mismo
+// orden/indice.
+const ETIQUETAS_TIMELINE_CLIENTE = ["Recibido", "En reparación", "Listo"];
+
+// Compartido entre la tarjeta chica de la lista (sm, sin etiquetas) y el
+// rail grande de #seccionDestacada (heroe de la pantalla, con etiquetas
+// debajo de cada circulo — ver .step-indicator.hero en style.css).
+function renderRailPasos(estado, conEtiquetas = false) {
+    const pasoActual = PASOS_TIMELINE_CLIENTE.indexOf(estado);
+    return PASOS_TIMELINE_CLIENTE.map((paso, indice) => `
+        ${indice > 0 ? '<div class="step-line"></div>' : ""}
+        <div class="step ${conEtiquetas ? "" : "sm"} ${indice < pasoActual ? "done" : ""} ${indice === pasoActual ? "active" : ""}">
+            <span class="step-circle"><i class="bi ${indice <= pasoActual ? "bi-check-lg" : "bi-circle"}"></i></span>
+            ${conEtiquetas ? `<span class="step-label">${ETIQUETAS_TIMELINE_CLIENTE[indice]}</span>` : ""}
+        </div>
+    `).join("");
+}
 
 async function cargarTicketsCliente() {
     const lista = document.getElementById("listaTickets");
@@ -97,13 +115,7 @@ function renderListaTicketsCliente() {
         : ticketsClienteActivos;
 
     lista.innerHTML = datos.map(ticket => {
-        const pasoActual = PASOS_TIMELINE_CLIENTE.indexOf(ticket.estado);
-        const pasos = PASOS_TIMELINE_CLIENTE.map((paso, indice) => `
-            ${indice > 0 ? '<div class="step-line"></div>' : ""}
-            <div class="step sm ${indice < pasoActual ? "done" : ""} ${indice === pasoActual ? "active" : ""}">
-                <span class="step-circle"><i class="bi ${indice <= pasoActual ? "bi-check-lg" : "bi-circle"}"></i></span>
-            </div>
-        `).join("");
+        const pasos = renderRailPasos(ticket.estado);
 
         return `
             <div class="col-md-6 col-lg-4">
@@ -178,6 +190,7 @@ async function renderSeccionDestacada(tickets) {
                     </div>
                     ${UI.badgeEstado(activo.estado)}
                 </div>
+                <div class="step-indicator step-indicator-hero mt-4">${renderRailPasos(activo.estado, true)}</div>
                 ${ultimaNota ? `
                     <div class="mt-3 pt-3 border-top">
                         <small class="text-muted d-block mb-1">Última novedad · ${UI.formatearFecha(ultimaNota.fecha_actualizacion)}</small>

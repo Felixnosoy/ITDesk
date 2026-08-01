@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
-<body data-protegido="Cliente" data-footer="Mis Documentos">
+<body data-protegido="Cliente" data-titulo="Documentos" data-footer="Mis Documentos">
     <div class="app-shell">
         <div id="sidebar-placeholder"></div>
         <div class="app-main">
@@ -54,55 +54,66 @@
 
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="panelCotizaciones" role="tabpanel">
-                        <div class="card shadow">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle table-mobile-cards">
-                                        <thead>
-                                            <tr>
-                                                <th data-sort="id_cotizacion">N.°</th>
-                                                <th data-sort="fecha_creacion">Fecha</th>
-                                                <th data-sort="estado">Estado</th>
-                                                <th data-sort="total" class="text-end">Total</th>
-                                                <th>Detalle</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tablaCotizaciones">
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted">Cargando...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div id="verMasCotizaciones" class="d-none mt-3 text-center"></div>
+                        <div class="d-flex justify-content-end mb-3">
+                            <div class="selector-orden">
+                                <label class="visually-hidden" for="ordenCotizacionesSelect">Ordenar por</label>
+                                <select class="form-select form-select-sm" id="ordenCotizacionesSelect">
+                                    <option value=":asc">Más reciente</option>
+                                    <option value="estado:asc">Estado</option>
+                                    <option value="total:asc">Total</option>
+                                </select>
                             </div>
                         </div>
+                        <!-- Regla de densidad por rol: el cliente nunca ve una
+                             tabla (Bloque 4) — table-cards-siempre, igual que
+                             en historial.html. -->
+                        <table class="table table-hover align-middle table-mobile-cards table-cards-siempre">
+                            <thead>
+                                <tr>
+                                    <th>N.°</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Total</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCotizaciones">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="verMasCotizaciones" class="d-none mt-3 text-center"></div>
                     </div>
 
                     <div class="tab-pane fade" id="panelFacturas" role="tabpanel">
-                        <div class="card shadow">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle table-mobile-cards">
-                                        <thead>
-                                            <tr>
-                                                <th data-sort="id_factura">N.°</th>
-                                                <th data-sort="fecha_emision">Fecha</th>
-                                                <th data-sort="estado">Estado</th>
-                                                <th data-sort="total" class="text-end">Total</th>
-                                                <th>Detalle</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tablaFacturas">
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted">Cargando...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div id="verMasFacturas" class="d-none mt-3 text-center"></div>
+                        <div class="d-flex justify-content-end mb-3">
+                            <div class="selector-orden">
+                                <label class="visually-hidden" for="ordenFacturasSelect">Ordenar por</label>
+                                <select class="form-select form-select-sm" id="ordenFacturasSelect">
+                                    <option value=":asc">Más reciente</option>
+                                    <option value="estado:asc">Estado</option>
+                                    <option value="total:asc">Total</option>
+                                </select>
                             </div>
                         </div>
+                        <table class="table table-hover align-middle table-mobile-cards table-cards-siempre">
+                            <thead>
+                                <tr>
+                                    <th>N.°</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Total</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaFacturas">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div id="verMasFacturas" class="d-none mt-3 text-center"></div>
                     </div>
                 </div>
 

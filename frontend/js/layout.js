@@ -21,6 +21,15 @@
 // Las paginas publicas (index, login) no llevan data-protegido: Layout no
 // hace nada en ellas.
 
+// data-rol en <body> (ver Layout.init) — valores en minuscula sin tilde
+// para usarlos como selector de atributo en tokens.css/style.css.
+const ROL_A_DATA_ROL = {
+    Administrador: "admin",
+    Tecnico: "tecnico",
+    Cliente: "cliente",
+    Recepcionista: "recepcion"
+};
+
 const NAV_POR_ROL = {
     Administrador: {
         marca: { href: "dashboard-admin.html", texto: "ITDESK", icono: "bi-headset" },
@@ -533,32 +542,122 @@ const Layout = {
 
     // Barra superior fija de escritorio (oculta bajo 992px, ver style.css —
     // en mobile el acceso sigue siendo el drawer de renderTopbarMobile).
-    // titulo sale de data-footer del <body>, que ya existe en la mayoria de
-    // las paginas para el pie — no se agrega un atributo nuevo solo para esto.
-    renderTopbarDesktop(rol, tituloPagina) {
+    // titulo sale de data-titulo del <body> (con data-footer como respaldo
+    // para paginas viejas que todavia no lo tengan, ver Bloque 4).
+    //
+    // El lado derecho de la topbar cambia por rol (Bloque 4): Cliente no
+    // tiene buscador global (no puede pedir nada mas que lo suyo, ver
+    // _cargarCacheBusquedaGlobal), en su lugar un boton que abre un modal
+    // con los datos de contacto — un cliente no puede crear/pedir tickets
+    // desde la app (regla de negocio ya establecida, ver index.html#contacto:
+    // "no existe un formulario de autoservicio"), asi que el boton informa
+    // en vez de simular una accion que no existe.
+    renderTopbarDesktop(usuario, tituloPagina) {
         const contenedor = document.getElementById("topbar-desktop-placeholder");
         if (!contenedor) {
             return;
         }
 
+        const rol = usuario.rol;
+        const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ""}`.trim();
+
+        const ladoDerecho = rol === "Cliente" ? `
+            <div class="topbar-cliente-acciones">
+                <span class="topbar-titulo d-none d-lg-inline">${nombreCompleto}</span>
+                <button type="button" class="btn btn-primary btn-sm" id="btnSolicitarSoporte">
+                    <i class="bi bi-headset"></i> Solicitar soporte
+                </button>
+            </div>
+        ` : `
+            <div class="topbar-buscador-wrap position-relative">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <label class="visually-hidden" for="buscadorGlobal">Buscar en todo el sistema</label>
+                    <input type="text" id="buscadorGlobal" class="form-control" autocomplete="off"
+                        placeholder="${this._placeholderBuscadorPorRol(rol)}"
+                        role="combobox" aria-expanded="false" aria-autocomplete="list"
+                        aria-controls="panelBuscadorGlobal">
+                    ${rol === "Tecnico" ? `<kbd class="topbar-buscador-atajo">/</kbd>` : ""}
+                </div>
+                <div class="typeahead-panel d-none" id="panelBuscadorGlobal" role="listbox" aria-label="Resultados de búsqueda"></div>
+            </div>
+        `;
+
         contenedor.outerHTML = `
             <header class="topbar-desktop" id="topbar-desktop-placeholder">
                 <span class="topbar-titulo">${tituloPagina}</span>
-                <div class="topbar-buscador-wrap position-relative">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <label class="visually-hidden" for="buscadorGlobal">Buscar en todo el sistema</label>
-                        <input type="text" id="buscadorGlobal" class="form-control" autocomplete="off"
-                            placeholder="Buscar ticket, cliente, documento, teléfono..."
-                            role="combobox" aria-expanded="false" aria-autocomplete="list"
-                            aria-controls="panelBuscadorGlobal">
-                    </div>
-                    <div class="typeahead-panel d-none" id="panelBuscadorGlobal" role="listbox" aria-label="Resultados de búsqueda"></div>
-                </div>
+                ${ladoDerecho}
             </header>
         `;
 
-        this._inicializarBusquedaGlobal(rol);
+        if (rol === "Cliente") {
+            this._inicializarModalSoporte();
+        } else {
+            this._inicializarBusquedaGlobal(rol);
+            if (rol === "Tecnico") {
+                this._inicializarAtajoBusqueda();
+            }
+        }
+    },
+
+    _placeholderBuscadorPorRol(rol) {
+        const placeholders = {
+            Tecnico: "código, cliente, equipo...",
+            Recepcionista: "cliente, teléfono, documento..."
+        };
+        return placeholders[rol] || "Buscar ticket, cliente, documento, teléfono...";
+    },
+
+    // "/" enfoca el buscador — solo Tecnico lo pidio (cola densa, uso de
+    // teclado). No interfiere si el foco ya esta en un campo de texto.
+    _inicializarAtajoBusqueda() {
+        document.addEventListener("keydown", (evento) => {
+            if (evento.key !== "/" || evento.target.matches("input, textarea, select, [contenteditable]")) {
+                return;
+            }
+            evento.preventDefault();
+            document.getElementById("buscadorGlobal")?.focus();
+        });
+    },
+
+    // El modal se arma una sola vez y se reusa (mismo criterio que el panel
+    // de notificaciones) — datos identicos a index.html#contacto, la unica
+    // fuente de "como pedir soporte" que ya existia en el proyecto.
+    _inicializarModalSoporte() {
+        if (!document.getElementById("modalSoporte")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <div class="modal fade" id="modalSoporte" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="bi bi-headset"></i> Solicitar soporte</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Por seguridad, los tickets se registran en recepción luego de reportar el equipo en persona — no existe un formulario en línea.</p>
+                                <dl class="row mb-0">
+                                    <dt class="col-5"><i class="bi bi-geo-alt-fill"></i> Dirección</dt>
+                                    <dd class="col-7">Santo Domingo, República Dominicana</dd>
+                                    <dt class="col-5"><i class="bi bi-telephone-fill"></i> Teléfono</dt>
+                                    <dd class="col-7">(809) 555-1234</dd>
+                                    <dt class="col-5"><i class="bi bi-envelope-fill"></i> Correo</dt>
+                                    <dd class="col-7">soporte@itdesk.com</dd>
+                                    <dt class="col-5"><i class="bi bi-clock-fill"></i> Horario</dt>
+                                    <dd class="col-7 mb-0">Lunes a Viernes, 8:00 AM - 6:00 PM</dd>
+                                </dl>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        document.getElementById("btnSolicitarSoporte")?.addEventListener("click", () => {
+            new bootstrap.Modal(document.getElementById("modalSoporte")).show();
+        });
     },
 
     // La carga de datos es perezosa (recien al primer foco/tecla, no al
@@ -728,6 +827,12 @@ const Layout = {
             return;
         }
 
+        // data-rol habilita los bloques de tokens.css que diferencian cada
+        // rol (color de sidebar, densidad, etc.) — se pone antes del corte
+        // de modo embebido de abajo, para que tambien aplique adentro del
+        // iframe (ej. densidad de contenido en detalle-ticket.html?embed=1).
+        body.dataset.rol = ROL_A_DATA_ROL[usuario.rol] || "";
+
         // Modo embebido (?embed=1): la pagina se carga dentro de un <iframe>
         // (panel de detalle del tecnico, ver tecnico.js) — se salta el
         // sidebar/topbar/footer para no duplicar el chrome de la app adentro
@@ -739,7 +844,7 @@ const Layout = {
 
         this.renderSidebar(usuario.rol, usuario);
         this.renderTopbarMobile(usuario.rol);
-        this.renderTopbarDesktop(usuario.rol, body.dataset.footer || "ITDESK");
+        this.renderTopbarDesktop(usuario, body.dataset.titulo || body.dataset.footer || "ITDESK");
         this.renderFooter(body.dataset.footer || "Sistema de Gestión de Soporte Técnico");
 
         const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ""}`.trim();

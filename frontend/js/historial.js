@@ -64,8 +64,12 @@ function actualizarTablaHistorial() {
 document.addEventListener("DOMContentLoaded", () => {
     cargarHistorial();
 
-    Ordenar.conectar(document.getElementById("tablaHistorial")?.closest("table"), (campo, direccion) => {
-        ordenHistorial = { campo, direccion };
+    // Sin encabezados clickeables (la tabla se ve siempre como lista de
+    // tarjetas para el cliente, ver table-cards-siempre en style.css) — el
+    // orden se elige con un select, mismo patron que dashboard-cliente.html.
+    document.getElementById("ordenHistorialSelect")?.addEventListener("change", (evento) => {
+        const [campo, direccion] = evento.target.value.split(":");
+        ordenHistorial = { campo: campo || null, direccion: direccion || "asc" };
         actualizarTablaHistorial();
     });
 });

@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
-<body data-protegido="Cliente" data-footer="Historial de Tickets">
+<body data-protegido="Cliente" data-titulo="Historial" data-footer="Historial de Tickets">
     <div class="app-shell">
         <div id="sidebar-placeholder"></div>
         <div class="app-main">
@@ -37,31 +37,40 @@
                     </div>
                 </div>
 
-                <div class="card shadow">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle table-mobile-cards">
-                                <thead>
-                                    <tr>
-                                        <th data-sort="id_ticket">ID</th>
-                                        <th data-sort="equipo_tipo">Equipo</th>
-                                        <th data-sort="titulo">Título</th>
-                                        <th data-sort="estado">Estado</th>
-                                        <th data-sort="fecha_apertura">Apertura</th>
-                                        <th data-sort="fecha_cierre">Cierre</th>
-                                        <th>Detalle</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaHistorial">
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">Cargando historial...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="verMasHistorial" class="d-none mt-3 text-center"></div>
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="selector-orden">
+                        <label class="visually-hidden" for="ordenHistorialSelect">Ordenar por</label>
+                        <select class="form-select form-select-sm" id="ordenHistorialSelect">
+                            <option value=":asc">Más reciente</option>
+                            <option value="estado:asc">Estado</option>
+                            <option value="titulo:asc">Título</option>
+                        </select>
                     </div>
                 </div>
+
+                <!-- Regla de densidad por rol: el cliente nunca ve una tabla
+                     (Bloque 4) — .table-cards-siempre reusa el mismo diseño
+                     de tarjeta que table-mobile-cards ya usaba solo en
+                     movil, pero activo en todos los anchos. -->
+                <table class="table table-hover align-middle table-mobile-cards table-cards-siempre">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipo</th>
+                            <th>Título</th>
+                            <th>Estado</th>
+                            <th>Apertura</th>
+                            <th>Cierre</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Cargando historial...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="verMasHistorial" class="d-none mt-3 text-center"></div>
 
             </main>
             <div id="footer-placeholder"></div>

@@ -69,6 +69,47 @@ function actualizarTablaTicketsAdmin() {
 //========================================
 // DASHBOARD-ADMIN: resumen + tickets + asignar tecnico
 //========================================
+
+// Microsparkline SVG hecho a mano (sin libreria, Bloque 4 — firma visual
+// del administrador) — cuenta los tickets ya cargados en memoria por dia,
+// ultimos 7 dias, sin pedir nada nuevo al backend.
+function conteoPorDiaUltimos7(tickets, campoFecha) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const dias = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(hoy);
+        d.setDate(d.getDate() - (6 - i));
+        return d;
+    });
+
+    return dias.map(dia => tickets.filter(t => {
+        if (!t[campoFecha]) {
+            return false;
+        }
+        const fecha = new Date(t[campoFecha]);
+        return fecha.getFullYear() === dia.getFullYear() &&
+            fecha.getMonth() === dia.getMonth() &&
+            fecha.getDate() === dia.getDate();
+    }).length);
+}
+
+function sparklineSvg(valores) {
+    const ancho = 60;
+    const alto = 20;
+    const max = Math.max(...valores, 1);
+    const paso = ancho / (valores.length - 1);
+    const puntos = valores.map((v, i) => `${(i * paso).toFixed(1)},${(alto - (v / max) * alto).toFixed(1)}`).join(" ");
+    return `<svg class="sparkline" viewBox="0 0 ${ancho} ${alto}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${puntos}"></polyline></svg>`;
+}
+
+function renderSparklineKpi(idContenedor, tickets, campoFecha) {
+    const contenedor = document.getElementById(idContenedor);
+    if (!contenedor) {
+        return;
+    }
+    contenedor.innerHTML = sparklineSvg(conteoPorDiaUltimos7(tickets, campoFecha));
+}
+
 async function cargarResumenAdmin() {
     if (!document.getElementById("totalUsuarios")) {
         return;
@@ -185,6 +226,7 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
 
         if (document.getElementById("totalTickets")) {
             document.getElementById("totalTickets").textContent = tickets.length;
+            renderSparklineKpi("sparkTickets", tickets, "fecha_apertura");
         }
         if (document.getElementById("ticketsSinAsignar")) {
             // "Abierto" = todavia sin tecnico asignado (asignar siempre mueve
@@ -196,8 +238,9 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
             elSinAsignar.classList.toggle("tone-success", sinAsignar === 0);
         }
         if (document.getElementById("ticketsResueltos")) {
-            document.getElementById("ticketsResueltos").textContent =
-                tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado").length;
+            const resueltos = tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado");
+            document.getElementById("ticketsResueltos").textContent = resueltos.length;
+            renderSparklineKpi("sparkResueltos", resueltos, "fecha_cierre");
         }
 
         if (tickets.length === 0) {

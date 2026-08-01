@@ -245,13 +245,18 @@ let facturasCargadas = false;
 document.addEventListener("DOMContentLoaded", () => {
     cargarCotizaciones();
 
-    Ordenar.conectar(document.getElementById("tablaCotizaciones")?.closest("table"), (campo, direccion) => {
-        ordenCotizaciones = { campo, direccion };
+    // Sin encabezados clickeables (tablas siempre en modo tarjeta para el
+    // cliente, ver table-cards-siempre en style.css) — el orden se elige
+    // con un select, mismo patron que dashboard-cliente.html.
+    document.getElementById("ordenCotizacionesSelect")?.addEventListener("change", (evento) => {
+        const [campo, direccion] = evento.target.value.split(":");
+        ordenCotizaciones = { campo: campo || null, direccion: direccion || "asc" };
         actualizarTablaCotizaciones();
     });
 
-    Ordenar.conectar(document.getElementById("tablaFacturas")?.closest("table"), (campo, direccion) => {
-        ordenFacturas = { campo, direccion };
+    document.getElementById("ordenFacturasSelect")?.addEventListener("change", (evento) => {
+        const [campo, direccion] = evento.target.value.split(":");
+        ordenFacturas = { campo: campo || null, direccion: direccion || "asc" };
         actualizarTablaFacturas();
     });
 
