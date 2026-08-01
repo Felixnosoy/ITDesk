@@ -59,11 +59,14 @@
                         </div>
                     </div>
                     <div class="col-6 col-lg">
-                        <div class="card card-stat card-stat-clickable h-100" role="button" tabindex="0"
+                        <!-- Unico lugar del sistema que usa el dorado critico (Design
+                             System v2) — reservado a esto a proposito, para que
+                             cuando aparezca signifique de verdad "requiere tu firma". -->
+                        <div class="card card-stat card-stat-clickable card-stat-gold h-100" role="button" tabindex="0"
                             onclick="filtrarPorSinAsignar()" title="Ver tickets sin asignar en la tabla de abajo">
                             <div class="card-body">
                                 <div class="card-stat-head">
-                                    <span class="card-stat-icon tone-danger"><i class="bi bi-exclamation-circle"></i></span>
+                                    <span class="card-stat-icon tone-gold"><i class="bi bi-exclamation-circle"></i></span>
                                     <span class="card-stat-label">Sin asignar</span>
                                 </div>
                                 <div class="card-stat-value" id="ticketsSinAsignar">0</div>

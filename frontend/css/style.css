@@ -1069,6 +1069,18 @@ CARDS
 .card-stat-icon.tone-success { background: var(--success-bg); color: var(--success); }
 .card-stat-icon.tone-danger { background: var(--danger-bg); color: var(--danger); }
 .card-stat-icon.tone-accent { background: var(--accent-100); color: var(--accent-600); }
+/* dorado critico (Design System v2) — solo lo usa el KPI "Sin asignar"
+   del administrador, a proposito: si aparecio en mas de un lugar dejaria
+   de significar "esto exige tu decision". */
+.card-stat-icon.tone-gold { background: var(--critical-gold-bg, var(--warning-bg)); color: var(--critical-gold, var(--warning)); }
+
+.card-stat-gold {
+    border-top-color: var(--critical-gold, var(--accent-600));
+}
+
+.card-stat-gold .card-stat-value {
+    color: var(--critical-gold, var(--ink-900));
+}
 
 .card-stat-label {
     font-size: var(--fs-small);
@@ -1095,6 +1107,13 @@ CARDS
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+/* Barra superior de 3px con el acento del rol (Design System v2) — solo
+   .card-stat, que ya lleva color en sus iconos; .card-info se queda
+   deliberadamente plana (regla ya establecida, ver comentario mas abajo). */
+.card-stat {
+    border-top: 3px solid var(--accent-600);
 }
 
 .card-stat-value {
@@ -1168,6 +1187,24 @@ BOTONES
 .btn-primary:hover {
     background: var(--accent-500);
     border-color: var(--accent-500);
+}
+
+/* Boton primario en degradado (Design System v2) — cliente y admin
+   definen --accent-gradient (ver tokens.css); tecnico no, se queda solido
+   a proposito: pidio glow de estado, no degradados. En hover se aclara
+   con un filtro en vez de cambiar a un color solido, para no cortar el
+   degradado de golpe. */
+[data-rol="cliente"] .btn-primary,
+[data-rol="admin"] .btn-primary {
+    background: var(--accent-gradient);
+    border-color: transparent;
+}
+
+[data-rol="cliente"] .btn-primary:hover,
+[data-rol="admin"] .btn-primary:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    filter: brightness(1.08);
 }
 
 .btn-secondary {
@@ -2178,11 +2215,21 @@ EMPTY STATE
     color: var(--ink-300);
 }
 
+/* Insignia tintada con el acento del rol (Design System v2) — antes un
+   icono gris suelto, ahora una placa redondeada (radio y color del rol,
+   igual que la insignia de marca del sidebar) sin agregar markup nuevo:
+   la etiqueta <i> ya existente pasa a comportarse como badge via CSS. */
 .empty-state i {
-    font-size: 2.5rem;
-    display: block;
+    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-lg);
     margin-bottom: var(--space-3);
-    color: var(--border);
+    background: var(--accent-100);
+    color: var(--accent-600);
 }
 
 .empty-state p {
