@@ -1,32 +1,13 @@
-# Node
-node_modules/
+# ITDesk
 
-# Variables de entorno
-.env
-backend/.env
-frontend/.env
+Sistema de gestión de soporte técnico (ITSM): registro y seguimiento de tickets, diagnóstico, cotización, facturación y satisfacción del cliente, para un taller/servicio técnico.
 
-# Logs
-*.log
+- **Frontend**: HTML/CSS/JS estático, sin build (`frontend/`).
+- **Backend**: Node.js + Express 5, API REST (`backend/`).
+- **Base de datos**: MySQL/MariaDB, 15 tablas (`base de datos/schema.sql`).
 
-# Dependencias
-npm-debug.log*
+## Documentación
 
-# Mac
-.DS_Store
+La documentación técnica completa del proyecto — arquitectura, base de datos, API, autenticación, roles, guía para desarrolladores y más — está en [`docs/README.md`](docs/README.md).
 
-# Windows
-Thumbs.db
-
-# VS Code (opcional)
-.vscode/
-
-# JetBrains
-.idea/
-
-# Coverage
-coverage/
-
-# Build
-dist/
-build/
+Para instalar y levantar el proyecto localmente, ir directo a [`docs/04-instalacion.md`](docs/04-instalacion.md).
