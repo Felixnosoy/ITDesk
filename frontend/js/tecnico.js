@@ -9,7 +9,6 @@
 // secundaria) — la eleccion se guarda en localStorage.
 
 let ticketsTecnico = [];
-let terminoTecnico = "";
 let vistaActivaTecnico = "lista";
 let ticketSeleccionadoId = null;
 let soloMiEspecialidad = false;
@@ -18,6 +17,15 @@ let incluirCerrados = false;
 // — no en cada re-render por busqueda/toggle, para no pisarle al tecnico
 // una seleccion que ya hizo a mano.
 let autoSeleccionInicialHecha = false;
+
+// Panel de filtros combinables (reemplaza la busqueda de texto libre) — solo
+// se actualiza al hacer click en "Aplicar filtros", no en cada checkbox, ver
+// leerFiltrosDelPanel() mas abajo.
+let filtrosTecnico = {
+    estados: [], prioridades: [], categorias: [],
+    clienteId: null, tecnicoId: null, equipoId: null,
+    codigo: "", fechaDesde: null, fechaHasta: null
+};
 
 // Columnas del tablero, en orden. "Abierto" no acepta drop (el backend no
 // soporta volver a ese estado via PATCH /ticket/:id/estado — ver
@@ -80,6 +88,7 @@ async function cargarTicketsTecnico() {
 
         actualizarStatsTecnico(ticketsTecnico);
         renderMiRendimiento(ticketsTecnico);
+        poblarSelectsFiltro();
         renderVistas();
 
     } catch (error) {
@@ -123,26 +132,78 @@ function renderSkeletonTablero() {
     }
 }
 
-const CAMPOS_BUSQUEDA_TECNICO = [
-    t => `${Codigos.ticket(t)} ${t.id_ticket}`,
-    "cliente",
-    "equipo_tipo",
-    "equipo_marca",
-    "equipo_modelo",
-    "equipo_numero_serie",
-    "equipo_codigo",
-    "estado",
-    "titulo",
-    "categoria",
-    "especialista"
-];
+// Todos los criterios del panel son combinables entre si (AND) — dentro de
+// un mismo criterio de lista (estados/prioridades/categorias) es OR: "Alta"
+// o "Media" trae tickets de cualquiera de las dos, no solo de ambas a la vez.
+function aplicarFiltroPanel(lista) {
+    const f = filtrosTecnico;
+    return lista.filter(t => {
+        if (f.estados.length && !f.estados.includes(t.estado)) {
+            return false;
+        }
+        if (f.prioridades.length && !f.prioridades.includes(t.prioridad)) {
+            return false;
+        }
+        if (f.categorias.length && !f.categorias.includes(t.categoria)) {
+            return false;
+        }
+        if (f.clienteId && String(t.id_usuario) !== f.clienteId) {
+            return false;
+        }
+        if (f.tecnicoId && String(t.especialista_id) !== f.tecnicoId) {
+            return false;
+        }
+        if (f.equipoId && String(t.id_equipo) !== f.equipoId) {
+            return false;
+        }
+        if (f.codigo) {
+            const texto = `${Codigos.ticket(t)} ${t.id_ticket}`.toLowerCase();
+            if (!texto.includes(f.codigo.toLowerCase())) {
+                return false;
+            }
+        }
+        if (f.fechaDesde && new Date(t.fecha_apertura) < new Date(f.fechaDesde)) {
+            return false;
+        }
+        if (f.fechaHasta) {
+            // "Hasta" incluye el dia entero elegido, no solo las 00:00.
+            const limite = new Date(f.fechaHasta);
+            limite.setHours(23, 59, 59, 999);
+            if (new Date(t.fecha_apertura) > limite) {
+                return false;
+            }
+        }
+        return true;
+    });
+}
 
-// Alcance compartido por Lista y Kanban: busqueda de texto + "solo donde soy
+function hayFiltrosActivos() {
+    const f = filtrosTecnico;
+    return f.estados.length > 0 || f.prioridades.length > 0 || f.categorias.length > 0 ||
+        Boolean(f.clienteId) || Boolean(f.tecnicoId) || Boolean(f.equipoId) ||
+        Boolean(f.codigo) || Boolean(f.fechaDesde) || Boolean(f.fechaHasta);
+}
+
+function contarFiltrosActivos() {
+    const f = filtrosTecnico;
+    return [
+        f.estados.length > 0,
+        f.prioridades.length > 0,
+        f.categorias.length > 0,
+        Boolean(f.clienteId),
+        Boolean(f.tecnicoId),
+        Boolean(f.equipoId),
+        Boolean(f.codigo),
+        Boolean(f.fechaDesde || f.fechaHasta)
+    ].filter(Boolean).length;
+}
+
+// Alcance compartido por Lista y Kanban: panel de filtros + "solo donde soy
 // especialista". El filtro de cerrados (ticketsFiltradosLista, mas abajo) es
 // aparte porque solo aplica a la vista Lista — en el Kanban "Cerrado" es una
 // columna legitima del tablero.
 function ticketsFiltrados() {
-    const filtrados = Search.filtrar(ticketsTecnico, terminoTecnico, CAMPOS_BUSQUEDA_TECNICO);
+    const filtrados = aplicarFiltroPanel(ticketsTecnico);
     if (!soloMiEspecialidad) {
         return filtrados;
     }
@@ -153,6 +214,104 @@ function ticketsFiltrados() {
 function ticketsFiltradosLista() {
     const base = ticketsFiltrados();
     return incluirCerrados ? base : base.filter(t => t.estado !== "Cerrado" && t.estado !== "Resuelto");
+}
+
+// Cliente/Tecnico asignado/Equipo son selects (no texto libre) poblados con
+// los valores que de verdad aparecen en la cola — se recalculan cada vez que
+// llega data nueva (cargarTicketsTecnico), no son una lista aparte pedida al
+// backend. Se conserva la seleccion previa si el valor sigue existiendo.
+function poblarSelectsFiltro() {
+    const clientes = new Map();
+    const tecnicos = new Map();
+    const equipos = new Map();
+
+    ticketsTecnico.forEach(t => {
+        if (t.id_usuario && !clientes.has(t.id_usuario)) {
+            clientes.set(t.id_usuario, t.cliente);
+        }
+        if (t.especialista_id && !tecnicos.has(t.especialista_id)) {
+            tecnicos.set(t.especialista_id, t.especialista);
+        }
+        if (t.id_equipo && !equipos.has(t.id_equipo)) {
+            equipos.set(t.id_equipo, t.equipo_codigo || `${t.equipo_tipo} ${t.equipo_marca}`.trim());
+        }
+    });
+
+    const llenar = (id, mapa) => {
+        const select = document.getElementById(id);
+        if (!select) {
+            return;
+        }
+        const valorPrevio = select.value;
+        const entradas = [...mapa.entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), "es"));
+        select.innerHTML = `<option value="">Todos</option>` +
+            entradas.map(([id_valor, nombre]) => `<option value="${id_valor}">${nombre}</option>`).join("");
+        select.value = valorPrevio;
+    };
+
+    llenar("filtroCliente", clientes);
+    llenar("filtroTecnicoAsignado", tecnicos);
+    llenar("filtroEquipo", equipos);
+}
+
+// Los filtros solo pasan de "seleccionados en el panel" a "aplicados de
+// verdad" cuando se hace click en Aplicar — asi que se leen todos juntos en
+// vez de escuchar cada checkbox por separado.
+function leerFiltrosDelPanel() {
+    const marcados = (selector) => [...document.querySelectorAll(selector)].map(el => el.value);
+
+    filtrosTecnico = {
+        estados: marcados(".fc-estado:checked"),
+        prioridades: marcados(".fc-prioridad:checked"),
+        categorias: marcados(".fc-categoria:checked"),
+        clienteId: document.getElementById("filtroCliente")?.value || null,
+        tecnicoId: document.getElementById("filtroTecnicoAsignado")?.value || null,
+        equipoId: document.getElementById("filtroEquipo")?.value || null,
+        codigo: document.getElementById("filtroCodigo")?.value.trim() || "",
+        fechaDesde: document.getElementById("filtroFechaDesde")?.value || null,
+        fechaHasta: document.getElementById("filtroFechaHasta")?.value || null
+    };
+}
+
+function actualizarBadgeFiltros() {
+    const badge = document.getElementById("badgeFiltrosActivos");
+    if (!badge) {
+        return;
+    }
+    const cantidad = contarFiltrosActivos();
+    badge.textContent = cantidad;
+    badge.classList.toggle("d-none", cantidad === 0);
+}
+
+function anunciarResultadosFiltro() {
+    const el = document.getElementById("resultadosFiltroTecnico");
+    if (!el) {
+        return;
+    }
+    const cantidad = ticketsFiltradosLista().length;
+    el.textContent = cantidad === 1 ? "1 resultado" : `${cantidad} resultados`;
+}
+
+function limpiarFiltrosPanel() {
+    document.querySelectorAll(".fc-estado, .fc-prioridad, .fc-categoria").forEach(el => {
+        el.checked = false;
+    });
+    ["filtroCliente", "filtroTecnicoAsignado", "filtroEquipo", "filtroCodigo", "filtroFechaDesde", "filtroFechaHasta"]
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = "";
+            }
+        });
+
+    filtrosTecnico = {
+        estados: [], prioridades: [], categorias: [],
+        clienteId: null, tecnicoId: null, equipoId: null,
+        codigo: "", fechaDesde: null, fechaHasta: null
+    };
+    actualizarBadgeFiltros();
+    renderVistas();
+    anunciarResultadosFiltro();
 }
 
 function renderTablero() {
@@ -175,8 +334,8 @@ function renderTablero() {
     if (filtrados.length === 0) {
         tablero.innerHTML = `
             <div class="empty-state">
-                <i class="bi bi-search"></i>
-                <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
+                <i class="bi bi-funnel"></i>
+                <p class="mb-0">Ningún ticket coincide con los filtros aplicados.</p>
             </div>
         `;
         return;
@@ -434,10 +593,10 @@ function renderListaTecnico() {
 
     if (filtrados.length === 0) {
         autoSeleccionInicialHecha = autoSeleccionInicialHecha || debeAutoSeleccionar;
-        cont.innerHTML = terminoTecnico ? `
+        cont.innerHTML = hayFiltrosActivos() ? `
             <div class="empty-state">
-                <i class="bi bi-search"></i>
-                <p class="mb-0">Ningún ticket coincide con la búsqueda.</p>
+                <i class="bi bi-funnel"></i>
+                <p class="mb-0">Ningún ticket coincide con los filtros aplicados.</p>
             </div>
         ` : `
             <div class="empty-state">
@@ -578,9 +737,12 @@ document.addEventListener("DOMContentLoaded", () => {
         renderListaTecnico();
     });
 
-    Search.conectar(document.getElementById("buscarTicketTecnico"), (termino) => {
-        terminoTecnico = termino;
+    document.getElementById("btnAplicarFiltros")?.addEventListener("click", () => {
+        leerFiltrosDelPanel();
+        actualizarBadgeFiltros();
         renderVistas();
-        return ticketsFiltrados().length;
-    }, "resultadosBusquedaTicketTecnico");
+        anunciarResultadosFiltro();
+    });
+
+    document.getElementById("btnLimpiarFiltros")?.addEventListener("click", limpiarFiltrosPanel);
 });

@@ -1835,6 +1835,60 @@ MODALES / DROPDOWNS / TOASTS (Bootstrap con colores fijos por defecto)
     border-top-color: var(--border);
 }
 
+/* Bootstrap tampoco pinta el offcanvas segun [data-theme] por su cuenta —
+   mismo criterio que .modal-content de arriba. */
+.offcanvas {
+    background-color: var(--surface-1);
+    color: var(--texto);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.offcanvas-title {
+    font-weight: 600;
+    color: var(--ink-900);
+}
+
+/*==========================
+PANEL DE FILTROS (offcanvas de dashboard-tecnico.html) — reemplaza la
+busqueda de texto libre por criterios combinables. Un solo estilo de grupo
+reutilizado para Estado/Prioridad/Categoria (checkboxes) y para los selects/
+inputs de mas abajo.
+===========================*/
+.filtro-grupo {
+    margin-bottom: var(--space-4);
+}
+
+.filtro-grupo-label {
+    display: block;
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--ink-700);
+    margin-bottom: var(--space-2);
+}
+
+.filtro-checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
+}
+
+.filtro-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-body);
+    font-weight: 400;
+    cursor: pointer;
+    margin: 0;
+}
+
+.filtro-check input {
+    margin: 0;
+}
+
 /*==========================
 ASIGNAR TECNICO (modal en dashboard-admin.html) — antes era un <select>
 apretado adentro de una celda de tabla junto a un boton; ahora la tabla

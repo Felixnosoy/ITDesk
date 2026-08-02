@@ -81,14 +81,13 @@
                             <input class="form-check-input" type="checkbox" id="chkIncluirCerrados">
                             <label class="form-check-label small" for="chkIncluirCerrados">Incluir cerrados</label>
                         </div>
-                        <div class="input-group input-group-sm" style="max-width: 320px;">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <label class="visually-hidden" for="buscarTicketTecnico">Buscar tickets</label>
-                            <input type="text" id="buscarTicketTecnico" class="form-control"
-                                placeholder="Buscar por código, cliente, equipo...">
-                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm position-relative"
+                            data-bs-toggle="offcanvas" data-bs-target="#panelFiltrosTecnico" aria-controls="panelFiltrosTecnico">
+                            <i class="bi bi-funnel"></i> Filtros
+                            <span class="badge-pill tone-accent d-none" id="badgeFiltrosActivos"></span>
+                        </button>
                     </div>
-                    <span class="visually-hidden" aria-live="polite" id="resultadosBusquedaTicketTecnico"></span>
+                    <span class="visually-hidden" aria-live="polite" id="resultadosFiltroTecnico"></span>
                 </div>
 
                 <!-- VISTA LISTA (default): lista densa a la izquierda + panel
@@ -114,6 +113,82 @@
 
             </main>
             <div id="footer-placeholder"></div>
+        </div>
+    </div>
+
+    <!-- Panel de filtros combinables (reemplaza la busqueda de texto libre)
+         — offcanvas de Bootstrap, ya cargado por CDN: foco atrapado y
+         Escape para cerrar vienen gratis del componente. Los filtros solo
+         se aplican al hacer click en "Aplicar filtros" (tecnico.js). -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="panelFiltrosTecnico" aria-labelledby="panelFiltrosTecnicoLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="panelFiltrosTecnicoLabel"><i class="bi bi-funnel"></i> Filtros</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="filtro-grupo">
+                <span class="filtro-grupo-label">Estado</span>
+                <div class="filtro-checks">
+                    <label class="filtro-check"><input type="checkbox" class="fc-estado" value="Abierto"> Abierto</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-estado" value="En proceso"> En proceso</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-estado" value="Resuelto"> Resuelto</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-estado" value="Cerrado"> Cerrado</label>
+                </div>
+            </div>
+            <div class="filtro-grupo">
+                <span class="filtro-grupo-label">Prioridad</span>
+                <div class="filtro-checks">
+                    <label class="filtro-check"><input type="checkbox" class="fc-prioridad" value="Alta"> Alta</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-prioridad" value="Media"> Media</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-prioridad" value="Baja"> Baja</label>
+                </div>
+            </div>
+            <div class="filtro-grupo">
+                <span class="filtro-grupo-label">Categoría</span>
+                <div class="filtro-checks">
+                    <label class="filtro-check"><input type="checkbox" class="fc-categoria" value="Hardware"> Hardware</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-categoria" value="Software"> Software</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-categoria" value="Red"> Red</label>
+                    <label class="filtro-check"><input type="checkbox" class="fc-categoria" value="Otro"> Otro</label>
+                </div>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-grupo-label" for="filtroCliente">Cliente</label>
+                <select class="form-select form-select-sm" id="filtroCliente">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-grupo-label" for="filtroTecnicoAsignado">Técnico asignado</label>
+                <select class="form-select form-select-sm" id="filtroTecnicoAsignado">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-grupo-label" for="filtroEquipo">Equipo</label>
+                <select class="form-select form-select-sm" id="filtroEquipo">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-grupo-label" for="filtroCodigo">Código del ticket</label>
+                <input type="text" class="form-control form-control-sm" id="filtroCodigo" placeholder="Ej. TCK-2026-000037">
+            </div>
+            <div class="filtro-grupo">
+                <span class="filtro-grupo-label">Fecha de creación</span>
+                <div class="d-flex gap-2">
+                    <label class="visually-hidden" for="filtroFechaDesde">Desde</label>
+                    <input type="date" class="form-control form-control-sm" id="filtroFechaDesde">
+                    <label class="visually-hidden" for="filtroFechaHasta">Hasta</label>
+                    <input type="date" class="form-control form-control-sm" id="filtroFechaHasta">
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 p-3 border-top">
+            <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="btnLimpiarFiltros">Limpiar filtros</button>
+            <button type="button" class="btn btn-primary btn-sm flex-fill" id="btnAplicarFiltros" data-bs-dismiss="offcanvas">
+                <i class="bi bi-funnel-fill"></i> Aplicar filtros
+            </button>
         </div>
     </div>
 
