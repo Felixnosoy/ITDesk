@@ -299,7 +299,13 @@ sombra; la sombra queda solo para overlays reales (modal/dropdown/toast).
     --accent-600: #22D3EE;
     --accent-600-rgb: 34, 211, 238;
     --accent-500: #67E4F5;
-    --accent-100: #113842;
+    /* antes #113842 (hex plano): se veia opaco y sin contraste porque
+       queda casi tan oscuro como las superficies (--surface-1/2, tambien
+       oscuras) sobre las que se pinta — fila activa, avatar, badge de
+       estado vacio, etc. Un cian translucido se aclara o se oscurece
+       segun la superficie de abajo, asi que siempre se nota como un
+       resalte real en vez de un bloque aparte. */
+    --accent-100: rgba(34, 211, 238, .16);
     /* ambar: prioridad/estado, como el LED de un rack — no decorativo */
     --accent-2: #F59E0B;
     --accent-2-rgb: 245, 158, 11;
