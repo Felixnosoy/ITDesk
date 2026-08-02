@@ -18,6 +18,7 @@ const archivoRoutes = require("./routes/archivo.routes")
 const notaPrivadaRoutes = require("./routes/notaPrivada.routes")
 const auditoriaRoutes = require("./routes/auditoria.routes")
 const encuestaRoutes = require("./routes/encuesta.routes")
+const estadisticasRoutes = require("./routes/estadisticas.routes")
 
 const app = express();
 
@@ -41,5 +42,6 @@ app.use("/api/archivos", archivoRoutes)
 app.use("/api/notas", notaPrivadaRoutes)
 app.use("/api/auditoria", auditoriaRoutes)
 app.use("/api/encuestas", encuestaRoutes)
+app.use("/api/estadisticas", estadisticasRoutes)
 
 module.exports = app;

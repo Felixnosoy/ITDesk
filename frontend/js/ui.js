@@ -653,6 +653,14 @@ const UI = {
     // hasta valorFinal en ~700ms con easing. Respeta prefers-reduced-motion
     // (salta directo al valor final sin animar) — mismo criterio que ya sigue
     // el resto del proyecto para transiciones CSS, ver style.css.
+    // Porcentaje con maximo un decimal ("70%" pero "66.7%") — compartido
+    // entre el dashboard del administrador y las estadisticas publicas del
+    // landing (index.html), mismo calculo en los dos lugares.
+    formatearPorcentaje(valor) {
+        const redondeado = Math.round(valor * 10) / 10;
+        return `${Number.isInteger(redondeado) ? redondeado : redondeado.toFixed(1)}%`;
+    },
+
     // opciones.formatear (opcional): funcion(numero) => texto, para casos
     // como un porcentaje que no siempre quiere el mismo numero de decimales
     // ("70%" pero "66.7%") — si no se pasa, usa decimales/sufijo fijos.

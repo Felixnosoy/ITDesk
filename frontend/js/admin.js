@@ -245,9 +245,7 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
             // tickets, division por cero evitada a proposito.
             const resueltos = tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado").length;
             const porcentaje = tickets.length ? Math.round((resueltos / tickets.length) * 1000) / 10 : 0;
-            UI.contarHasta(document.getElementById("porcentajeResueltos"), porcentaje, {
-                formatear: (v) => `${Number.isInteger(Math.round(v * 10) / 10) ? Math.round(v) : v.toFixed(1)}%`
-            });
+            UI.contarHasta(document.getElementById("porcentajeResueltos"), porcentaje, { formatear: UI.formatearPorcentaje });
         }
 
         if (tickets.length === 0) {
