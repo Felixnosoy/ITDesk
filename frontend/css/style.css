@@ -1114,6 +1114,17 @@ CARDS
    deliberadamente plana (regla ya establecida, ver comentario mas abajo). */
 .card-stat {
     border-top: 3px solid var(--accent-600);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Hover moderno para los KPI del dashboard (metricas reales) — se levanta
+   un poco y usa la sombra ya tokenizada por rol (--shadow-2, Design System
+   v2), asi que no hace falta un color de sombra nuevo por panel.
+   card-stat-clickable ya tiene su propio hover (cambia el borde), este no
+   lo pisa porque no toca border-color. */
+.card-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-2);
 }
 
 .card-stat-value {

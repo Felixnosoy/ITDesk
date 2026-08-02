@@ -647,5 +647,37 @@ const UI = {
             boton.disabled = false;
             boton.innerHTML = original;
         }
+    },
+
+    // Animacion "count up" para numeros de KPI (dashboard-admin.html) — de 0
+    // hasta valorFinal en ~700ms con easing. Respeta prefers-reduced-motion
+    // (salta directo al valor final sin animar) — mismo criterio que ya sigue
+    // el resto del proyecto para transiciones CSS, ver style.css.
+    // opciones.formatear (opcional): funcion(numero) => texto, para casos
+    // como un porcentaje que no siempre quiere el mismo numero de decimales
+    // ("70%" pero "66.7%") — si no se pasa, usa decimales/sufijo fijos.
+    contarHasta(elemento, valorFinal, opciones = {}) {
+        if (!elemento) {
+            return;
+        }
+        const { decimales = 0, sufijo = "", duracion = 700, formatear } = opciones;
+        const numeroFinal = Number(valorFinal) || 0;
+        const aTexto = formatear || ((v) => `${v.toFixed(decimales)}${sufijo}`);
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            elemento.textContent = aTexto(numeroFinal);
+            return;
+        }
+
+        const inicio = performance.now();
+        const paso = (ahora) => {
+            const progreso = Math.min((ahora - inicio) / duracion, 1);
+            const suavizado = 1 - Math.pow(1 - progreso, 3);
+            elemento.textContent = aTexto(numeroFinal * suavizado);
+            if (progreso < 1) {
+                requestAnimationFrame(paso);
+            }
+        };
+        requestAnimationFrame(paso);
     }
 };

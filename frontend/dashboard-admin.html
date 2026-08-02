@@ -37,39 +37,27 @@
                     </div>
                 </div>
 
-                <!-- Tira de 5 KPI homogeneos (Bloque 5) — antes Tickets vivia
-                     solo en una card grande y Usuarios/Tecnicos/Resueltos
-                     apretados en otra chica, dos tratamientos distintos para
-                     el mismo tipo de dato. "Sin asignar" pasa de badge
-                     escondido a KPI propio y accionable (lleva al listado
-                     filtrado, ver filtrarPorSinAsignar en admin.js). -->
+                <!-- 4 KPI reales, conectados a la BD (metricas nuevas) — Tickets
+                     Registrados y Tecnicos Especializados ya estaban bien
+                     (se mantienen); Clientes Activos reemplaza al conteo de
+                     Usuarios total; Casos Resueltos pasa de conteo a
+                     porcentaje. "Sin asignar" (KPI accionable de hace un
+                     rato) se retira, decision del usuario. Cada valor entra
+                     con animacion count-up (UI.contarHasta, ui.js) y hover
+                     propio (.card-stat:hover, style.css). -->
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-lg">
                         <div class="card card-stat h-100">
                             <div class="card-body">
                                 <div class="card-stat-head">
                                     <span class="card-stat-icon tone-warning"><i class="bi bi-ticket-perforated"></i></span>
-                                    <span class="card-stat-label">Tickets</span>
+                                    <span class="card-stat-label">Tickets Registrados</span>
                                 </div>
                                 <div class="d-flex align-items-end gap-2">
                                     <div class="card-stat-value" id="totalTickets">0</div>
                                     <span id="sparkTickets" class="sparkline-wrap" title="Tickets abiertos por día, últimos 7 días"></span>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-lg">
-                        <!-- Unico lugar del sistema que usa el dorado critico (Design
-                             System v2) — reservado a esto a proposito, para que
-                             cuando aparezca signifique de verdad "requiere tu firma". -->
-                        <div class="card card-stat card-stat-clickable card-stat-gold h-100" role="button" tabindex="0"
-                            onclick="filtrarPorSinAsignar()" title="Ver tickets sin asignar en la tabla de abajo">
-                            <div class="card-body">
-                                <div class="card-stat-head">
-                                    <span class="card-stat-icon tone-gold"><i class="bi bi-exclamation-circle"></i></span>
-                                    <span class="card-stat-label">Sin asignar</span>
-                                </div>
-                                <div class="card-stat-value" id="ticketsSinAsignar">0</div>
+                                <div class="card-stat-sub">Total en el sistema</div>
                             </div>
                         </div>
                     </div>
@@ -78,9 +66,10 @@
                             <div class="card-body">
                                 <div class="card-stat-head">
                                     <span class="card-stat-icon tone-accent"><i class="bi bi-people-fill"></i></span>
-                                    <span class="card-stat-label">Usuarios</span>
+                                    <span class="card-stat-label">Clientes Activos</span>
                                 </div>
-                                <div class="card-stat-value" id="totalUsuarios">0</div>
+                                <div class="card-stat-value" id="clientesActivos">0</div>
+                                <div class="card-stat-sub">Cuentas habilitadas para iniciar sesión</div>
                             </div>
                         </div>
                     </div>
@@ -89,9 +78,10 @@
                             <div class="card-body">
                                 <div class="card-stat-head">
                                     <span class="card-stat-icon tone-accent"><i class="bi bi-person-workspace"></i></span>
-                                    <span class="card-stat-label">Técnicos</span>
+                                    <span class="card-stat-label">Técnicos Especializados</span>
                                 </div>
                                 <div class="card-stat-value" id="totalTecnicos">0</div>
+                                <div class="card-stat-sub">Con rol Técnico en el sistema</div>
                             </div>
                         </div>
                     </div>
@@ -100,12 +90,10 @@
                             <div class="card-body">
                                 <div class="card-stat-head">
                                     <span class="card-stat-icon tone-success"><i class="bi bi-check-circle"></i></span>
-                                    <span class="card-stat-label">Resueltos</span>
+                                    <span class="card-stat-label">Casos Resueltos</span>
                                 </div>
-                                <div class="d-flex align-items-end gap-2">
-                                    <div class="card-stat-value" id="ticketsResueltos">0</div>
-                                    <span id="sparkResueltos" class="sparkline-wrap" title="Tickets resueltos por día, últimos 7 días"></span>
-                                </div>
+                                <div class="card-stat-value" id="porcentajeResueltos">0%</div>
+                                <div class="card-stat-sub">Resueltos o cerrados sobre el total</div>
                             </div>
                         </div>
                     </div>

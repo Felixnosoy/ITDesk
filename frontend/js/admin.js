@@ -110,23 +110,8 @@ function renderSparklineKpi(idContenedor, tickets, campoFecha) {
     contenedor.innerHTML = sparklineSvg(conteoPorDiaUltimos7(tickets, campoFecha));
 }
 
-// KPI "Sin asignar" accionable (Bloque 5) — reusa el buscador de texto que
-// ya filtra la tabla de abajo (estado es uno de los campos indexados en
-// actualizarTablaTicketsAdmin) en vez de armar un mecanismo de filtro
-// nuevo. "Abierto" es el mismo criterio que ya usa el conteo del KPI.
-function filtrarPorSinAsignar() {
-    const input = document.getElementById("buscarTicketAdmin");
-    if (!input) {
-        return;
-    }
-    input.value = "Abierto";
-    input.dispatchEvent(new Event("input"));
-    input.focus();
-    document.getElementById("tablaTicketsAdmin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 async function cargarResumenAdmin() {
-    if (!document.getElementById("totalUsuarios")) {
+    if (!document.getElementById("clientesActivos")) {
         return;
     }
 
@@ -149,12 +134,14 @@ async function cargarResumenAdmin() {
         usuarios = usuariosCargados;
         asignaciones = asignacionesCargadas;
 
-        document.getElementById("totalUsuarios").textContent = usuarios.length;
-        document.getElementById("totalTecnicos").textContent =
-            usuarios.filter(u => u.rol === "Tecnico").length;
+        // "Clientes Activos": rol Cliente + estado Activo (usuario.estado ya
+        // existe, se usa el mismo campo que activar/desactivar en usuarios.html).
+        const clientesActivos = usuarios.filter(u => u.rol === "Cliente" && u.estado === "Activo").length;
+        UI.contarHasta(document.getElementById("clientesActivos"), clientesActivos);
+        UI.contarHasta(document.getElementById("totalTecnicos"), usuarios.filter(u => u.rol === "Tecnico").length);
     } catch (error) {
         console.error(error);
-        document.getElementById("totalUsuarios").textContent = "—";
+        document.getElementById("clientesActivos").textContent = "—";
         document.getElementById("totalTecnicos").textContent = "—";
     }
 
@@ -170,6 +157,16 @@ async function cargarResumenAdmin() {
         terminoTicketsAdmin = termino;
         return actualizarTablaTicketsAdmin();
     }, "resultadosBusquedaTicketAdmin");
+
+    // "Se actualiza automaticamente al crear un ticket": no hay websockets en
+    // este proyecto (decision de sesiones anteriores) — mismo criterio que ya
+    // usa la campanita de notificaciones (layout.js, poll cada 45s). Si el
+    // admin deja la pantalla abierta, Tickets Registrados y Casos Resueltos
+    // se refrescan solos sin recargar la pagina. Clientes Activos/Tecnicos no
+    // entran en este poll: cambian por gestion de usuarios, no por tickets.
+    if (!window.__pollKpisAdmin) {
+        window.__pollKpisAdmin = setInterval(() => cargarTicketsAdmin(), 60000);
+    }
 }
 
 // "Control total": ultimas asignaciones de tecnico, mas recientes primero.
@@ -240,23 +237,17 @@ async function cargarTicketsAdmin(asignaciones, usuariosCache = null) {
         ]);
 
         if (document.getElementById("totalTickets")) {
-            document.getElementById("totalTickets").textContent = tickets.length;
+            UI.contarHasta(document.getElementById("totalTickets"), tickets.length);
             renderSparklineKpi("sparkTickets", tickets, "fecha_apertura");
         }
-        if (document.getElementById("ticketsSinAsignar")) {
-            // "Abierto" = todavia sin tecnico asignado (asignar siempre mueve
-            // el ticket a "En proceso" en este flujo, ver admin.js:asignarTecnico).
-            // KPI propio y accionable (Bloque 5) — el numero solo, la tarjeta
-            // ya lo explica con su icono/etiqueta; el detalle "N sin asignar"
-            // vs "Todos asignados" vivia en el texto porque antes era un
-            // badge escondido dentro de otra tarjeta, ya no hace falta.
-            const sinAsignar = tickets.filter(t => t.estado === "Abierto").length;
-            document.getElementById("ticketsSinAsignar").textContent = sinAsignar;
-        }
-        if (document.getElementById("ticketsResueltos")) {
-            const resueltos = tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado");
-            document.getElementById("ticketsResueltos").textContent = resueltos.length;
-            renderSparklineKpi("sparkResueltos", resueltos, "fecha_cierre");
+        if (document.getElementById("porcentajeResueltos")) {
+            // (Resueltos / Total) x 100, 1 decimal como maximo — 0% si no hay
+            // tickets, division por cero evitada a proposito.
+            const resueltos = tickets.filter(t => t.estado === "Resuelto" || t.estado === "Cerrado").length;
+            const porcentaje = tickets.length ? Math.round((resueltos / tickets.length) * 1000) / 10 : 0;
+            UI.contarHasta(document.getElementById("porcentajeResueltos"), porcentaje, {
+                formatear: (v) => `${Number.isInteger(Math.round(v * 10) / 10) ? Math.round(v) : v.toFixed(1)}%`
+            });
         }
 
         if (tickets.length === 0) {
