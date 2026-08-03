@@ -66,6 +66,20 @@ router.patch(
     usuarioController.actualizarPerfilPropio
 )
 
+// especialidades tecnicas de un usuario (solo aplica a rol Tecnico)
+router.get(
+    "/:id/especialidades",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
+    usuarioController.obtenerEspecialidadesUsuario
+)
+
+// reemplaza el set completo de especialidades de un tecnico
+router.put(
+    "/:id/especialidades",
+    verificarRol(ROLES.ADMINISTRADOR),
+    usuarioController.asignarEspecialidadesUsuario
+)
+
 // eliminar usuario
 router.delete(
     "/:id", 

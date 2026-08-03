@@ -1,5 +1,6 @@
 const usuarioService = require('../services/usuario.service');
 const auditoriaService = require('../services/auditoria.service');
+const especialidadService = require('../services/especialidad.service');
 const responder = require('../utils/respuesta');
 const ROLES = require('../constants/roles');
 
@@ -198,6 +199,45 @@ const actualizarPerfilPropio = async (req, res) => {
     }
 }
 
+// especialidades tecnicas de un usuario (catalogo estructurado, distinto
+// del campo de texto libre usuario.especialidad)
+const obtenerEspecialidadesUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const especialidades = await especialidadService.obtenerEspecialidadesDeTecnico(id);
+
+        responder(res, 200, {
+            data: especialidades
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
+// reemplaza el set completo de especialidades de un tecnico (whitelist,
+// exclusivo de Administrador)
+const asignarEspecialidadesUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { especialidades } = req.body;
+
+        const actualizadas = await especialidadService.asignarEspecialidadesTecnico(id, especialidades);
+
+        responder(res, 200, {
+            data: actualizadas
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
 //solo para datos de pruebas (no se debe usar)
 const borrarUsuario = async (req, res) => {
     try {
@@ -226,5 +266,7 @@ module.exports = {
     cambiarContrasena,
     resetearContrasena,
     actualizarPerfilPropio,
+    obtenerEspecialidadesUsuario,
+    asignarEspecialidadesUsuario,
     borrarUsuario
 }
