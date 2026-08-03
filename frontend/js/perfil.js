@@ -6,6 +6,7 @@
 // que los 4 roles piden el registro completo de la misma forma.
 
 let idUsuarioActual = null;
+let especialidadesTecnicasActual = "";
 
 async function cargarPerfil() {
     const usuario = Auth.getUsuario();
@@ -28,11 +29,25 @@ async function cargarPerfil() {
 
     try {
         const completo = await apiFetch(`/usuarios/${usuario.id_usuario}`);
+
+        // catalogo estructurado de especialidades (distinto del campo de
+        // texto libre "especialidad") — solo lectura acá, se gestiona desde
+        // Usuarios (Administrador)
+        if (completo.rol === "Tecnico") {
+            try {
+                const propias = await apiFetch(`/usuarios/${usuario.id_usuario}/especialidades`);
+                especialidadesTecnicasActual = propias.map(e => e.nombre).join(", ");
+            } catch (error) {
+                // si falla, simplemente no se muestra la fila — no bloquea el resto del perfil
+            }
+        }
+
         renderDatos({
             correo: completo.correo,
             telefono: completo.telefono,
             direccion: completo.direccion,
             especialidad: completo.especialidad,
+            especialidades_tecnicas: especialidadesTecnicasActual,
             num_documento: completo.num_documento,
             estado: completo.estado,
             fecha_registro: UI.formatearFechaCorta(completo.fecha_registro)
@@ -54,6 +69,7 @@ const ETIQUETAS = {
     telefono: "Teléfono",
     direccion: "Dirección",
     especialidad: "Especialidad",
+    especialidades_tecnicas: "Especialidades técnicas",
     num_documento: "N.° Documento",
     estado: "Estado",
     fecha_registro: "Miembro desde"
@@ -88,6 +104,7 @@ async function guardarPerfilPropio(event) {
             telefono: actualizado.telefono,
             direccion: actualizado.direccion,
             especialidad: actualizado.especialidad,
+            especialidades_tecnicas: especialidadesTecnicasActual,
             num_documento: actualizado.num_documento,
             estado: actualizado.estado,
             fecha_registro: UI.formatearFechaCorta(actualizado.fecha_registro)

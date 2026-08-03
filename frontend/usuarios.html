@@ -107,6 +107,33 @@
         </div>
     </div>
 
+    <!-- MODAL ESPECIALIDADES DE UN TECNICO -->
+    <div class="modal fade" id="modalEspecialidades" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Especialidades técnicas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formEspecialidades" onsubmit="guardarEspecialidadesUsuario(event)">
+                    <div class="modal-body">
+                        <p class="text-muted small" id="especialidadesUsuarioNombre"></p>
+                        <p class="text-muted small">Usadas para recomendar técnicos al coordinar visitas técnicas.</p>
+                        <div class="filtro-grupo">
+                            <div class="filtro-checks" id="especialidadesLista">
+                                <!-- checkboxes renderizados por JS a partir del catalogo -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar especialidades</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL NUEVO USUARIO (alta de cliente/tecnico/admin) -->
     <div class="modal fade" id="modalCrear" tabindex="-1">
         <div class="modal-dialog">

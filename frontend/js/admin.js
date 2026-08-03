@@ -6,6 +6,8 @@
 let ticketsAdmin = [];
 let usuariosGestion = [];
 let idUsuarioResetearClave = null;
+let idUsuarioEspecialidades = null;
+let catalogoEspecialidades = null;
 let idTicketAsignarActual = null;
 let terminoTicketsAdmin = "";
 let ordenTicketsAdmin = { campo: null, direccion: "asc" };
@@ -563,6 +565,12 @@ function renderTablaUsuarios(usuarios) {
                     title="Resetear contraseña" aria-label="Resetear contraseña">
                     <i class="bi bi-key"></i>
                 </button>
+                ${usuario.rol === "Tecnico" ? `
+                <button class="btn btn-outline-secondary btn-sm" onclick="abrirModalEspecialidades(${usuario.id_usuario}, '${(usuario.nombre + " " + usuario.apellido).replace(/'/g, "\\'")}')"
+                    title="Especialidades técnicas" aria-label="Especialidades técnicas">
+                    <i class="bi bi-tools"></i>
+                </button>
+                ` : ""}
                 <button class="btn btn-danger btn-sm" onclick="eliminarUsuarioAdmin(${usuario.id_usuario})"
                     title="Eliminar usuario" aria-label="Eliminar usuario">
                     <i class="bi bi-trash"></i>
@@ -663,6 +671,69 @@ async function resetearClaveUsuario(event) {
 
         bootstrap.Modal.getInstance(document.getElementById("modalResetearClave")).hide();
         UI.toast("Contraseña reseteada correctamente.");
+
+    } catch (error) {
+        UI.toast(error.message, "danger");
+    }
+}
+
+// el catalogo completo de especialidades no cambia seguido — se pide una
+// sola vez y se reusa cada vez que se abre el modal
+async function obtenerCatalogoEspecialidades() {
+    if (!catalogoEspecialidades) {
+        catalogoEspecialidades = await apiFetch("/especialidad");
+    }
+    return catalogoEspecialidades;
+}
+
+async function abrirModalEspecialidades(id_usuario, nombreCompleto) {
+    idUsuarioEspecialidades = id_usuario;
+    document.getElementById("especialidadesUsuarioNombre").textContent = `Técnico: ${nombreCompleto}`;
+
+    const lista = document.getElementById("especialidadesLista");
+    lista.innerHTML = `<div class="skeleton-line"></div>`;
+
+    const modal = new bootstrap.Modal(document.getElementById("modalEspecialidades"));
+    modal.show();
+
+    try {
+        const [catalogo, propias] = await Promise.all([
+            obtenerCatalogoEspecialidades(),
+            apiFetch(`/usuarios/${id_usuario}/especialidades`)
+        ]);
+
+        const idsPropios = new Set(propias.map(e => e.id_especialidad));
+
+        lista.innerHTML = catalogo.map(especialidad => `
+            <label class="filtro-check">
+                <input type="checkbox" class="chk-especialidad" value="${especialidad.id_especialidad}"
+                    ${idsPropios.has(especialidad.id_especialidad) ? "checked" : ""}>
+                ${especialidad.nombre}
+            </label>
+        `).join("");
+
+    } catch (error) {
+        lista.innerHTML = "";
+        UI.toast(error.message, "danger");
+    }
+}
+
+async function guardarEspecialidadesUsuario(event) {
+    event.preventDefault();
+
+    const especialidades = Array.from(document.querySelectorAll(".chk-especialidad:checked"))
+        .map(input => Number(input.value));
+
+    const boton = event.target.querySelector("button[type=submit]");
+
+    try {
+        await UI.conCargando(boton, "Guardando...", () => apiFetch(`/usuarios/${idUsuarioEspecialidades}/especialidades`, {
+            method: "PUT",
+            body: JSON.stringify({ especialidades })
+        }));
+
+        bootstrap.Modal.getInstance(document.getElementById("modalEspecialidades")).hide();
+        UI.toast("Especialidades actualizadas correctamente.");
 
     } catch (error) {
         UI.toast(error.message, "danger");
