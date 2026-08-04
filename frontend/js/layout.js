@@ -65,7 +65,8 @@ const NAV_POR_ROL = {
         links: [
             { href: "dashboard-cliente.html", label: "Inicio", icono: "bi-house-fill" },
             { href: "historial.html", label: "Historial", icono: "bi-clock-history" },
-            { href: "documentos.html", label: "Documentos", icono: "bi-receipt" }
+            { href: "documentos.html", label: "Documentos", icono: "bi-receipt" },
+            { href: "mis-visitas.html", label: "Visitas técnicas", icono: "bi-calendar-check" }
         ]
     },
     Recepcionista: {

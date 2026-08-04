@@ -67,6 +67,17 @@ const UI = {
         Vencida: { tono: "neutral", icono: "bi-clock-history" }
     },
 
+    // visita_tecnica.estado — 7 valores fijos (backend/src/constants/estadosVisita.js)
+    MAPA_ESTADO_VISITA: {
+        Pendiente: { tono: "warning", icono: "bi-hourglass-split" },
+        Confirmada: { tono: "info", icono: "bi-calendar-check-fill" },
+        "En camino": { tono: "accent", icono: "bi-geo-alt-fill" },
+        "En progreso": { tono: "warning", icono: "bi-tools" },
+        Finalizada: { tono: "success", icono: "bi-check-circle-fill" },
+        Cancelada: { tono: "danger", icono: "bi-x-circle-fill" },
+        Reprogramada: { tono: "neutral", icono: "bi-arrow-repeat" }
+    },
+
     // "tipo" de notificacion (notificacion.tipo) — los 6 eventos formales de
     // la Salida 5 (Registro/Asignación/Estado/Diagnóstico/Finalización/
     // Reapertura) mas 3 tipos que ya existian antes de esa spec (Cotización/
@@ -115,6 +126,10 @@ const UI = {
 
     badgeEstadoEquipo(estado) {
         return this.badge(estado, this.MAPA_ESTADO_EQUIPO, "Sin estado");
+    },
+
+    badgeEstadoVisita(estado) {
+        return this.badge(estado, this.MAPA_ESTADO_VISITA, "Sin estado");
     },
 
     badgeTipoNotificacion(tipo) {
