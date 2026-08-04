@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 
+const responder = require('./utils/respuesta');
+
 const healthRoutes = require('./routes/health.routes')
 const usuarioRoutes = require('./routes/usuario.routes')
 const authRoutes = require("./routes/auth.routes");
@@ -45,5 +47,20 @@ app.use("/api/auditoria", auditoriaRoutes)
 app.use("/api/encuestas", encuestaRoutes)
 app.use("/api/estadisticas", estadisticasRoutes)
 app.use("/api/especialidad", especialidadRoutes)
+
+// ninguna ruta de arriba matcheo — recurso de la API inexistente
+app.use("/api", (req, res) => {
+    responder(res, 404, { message: "Recurso no encontrado." });
+});
+
+// manejador de errores global: sin esto, cualquier next(error) (por ejemplo
+// el 403 que dispara verificarRol cuando el rol no coincide) caia en el
+// manejador por defecto de Express, que devuelve HTML en vez del contrato
+// { success, message } que espera apiFetch en todo el frontend.
+app.use((err, req, res, next) => {
+    responder(res, err.status || 500, {
+        message: err.message || "Error interno del servidor"
+    });
+});
 
 module.exports = app;
