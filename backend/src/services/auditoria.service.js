@@ -16,6 +16,7 @@ const COLUMNAS_AUDITORIA = `
     a.id_ticket,
     t.fecha_apertura,
     t.titulo AS ticket_titulo,
+    a.id_visita,
     a.fecha
 `;
 
@@ -31,14 +32,14 @@ const JOIN_AUDITORIA = `
         ON a.id_ticket = t.id_ticket
 `;
 
-const registrarEvento = async ({ id_usuario, accion, descripcion, id_ticket }) => {
+const registrarEvento = async ({ id_usuario, accion, descripcion, id_ticket, id_visita }) => {
     try {
         await pool.query(
             `
-            INSERT INTO auditoria (id_usuario, accion, descripcion, id_ticket)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO auditoria (id_usuario, accion, descripcion, id_ticket, id_visita)
+            VALUES (?, ?, ?, ?, ?)
             `,
-            [id_usuario, accion, descripcion, id_ticket || null]
+            [id_usuario, accion, descripcion, id_ticket || null, id_visita || null]
         );
     } catch (error) {
         console.error("No se pudo registrar el evento de auditoría:", error.message);

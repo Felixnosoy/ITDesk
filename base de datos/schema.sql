@@ -102,12 +102,15 @@ CREATE TABLE `auditoria` (
   `accion` varchar(50) NOT NULL,
   `descripcion` text NOT NULL,
   `id_ticket` int(11) DEFAULT NULL,
+  `id_visita` int(11) DEFAULT NULL,
   `fecha` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id_auditoria`),
   KEY `FK_Auditoria_Usuario` (`id_usuario`),
   KEY `FK_Auditoria_Ticket` (`id_ticket`),
+  KEY `FK_Auditoria_Visita` (`id_visita`),
   CONSTRAINT `FK_Auditoria_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_Auditoria_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `FK_Auditoria_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_Auditoria_Visita` FOREIGN KEY (`id_visita`) REFERENCES `visita_tecnica` (`id_visita`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -405,6 +408,38 @@ CREATE TABLE `usuario` (
   UNIQUE KEY `UQ_Usuario_Correo` (`correo`),
   UNIQUE KEY `UQ_Usuario_Documento` (`num_documento`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `visita_tecnica`
+--
+
+DROP TABLE IF EXISTS `visita_tecnica`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `visita_tecnica` (
+  `id_visita` int(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) NOT NULL,
+  `id_especialidad` int(11) NOT NULL,
+  `id_tecnico` int(11) DEFAULT NULL,
+  `id_ticket` int(11) DEFAULT NULL,
+  `fecha_solicitada` date NOT NULL,
+  `hora_solicitada` time NOT NULL,
+  `direccion` varchar(255) NOT NULL,
+  `motivo` text NOT NULL,
+  `estado` varchar(20) NOT NULL DEFAULT 'Pendiente',
+  `fecha_creacion` datetime DEFAULT current_timestamp(),
+  `fecha_confirmacion` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_visita`),
+  KEY `FK_Visita_Usuario` (`id_usuario`),
+  KEY `FK_Visita_Especialidad` (`id_especialidad`),
+  KEY `IX_Visita_Tecnico_Fecha` (`id_tecnico`,`fecha_solicitada`),
+  KEY `FK_Visita_Ticket` (`id_ticket`),
+  CONSTRAINT `FK_Visita_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Visita_Especialidad` FOREIGN KEY (`id_especialidad`) REFERENCES `especialidad` (`id_especialidad`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Visita_Tecnico` FOREIGN KEY (`id_tecnico`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_Visita_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

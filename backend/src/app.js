@@ -22,6 +22,7 @@ const auditoriaRoutes = require("./routes/auditoria.routes")
 const encuestaRoutes = require("./routes/encuesta.routes")
 const estadisticasRoutes = require("./routes/estadisticas.routes")
 const especialidadRoutes = require("./routes/especialidad.routes")
+const visitaRoutes = require("./routes/visita.routes")
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/auditoria", auditoriaRoutes)
 app.use("/api/encuestas", encuestaRoutes)
 app.use("/api/estadisticas", estadisticasRoutes)
 app.use("/api/especialidad", especialidadRoutes)
+app.use("/api/visita-tecnica", visitaRoutes)
 
 // ninguna ruta de arriba matcheo — recurso de la API inexistente
 app.use("/api", (req, res) => {
