@@ -140,6 +140,20 @@ const UI = {
         return this.badge(rol, this.MAPA_ROL);
     },
 
+    // Para columnas DATE sin hora (visita_tecnica.fecha_solicitada) — nunca
+    // pasarlas por formatearFecha()/formatearFechaCorta(), que interpretan
+    // en huso horario local y pueden correr el dia mostrado (mismo problema
+    // ya resuelto para <input type=date> en reportes-comun.js). Se ancla
+    // todo en UTC de punta a punta, asi el dia elegido nunca se corre.
+    formatearFechaSolo(valor) {
+        if (!valor) {
+            return "—";
+        }
+        const [anio, mes, dia] = String(valor).slice(0, 10).split("-").map(Number);
+        const fecha = new Date(Date.UTC(anio, mes - 1, dia));
+        return fecha.toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+    },
+
     formatearFecha(fecha) {
         if (!fecha) {
             return "—";

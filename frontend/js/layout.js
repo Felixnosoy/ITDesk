@@ -36,6 +36,7 @@ const NAV_POR_ROL = {
         links: [
             { href: "dashboard-admin.html", label: "Inicio", icono: "bi-house-fill" },
             { href: "usuarios.html", label: "Usuarios", icono: "bi-people-fill" },
+            { href: "agenda-visitas.html", label: "Agenda de visitas", icono: "bi-calendar-week" },
             {
                 label: "Reportes", icono: "bi-bar-chart-fill",
                 hijos: [
@@ -73,7 +74,8 @@ const NAV_POR_ROL = {
         marca: { href: "dashboard-recepcion.html", texto: "ITDESK", icono: "bi-person-workspace" },
         links: [
             { href: "dashboard-recepcion.html", label: "Inicio", icono: "bi-house-fill" },
-            { href: "recepcion.html", label: "Nuevo ticket", icono: "bi-plus-circle" }
+            { href: "recepcion.html", label: "Nuevo ticket", icono: "bi-plus-circle" },
+            { href: "agenda-visitas.html", label: "Agenda de visitas", icono: "bi-calendar-week" }
         ]
     }
 };

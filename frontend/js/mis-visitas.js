@@ -31,7 +31,7 @@ function renderTablaMisVisitas(visitas) {
 
     tabla.innerHTML = visitas.map(visita => `
         <tr>
-            <td data-label="Fecha y hora">${UI.formatearFechaCorta(visita.fecha_solicitada)} · ${(visita.hora_solicitada || "").slice(0, 5)}</td>
+            <td data-label="Fecha y hora">${UI.formatearFechaSolo(visita.fecha_solicitada)} · ${(visita.hora_solicitada || "").slice(0, 5)}</td>
             <td data-label="Servicio">${visita.especialidad}</td>
             <td data-label="Estado">${UI.badgeEstadoVisita(visita.estado)}</td>
             <td data-label="Técnico">${visita.tecnico || "Sin asignar todavía"}</td>

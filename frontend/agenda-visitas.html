@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de visitas técnicas | ITDESK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+
+<body data-protegido="Recepcionista,Administrador" data-titulo="Agenda de visitas técnicas" data-footer="Agenda de visitas técnicas">
+    <div class="app-shell">
+        <div id="sidebar-placeholder"></div>
+        <div class="app-main">
+            <div id="topbar-mobile-placeholder"></div>
+            <div id="topbar-desktop-placeholder"></div>
+            <main class="app-content">
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-itdesk">
+                        <li class="breadcrumb-item"><a href="dashboard-recepcion.html">Inicio</a></li>
+                        <li class="breadcrumb-item active">Agenda de visitas</li>
+                    </ol>
+                </nav>
+
+                <div class="page-head">
+                    <div class="page-head-text">
+                        <h2>Agenda de visitas técnicas</h2>
+                        <p class="text-muted">Coordiná, confirmá y reprogramá las visitas solicitadas por los clientes.</p>
+                    </div>
+                </div>
+
+                <div class="agenda-toolbar">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Cambiar vista del calendario">
+                        <button type="button" class="btn btn-outline-secondary" id="btnVistaMes">Mes</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnVistaSemana">Semana</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnVistaDia">Día</button>
+                    </div>
+                    <div class="agenda-nav">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAgendaAnterior" aria-label="Período anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAgendaHoy">Hoy</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAgendaSiguiente" aria-label="Período siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                        <strong id="agendaPeriodoLabel" class="ms-2"></strong>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <div id="agendaCalendario" class="agenda-calendario">
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card-info">
+                            <h6 class="mb-3"><i class="bi bi-clock-history"></i> Próximas visitas</h6>
+                            <div id="agendaProximas">
+                                <div class="skeleton-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+            <div id="footer-placeholder"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE / ACCIONES DE UNA VISITA -->
+    <div class="modal fade" id="modalDetalleVisita" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-calendar-event"></i> Visita técnica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleVisitaInfo" class="mb-3"></div>
+                    <div id="detalleVisitaAcciones"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/agenda-visitas.js"></script>
+</body>
+
+</html>

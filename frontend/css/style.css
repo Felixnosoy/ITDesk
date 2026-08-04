@@ -2758,6 +2758,197 @@ sin importar si el usuario tenia modo oscuro activado en pantalla.
     padding-top: 4px;
 }
 
+/*==========================
+AGENDA DE VISITAS TECNICAS (calendario propio de Recepcion)
+===========================*/
+/* Hecho a mano con CSS grid, sin libreria de terceros — asi hereda el tema
+   oscuro y el acento por rol via las custom properties de tokens.css sin
+   parches extra (mismo problema recurrente que tuvo el proyecto forzando
+   el tema en componentes de Bootstrap). */
+.agenda-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.agenda-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.agenda-calendario {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+}
+
+/* ---- vista mes ---- */
+.agenda-mes-header,
+.agenda-mes-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.agenda-mes-header {
+    margin-bottom: var(--space-2);
+}
+
+.agenda-mes-header span {
+    font-size: var(--fs-caption, .75rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-500);
+    text-align: center;
+    padding-bottom: var(--space-1);
+}
+
+.agenda-dia-celda {
+    min-height: 96px;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.agenda-dia-celda:hover {
+    border-color: var(--accent-600);
+}
+
+.agenda-dia-celda.fuera-de-mes {
+    background: var(--surface-0);
+    opacity: .55;
+}
+
+.agenda-dia-celda.es-hoy {
+    border-color: var(--accent-600);
+    box-shadow: inset 0 0 0 1px var(--accent-600);
+}
+
+.agenda-dia-numero {
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--ink-700);
+}
+
+.agenda-visita-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .72rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--ink-900);
+    text-align: left;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.agenda-visita-pill:hover {
+    background: var(--accent-100);
+}
+
+.agenda-visita-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex: none;
+}
+
+.agenda-mas-visitas {
+    font-size: .7rem;
+    color: var(--accent-600);
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+}
+
+/* ---- vista semana ---- */
+.agenda-semana-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    align-items: start;
+}
+
+.agenda-semana-columna {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2);
+    min-height: 220px;
+    background: var(--surface-1);
+}
+
+.agenda-semana-columna.es-hoy {
+    border-color: var(--accent-600);
+}
+
+.agenda-semana-columna-header {
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--ink-700);
+    margin-bottom: var(--space-2);
+    text-align: center;
+}
+
+/* ---- vista dia ---- */
+.agenda-lista-dia {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.agenda-visita-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-1);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+
+.agenda-visita-card:hover {
+    border-color: var(--accent-600);
+}
+
+.agenda-visita-card-hora {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    min-width: 56px;
+}
+
+.agenda-visita-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.agenda-visita-card-info strong {
+    display: block;
+}
+
+.agenda-visita-card-info span {
+    font-size: .8rem;
+    color: var(--ink-500);
+}
+
 @media print {
     /* visibility:hidden esconde pero NO saca del flujo — .app-shell/.sidebar
        miden min-height/height:100vh, asi que el layout entero seguia
