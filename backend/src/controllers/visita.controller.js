@@ -182,7 +182,10 @@ const asignarTecnicoVisita = async (req, res) => {
 const cancelarVisita = async (req, res) => {
     try {
         const { id } = req.params
-        const { motivo } = req.body
+        // motivo es opcional por diseño (solo se usa para la descripcion de
+        // auditoria) — Express 5 deja req.body como undefined, no {}, cuando
+        // no llega ningun body en el request, a diferencia de Express 4.
+        const { motivo } = req.body || {}
 
         const visita = await visitaService.cancelarVisita(id, req.usuario);
 
@@ -208,9 +211,9 @@ const cancelarVisita = async (req, res) => {
 const cambiarEstadoVisita = async (req, res) => {
     try {
         const { id } = req.params
-        const { estado } = req.body
+        const { estado, observaciones } = req.body
 
-        const visita = await visitaService.cambiarEstadoPropia(id, estado, req.usuario);
+        const visita = await visitaService.cambiarEstadoPropia(id, estado, req.usuario, observaciones);
 
         auditoriaService.registrarEvento({
             id_usuario: req.usuario.id_usuario,

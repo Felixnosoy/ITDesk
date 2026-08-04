@@ -49,19 +49,19 @@ function renderTablaMisVisitas(visitas) {
 }
 
 async function cancelarVisitaPropia(id_visita) {
-    const motivo = await UI.pedirTexto("¿Por qué querés cancelar esta visita? (opcional)", {
+    const confirmado = await UI.confirmar("¿Cancelar esta visita técnica?", {
         titulo: "Cancelar visita técnica",
-        placeholder: "Ej: ya lo resolví por mi cuenta"
+        textoConfirmar: "Sí, cancelar"
     });
 
-    if (motivo === null) {
+    if (!confirmado) {
         return;
     }
 
     try {
         await apiFetch(`/visita-tecnica/${id_visita}/cancelar`, {
             method: "PATCH",
-            body: JSON.stringify({ motivo })
+            body: JSON.stringify({})
         });
 
         await cargarMisVisitas();

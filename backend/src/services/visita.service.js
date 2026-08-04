@@ -25,7 +25,8 @@ const COLUMNAS_VISITA = `
     v.motivo,
     v.estado,
     v.fecha_creacion,
-    v.fecha_confirmacion
+    v.fecha_confirmacion,
+    v.observaciones
 `;
 
 const JOIN_VISITA = `
@@ -377,7 +378,7 @@ const ESTADOS_TECNICO_PERMITIDOS = [
     ESTADOS_VISITA.FINALIZADA
 ];
 
-const cambiarEstadoPropia = async (id, estado, solicitante) => {
+const cambiarEstadoPropia = async (id, estado, solicitante, observaciones) => {
     if (typeof estado !== "string" || !ESTADOS_TECNICO_PERMITIDOS.includes(estado.trim())) {
         throw crearError(
             `Estado inválido. Debe ser: ${ESTADOS_TECNICO_PERMITIDOS.join(", ")}.`,
@@ -414,9 +415,13 @@ const cambiarEstadoPropia = async (id, estado, solicitante) => {
         }
     }
 
+    // observaciones es opcional en cada cambio de estado — si no viene, se
+    // conserva lo que ya hubiera (no se borra una nota anterior sin querer).
+    const observacionesFinal = observaciones !== undefined ? observaciones : visita.observaciones;
+
     await pool.query(
-        "UPDATE visita_tecnica SET estado = ? WHERE id_visita = ?",
-        [estadoNormalizado, id]
+        "UPDATE visita_tecnica SET estado = ?, observaciones = ? WHERE id_visita = ?",
+        [estadoNormalizado, observacionesFinal, id]
     );
 
     return obtenerVisitaPorId(id);

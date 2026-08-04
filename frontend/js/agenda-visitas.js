@@ -417,7 +417,7 @@ async function guardarConfirmacion(id_visita) {
 }
 
 async function cancelarVisitaAgenda(id_visita) {
-    const motivo = await UI.pedirTexto("¿Por qué se cancela esta visita? (opcional)", {
+    const motivo = await UI.pedirTexto("¿Por qué se cancela esta visita?", {
         titulo: "Cancelar visita técnica"
     });
 

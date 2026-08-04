@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <script>(function () { var t = localStorage.getItem("tema"); if (t) { document.documentElement.setAttribute("data-theme", t); return; } try { var u = JSON.parse(sessionStorage.getItem("usuario") || "null"); if (u && u.rol === "Tecnico") { document.documentElement.setAttribute("data-theme", "dark"); } } catch (e) {} })();</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis visitas técnicas | ITDESK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+
+<body data-protegido="Tecnico" data-titulo="Mis visitas técnicas" data-footer="Mis visitas técnicas">
+    <div class="app-shell">
+        <div id="sidebar-placeholder"></div>
+        <div class="app-main">
+            <div id="topbar-mobile-placeholder"></div>
+            <div id="topbar-desktop-placeholder"></div>
+            <main class="app-content">
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-itdesk">
+                        <li class="breadcrumb-item"><a href="dashboard-tecnico.html">Inicio</a></li>
+                        <li class="breadcrumb-item active">Mis visitas técnicas</li>
+                    </ol>
+                </nav>
+
+                <div class="page-head">
+                    <div class="page-head-text">
+                        <h2>Mis visitas técnicas</h2>
+                        <p class="text-muted">Las visitas de campo que tenés asignadas, de la más próxima a la más lejana.</p>
+                    </div>
+                </div>
+
+                <table class="table table-hover align-middle table-mobile-cards">
+                    <thead>
+                        <tr>
+                            <th>Fecha y hora</th>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Dirección</th>
+                            <th>Estado</th>
+                            <th>Ticket</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMisVisitasTecnico">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Cargando visitas...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </main>
+            <div id="footer-placeholder"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/mis-visitas-tecnico.js"></script>
+</body>
+
+</html>

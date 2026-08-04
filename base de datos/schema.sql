@@ -430,6 +430,7 @@ CREATE TABLE `visita_tecnica` (
   `estado` varchar(20) NOT NULL DEFAULT 'Pendiente',
   `fecha_creacion` datetime DEFAULT current_timestamp(),
   `fecha_confirmacion` datetime DEFAULT NULL,
+  `observaciones` text DEFAULT NULL,
   PRIMARY KEY (`id_visita`),
   KEY `FK_Visita_Usuario` (`id_usuario`),
   KEY `FK_Visita_Especialidad` (`id_especialidad`),
