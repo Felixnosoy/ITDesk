@@ -13,10 +13,11 @@ Puede:
 - Ver y descargar sus propios archivos adjuntos **marcados como públicos** (`GET /archivos/mis/ticket/:id`).
 - Calificar un ticket propio una vez cerrado (`POST /encuestas`, una sola vez).
 - Editar su propio perfil (solo teléfono y dirección) y cambiar su propia contraseña.
+- Solicitar una visita técnica presencial (`POST /visita-tecnica`) y ver/cancelar las propias (`GET /visita-tecnica/mis`, `PATCH /visita-tecnica/:id/cancelar` mientras siga `Pendiente`/`Confirmada`) — pero **no crea un ticket al hacerlo**: el ticket nace recién cuando Recepción/Administrador confirma la visita.
 
-No puede: crear ni ver el detalle completo de un ticket por id (solo el listado `/mis`), ver diagnóstico, ver notas privadas, ver archivos marcados como privados, ver quién del staff escribió una nota (el log que sí ve nunca incluye el nombre del autor).
+No puede: crear ni ver el detalle completo de un ticket por id (solo el listado `/mis`), ver diagnóstico, ver notas privadas, ver archivos marcados como privados, ver quién del staff escribió una nota (el log que sí ve nunca incluye el nombre del autor), ver el listado completo de visitas técnicas de otros clientes.
 
-**Pantallas**: `dashboard-cliente.html`, `historial.html`, `documentos.html`, `ticket-cliente.html`, `perfil.html` (compartida con los demás roles).
+**Pantallas**: `dashboard-cliente.html`, `historial.html`, `documentos.html`, `ticket-cliente.html`, `agendar-visita.html`, `mis-visitas.html`, `perfil.html` (compartida con los demás roles).
 
 ## Técnico
 
@@ -28,7 +29,9 @@ No puede: aprobar/rechazar cotizaciones en nombre del cliente (`PATCH /cotizacio
 
 **Ve todos los tickets del sistema, no solo los "suyos"**: `GET /api/ticket` no filtra por técnico asignado. El módulo `asignacion` existe como registro de "especialista sugerido", no como control de acceso — la restricción de que un técnico solo viera sus propios tickets asignados existió en algún momento solo en el frontend y fue removida deliberadamente (ver [15-futuras-mejoras.md](15-futuras-mejoras.md) si se quisiera reintroducir como opción).
 
-**Pantallas**: `dashboard-tecnico.html`, `detalle-ticket.html` (compartida con Administrador), `auditoria.html` (compartida con Administrador), `perfil.html`.
+**Visitas técnicas**: ve y avanza el estado únicamente de las visitas que tiene asignadas (`GET /visita-tecnica/tecnico/mis`, `PATCH /visita-tecnica/:id/estado`) — `En camino` → `En progreso` → `Finalizada`, esta última exige que el ticket vinculado ya tenga diagnóstico registrado. No puede confirmar, reprogramar, reasignar ni cancelar una visita (eso es de Recepción/Administrador), salvo la excepción de que Administrador comparte todos sus propios permisos.
+
+**Pantallas**: `dashboard-tecnico.html`, `detalle-ticket.html` (compartida con Administrador), `mis-visitas-tecnico.html`, `auditoria.html` (compartida con Administrador), `perfil.html`.
 
 ## Administrador
 
@@ -38,8 +41,9 @@ Superset de los permisos de Técnico, más:
 - Es el único rol habilitado para operaciones destructivas (`DELETE`) en usuario, equipo, asignación, diagnóstico, actualización, cotización, factura, notificación y archivo.
 - Único rol para aprobar/rechazar cotizaciones del lado de staff (`PATCH /cotizacion/:id/estado`) y para ver el listado completo de encuestas (`GET /encuestas`).
 - Acceso a los 8 reportes y a la auditoría completa del sistema.
+- Único rol, junto con Recepcionista, que puede confirmar/reprogramar/reasignar/cancelar visitas técnicas y gestionar el catálogo de especialidades (crear/renombrar/eliminar, y asignárselas a un técnico).
 
-**Pantallas**: `dashboard-admin.html`, `usuarios.html`, `detalle-ticket.html`, `auditoria.html`, `reportes.html` + 8 reportes individuales, `perfil.html`.
+**Pantallas**: `dashboard-admin.html`, `usuarios.html`, `detalle-ticket.html`, `agenda-visitas.html`, `auditoria.html`, `reportes.html` + 8 reportes individuales, `perfil.html`.
 
 ## Recepcionista
 
@@ -51,7 +55,9 @@ No puede: ver el detalle de un ticket individual por id (`GET /ticket/:id` no in
 
 Esta es una asimetría real y deliberada del sistema: Recepcionista no tiene página de detalle de ticket en el frontend. Su pantalla `dashboard-recepcion.html` compensa parcialmente con una "consulta rápida" (typeahead que muestra estado y tiempo abierto de un ticket buscado), pero no hay *drill-down* real al estilo `detalle-ticket.html`.
 
-**Pantallas**: `dashboard-recepcion.html`, `recepcion.html`, `perfil.html`.
+**Sí coordina las visitas técnicas**: junto con Administrador, es quien confirma (asigna técnico y equipo/ticket), reprograma, reasigna y cancela visitas desde `agenda-visitas.html` — el único módulo nuevo donde Recepcionista tiene más alcance que Técnico.
+
+**Pantallas**: `dashboard-recepcion.html`, `recepcion.html`, `agenda-visitas.html`, `perfil.html`.
 
 ## Matriz resumida de acceso a recursos
 
@@ -70,5 +76,10 @@ Esta es una asimetría real y deliberada del sistema: Recepcionista no tiene pá
 | Encuesta de satisfacción | ✅ (la propia, ticket cerrado) | ❌ | ❌ (solo lectura por ticket) | ✅ (lectura + listado completo) |
 | Auditoría | ❌ | ❌ | ✅ (lectura) | ✅ (lectura) |
 | Operaciones `DELETE` | ❌ | ❌ | solo líneas de cotización | ✅ |
+| Especialidades (catálogo) | lectura | lectura | lectura | ✅ (CRUD) |
+| Visita técnica (solicitar) | ✅ (la propia) | ❌ | ❌ | ❌ |
+| Visita técnica (confirmar/reprogramar/reasignar) | ❌ | ✅ | ❌ | ✅ |
+| Visita técnica (avanzar estado propio) | ❌ | ❌ | ✅ (la asignada) | ✅ |
+| Visita técnica (cancelar) | ✅ (la propia, no terminal) | ✅ | ❌ | ✅ |
 
 Esta tabla resume; el detalle exacto de middleware por endpoint está en `docs/api/*.md`.

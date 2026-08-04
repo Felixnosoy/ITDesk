@@ -124,6 +124,19 @@ Ningún campo se valida explícitamente como obligatorio en el service (a difere
 - **Body**: `{ "telefono": "...", "direccion": "..." }`.
 - **Errores**: `403 "Solo podés editar tu propio perfil."` / `404 "usuario no encontrado"`.
 
+## `GET /api/usuarios/:id/especialidades`
+
+- **Rol**: Administrador, Tecnico, Recepcionista.
+- **Descripción**: especialidades técnicas estructuradas del usuario indicado (catálogo, distinto del campo de texto libre `especialidad`). Solo tiene sentido para usuarios con `rol = Tecnico`. Ver [api/especialidad.md](especialidad.md).
+- **Error**: `404 "El técnico no existe."`
+
+## `PUT /api/usuarios/:id/especialidades`
+
+- **Rol**: Administrador.
+- **Descripción**: reemplaza el set completo de especialidades del técnico — no agrega/quita de a una, la lista enviada es la final.
+- **Body**: `{ "especialidades": [1, 2] }` (array de ids; `[]` vacía el set).
+- **Errores**: `400` (no es un arreglo / algún id no existe) / `404 "El técnico no existe."`
+
 ## `DELETE /api/usuarios/:id`
 
 - **Rol**: Administrador.

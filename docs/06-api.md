@@ -57,7 +57,7 @@ Varios recursos exponen una variante bajo `/mis` o `/mis/...` pensada para el ro
 |---|---|---|---|
 | Salud del sistema | `/api/health` | 1 | [api/health.md](api/health.md) |
 | Autenticación | `/api/auth` | 1 | [api/auth.md](api/auth.md) |
-| Usuarios | `/api/usuarios` | 9 | [api/usuarios.md](api/usuarios.md) |
+| Usuarios | `/api/usuarios` | 11 | [api/usuarios.md](api/usuarios.md) |
 | Equipos | `/api/equipo` | 6 | [api/equipo.md](api/equipo.md) |
 | Tickets | `/api/ticket` | 7 | [api/ticket.md](api/ticket.md) |
 | Asignaciones | `/api/asignacion` | 7 | [api/asignacion.md](api/asignacion.md) |
@@ -73,8 +73,10 @@ Varios recursos exponen una variante bajo `/mis` o `/mis/...` pensada para el ro
 | Auditoría | `/api/auditoria` | 1 | [api/auditoria.md](api/auditoria.md) |
 | Encuestas de satisfacción | `/api/encuestas` | 4 | [api/encuestas.md](api/encuestas.md) |
 | Estadísticas públicas | `/api/estadisticas` | 1 | [api/estadisticas.md](api/estadisticas.md) |
+| Especialidades técnicas | `/api/especialidad` | 4 | [api/especialidad.md](api/especialidad.md) |
+| Visitas técnicas | `/api/visita-tecnica` | 11 | [api/visita-tecnica.md](api/visita-tecnica.md) |
 
-**Total: 99 endpoints**, todos verificados contra el código fuente real de `backend/src/routes/*.js`.
+**Total: 116 endpoints**, todos verificados contra el código fuente real de `backend/src/routes/*.js`.
 
 ## Reglas de negocio transversales
 
@@ -86,5 +88,6 @@ Estas reglas atraviesan más de un recurso y conviene tenerlas presentes al leer
 4. **Factura = snapshot 1:1 de una cotización aprobada**, no se recalcula después. Ver [api/factura.md](api/factura.md).
 5. **Auditoría nunca rompe la acción principal**: si falla el registro de auditoría, la operación de negocio igual se considera exitosa. Ver [api/auditoria.md](api/auditoria.md).
 6. **Notificaciones nunca se disparan automáticamente**: siempre nacen de un `POST /api/notificacion` explícito. Ver [api/notificacion.md](api/notificacion.md).
+7. **El cliente nunca crea un ticket directamente, ni siquiera al solicitar una visita técnica**: el ticket nace recién cuando Recepción/Administrador confirma la visita (se crea uno nuevo o se vincula uno existente del cliente) — la regla original de "solo staff crea tickets" se mantiene intacta. Ver [api/visita-tecnica.md](api/visita-tecnica.md).
 
-Un catálogo completo de 21 reglas de negocio no obvias (una por cada matiz encontrado en el código) está distribuido entre los archivos de `docs/api/`, agrupado en el recurso donde vive la regla.
+Un catálogo más completo de reglas de negocio no obvias (una por cada matiz encontrado en el código) está distribuido entre los archivos de `docs/api/`, agrupado en el recurso donde vive la regla.

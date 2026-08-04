@@ -1,6 +1,6 @@
 # 10. Componentes importantes del frontend
 
-Frontend HTML/CSS/JS "vanilla", sin build ni framework. Bootstrap 5.3.7 + Bootstrap Icons 1.13.1 vía CDN, Chart.js 4 vía CDN (solo en `reporte-estadisticas.html`). **23 páginas HTML, 31 scripts JS.** Ver la lista completa de páginas por rol en [08-roles.md](08-roles.md); este capítulo se centra en cómo funciona cada pieza y cómo se conecta a la API.
+Frontend HTML/CSS/JS "vanilla", sin build ni framework. Bootstrap 5.3.7 + Bootstrap Icons 1.13.1 vía CDN, Chart.js 4 vía CDN (solo en `reporte-estadisticas.html`). **27 páginas HTML, 35 scripts JS.** Ver la lista completa de páginas por rol en [08-roles.md](08-roles.md); este capítulo se centra en cómo funciona cada pieza y cómo se conecta a la API.
 
 ## Infraestructura compartida
 
@@ -13,14 +13,15 @@ Expone `apiFetch(endpoint, opciones)`, el único punto de salida hacia la red en
 Objeto `Auth` — sesión en `sessionStorage` (no `localStorage`, a propósito: sesión distinta por pestaña). Ver el detalle completo en [07-autenticacion.md](07-autenticacion.md).
 
 ### `js/ui.js`
-Helpers de presentación puros, sin dependencia de `api.js`/`Auth`, usados en las 22 pantallas protegidas:
-- `badgeEstado` / `badgePrioridad` / `badgeCategoria` / `badgeEstadoUsuario` / `badgeEstadoEquipo` / `badgeRol` / `badgeTipoNotificacion` — badges con tono semántico según mapas fijos.
-- `formatearFecha` / `formatearFechaCorta` / `formatearPorcentaje` — formato `es-DO`.
+Helpers de presentación puros, sin dependencia de `api.js`/`Auth`, usados en las pantallas protegidas:
+- `badgeEstado` / `badgePrioridad` / `badgeCategoria` / `badgeEstadoUsuario` / `badgeEstadoEquipo` / `badgeEstadoVisita` / `badgeRol` / `badgeTipoNotificacion` — badges con tono semántico según mapas fijos.
+- `formatearFecha` / `formatearFechaCorta` / `formatearPorcentaje` — formato `es-DO`, interpretan la fecha en huso horario **local** (correcto para columnas `DATETIME` con hora real).
+- `formatearFechaSolo(valor)` — igual pero para columnas `DATE` sin hora (ej. `visita_tecnica.fecha_solicitada`): ancla todo en UTC de punta a punta para no correr el día mostrado según el huso horario del navegador. **No usar `formatearFecha`/`formatearFechaCorta` para un valor `DATE`** — fue un bug real, corregido durante el desarrollo del módulo de visitas técnicas.
 - `renderSkeleton` / `renderEmptyState` / `renderErrorRow` — estados de carga/vacío/error para tablas.
 - `paginarRender(listaOrdenada, renderFn, contenedorBoton, opciones)` — paginación 100% client-side, ya que la API no soporta `LIMIT`/`OFFSET`.
 - `renderTimeline` — pinta el timeline público/privado de un ticket.
 - `renderAdjunto` / `mostrarImagen` — placeholder + lightbox para archivos adjuntos.
-- `confirmar` / `pedirTexto` — reemplazos de `confirm()`/`prompt()` nativos con modal de Bootstrap (devuelven `Promise`).
+- `confirmar` / `pedirTexto` — reemplazos de `confirm()`/`prompt()` nativos con modal de Bootstrap (devuelven `Promise`). **`pedirTexto` exige texto no vacío** (bloquea el submit con `.is-invalid` si el campo queda en blanco) — no sirve para pedir un dato realmente opcional; para eso, usar `confirmar` sin campo de texto.
 - `toast` — aviso no bloqueante.
 - `conCargando(boton, textoCargando, fn)` — patrón disable+spinner+restaurar para botones de formulario.
 - `contarHasta(elemento, valorFinal, opciones)` — animación *count-up* para KPIs, respeta `prefers-reduced-motion`.
@@ -60,6 +61,13 @@ Renderiza documentos imprimibles dentro de `#areaImprimir` (oculto en pantalla, 
 - **`ticket-cliente.html` (`ticket-cliente.js`)**: la vista del cliente sobre su propio ticket — info de equipo, timeline público, cotización con Aprobar/Rechazar si está `Pendiente`, encuesta de satisfacción si el ticket está `Cerrado`. Deliberadamente **no comparte código** con `ticket-tecnico.js` (carga de adjuntos, formato de timeline) — se mantiene independiente a propósito.
 - **`recepcion.html` (`recepcion.js`)**: wizard de 3 pasos (buscar/crear cliente → elegir/crear equipo → crear ticket), con atajos de teclado Alt+1/2/3 y comprobante imprimible.
 
+### Visitas técnicas
+
+- **`agendar-visita.html` (`agendar-visita.js`)**: formulario del Cliente — especialidad (catálogo), fecha (`<input type="date">`), hora libre (`<input type="time">`) con un aviso informativo de horarios ya ocupados ese día por especialidad (`GET /visita-tecnica/disponibilidad`), dirección, motivo.
+- **`mis-visitas.html` (`mis-visitas.js`)**: listado del Cliente de sus propias visitas con `UI.badgeEstadoVisita` y cancelar mientras siga `Pendiente`/`Confirmada`.
+- **`agenda-visitas.html` (`agenda-visitas.js`)**: calendario de Recepción/Administrador — vistas Mes/Semana/Día hechas a mano con CSS grid (sin librería de terceros), panel de "próximas visitas", y un modal con las acciones completas (confirmar con técnico+equipo del cliente, reprogramar, reasignar técnico, cancelar). Todas las fechas se manejan ancladas en UTC de punta a punta (nunca `new Date(iso)` con getters locales) para no correr el día mostrado según el huso horario del navegador.
+- **`mis-visitas-tecnico.html` (`mis-visitas-tecnico.js`)**: cola de visitas asignadas al Técnico, con botón para avanzar de estado (`Confirmada` → `En camino` → `En progreso` → `Finalizada`), botón aparte para dejar una observación sin cambiar de estado, y enlace directo al ticket vinculado para cargar el diagnóstico.
+
 ### Usuarios
 
 - **`usuarios.html` (`admin.js`)**: CRUD completo — crear, activar/desactivar, resetear contraseña, eliminar (solo Administrador y Recepcionista pueden acceder a la creación, según el mismo control de rol que el backend).
@@ -95,9 +103,13 @@ No tiene una pantalla dedicada de gestión independiente — los equipos se crea
 | `historial.html` (historial.js) | `GET /ticket/mis` |
 | `documentos.html` (documentos.js) | `GET /cotizacion/mis(/:id)`, `GET /factura/mis(/:id)`, `GET /ticket/mis`, `GET /usuarios/:id` |
 | `ticket-cliente.html` (ticket-cliente.js) | `GET /ticket/mis`, `GET /actualizacion/notas/:id`, `GET /archivos/mis/ticket/:id`, `GET /archivos/:id/descargar`, `GET/PATCH /detalle-cotizacion/mis/ticket/:id`, `GET/PATCH /cotizacion/mis/:id(/estado)`, `GET/POST /encuestas(/mis/ticket/:id)` |
+| `agendar-visita.html` (agendar-visita.js) | `GET /especialidad`, `GET /visita-tecnica/disponibilidad`, `POST /visita-tecnica` |
+| `mis-visitas.html` (mis-visitas.js) | `GET /visita-tecnica/mis`, `PATCH /visita-tecnica/:id/cancelar` |
 | `dashboard-tecnico.html` (tecnico.js) | `GET /ticket`, `GET /asignacion`, `GET /equipo`, `PATCH /ticket/:id/estado`, `PATCH /ticket/:id/cerrar`, `POST /notificacion` |
 | `detalle-ticket.html` (ticket-tecnico.js) | `GET /ticket/:id`, `GET /usuarios/:id`, `GET /actualizacion/ticket/:id`, `POST /actualizacion`, `PUT /actualizacion/:id`, `GET /diagnostico/ticket/:id`, `POST /diagnostico`, `PUT /diagnostico/:id`, `GET /equipo/:id`, `PUT /equipo/:id`, `GET /archivos/ticket/:id`, `POST /archivos`, `DELETE /archivos/:id`, `GET /archivos/:id/descargar`, `GET/POST /notas`, `GET /notas/ticket/:id`, `GET /detalle-cotizacion/ticket/:id`, `GET/POST /cotizacion`, `GET /cotizacion/usuario/:id`, `PATCH /cotizacion/:id/descuento`, `GET /detalle-factura/ticket/:id`, `GET/POST /factura`, `PATCH /factura/:id/estado`, `GET /asignacion/ticket/:id`, `GET /encuestas/ticket/:id`, `PATCH /ticket/:id/estado`, `PATCH /ticket/:id/cerrar`, `POST /notificacion` |
-| `dashboard-admin.html` + `usuarios.html` (admin.js) | `GET /usuarios`, `POST /usuarios`, `DELETE /usuarios/:id`, `PATCH /usuarios/:id/estado`, `PATCH /usuarios/:id/clave/reset`, `GET /asignacion`, `POST /asignacion`, `PUT /asignacion/:id`, `GET /ticket`, `PATCH /ticket/:id/estado`, `GET /equipo`, `POST /notificacion` |
+| `mis-visitas-tecnico.html` (mis-visitas-tecnico.js) | `GET /visita-tecnica/tecnico/mis`, `PATCH /visita-tecnica/:id/estado` |
+| `dashboard-admin.html` + `usuarios.html` (admin.js) | `GET /usuarios`, `POST /usuarios`, `DELETE /usuarios/:id`, `PATCH /usuarios/:id/estado`, `PATCH /usuarios/:id/clave/reset`, `GET/PUT /usuarios/:id/especialidades`, `GET /especialidad`, `GET /asignacion`, `POST /asignacion`, `PUT /asignacion/:id`, `GET /ticket`, `PATCH /ticket/:id/estado`, `GET /equipo`, `POST /notificacion` |
+| `agenda-visitas.html` (agenda-visitas.js) | `GET /visita-tecnica`, `GET /visita-tecnica/disponibilidad`, `GET /equipo/usuario/:id`, `PATCH /visita-tecnica/:id/confirmar`, `PATCH /visita-tecnica/:id/reprogramar`, `PATCH /visita-tecnica/:id/asignar`, `PATCH /visita-tecnica/:id/cancelar` |
 | `auditoria.html` (auditoria.js) | `GET /auditoria` |
 | `recepcion.html` (recepcion.js) | `GET /usuarios`, `POST /usuarios`, `POST /equipo`, `GET /equipo/usuario/:id`, `POST /ticket`, `POST /notificacion` |
 | `dashboard-recepcion.html` (dashboard-recepcion.js) | `GET /ticket`, `GET /usuarios`, `GET /equipo` |

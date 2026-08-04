@@ -2,7 +2,7 @@
 
 Motor: MySQL/MariaDB (esquema exportado desde MariaDB 10.4), motor de tabla InnoDB, charset `utf8mb4` / collation `utf8mb4_unicode_ci` en todas las tablas. Definición completa en [`base de datos/schema.sql`](../base%20de%20datos/schema.sql). Sin ORM: el backend ejecuta SQL parametrizado directo vía `mysql2/promise`.
 
-Total: **15 tablas**, sin datos semilla versionados en el repositorio.
+Total: **18 tablas**, sin datos semilla versionados en el repositorio.
 
 ## 5.1. Listado de tablas
 
@@ -17,12 +17,15 @@ Total: **15 tablas**, sin datos semilla versionados en el repositorio.
 | `nota_privada` | 5 | Nota interna de staff sobre un ticket, no visible al cliente. |
 | `notificacion` | 7 | Notificación dirigida a un usuario (destinatario) sobre eventos de un ticket, con bandera de leída/no leída. |
 | `archivo_adjunto` | 11 | Archivo subido en el contexto de un ticket, opcionalmente ligado a una `actualizacion` o a una `nota_privada` puntual, con bandera público/privado. |
-| `auditoria` | 6 | Log de auditoría de acciones del sistema, ligado al usuario que las ejecuta y opcionalmente a un ticket. |
+| `auditoria` | 7 | Log de auditoría de acciones del sistema, ligado al usuario que las ejecuta y opcionalmente a un ticket o a una visita técnica. |
 | `cotizacion` | 8 | Cotización de servicio dirigida a un cliente (`usuario`), con montos (subtotal/ITBIS/descuento/total) y estado de aprobación. |
 | `detalle_cotizacion` | 7 | Línea de detalle (mano de obra/repuestos/descuento) de una cotización, ligada también al ticket que origina el servicio. |
 | `factura` | 9 | Factura generada a partir de una cotización aprobada (relación 1 a 1 forzada por `UNIQUE`), dirigida al mismo cliente. |
 | `detalle_factura` | 7 | Línea de detalle de una factura, estructuralmente paralela a `detalle_cotizacion`. |
 | `encuesta_satisfaccion` | 6 | Calificación (1-5) y comentario opcional que el cliente deja sobre un ticket cerrado (una por ticket, forzado por `UNIQUE`). |
+| `especialidad` | 3 | Catálogo de especialidades técnicas (Redes, Hardware, Software, etc.), independiente del campo de texto libre `usuario.especialidad`. |
+| `tecnico_especialidad` | 3 | Relación M:N entre `usuario` (técnico) y `especialidad` — un técnico puede tener varias. |
+| `visita_tecnica` | 14 | Solicitud/programación de una visita presencial: cliente, especialidad pedida, técnico y ticket asignados (ambos opcionales hasta que se confirma), fecha/hora, dirección, motivo, estado y observaciones. |
 
 ## 5.2. Diagrama entidad-relación
 
@@ -54,6 +57,7 @@ erDiagram
 
     USUARIO ||--o{ AUDITORIA : "genera evento"
     TICKET |o--o{ AUDITORIA : "referencia"
+    VISITA_TECNICA |o--o{ AUDITORIA : "referencia"
 
     TICKET ||--o| ENCUESTA_SATISFACCION : "es calificado en"
     USUARIO ||--o{ ENCUESTA_SATISFACCION : "califica (cliente)"
@@ -66,9 +70,17 @@ erDiagram
     USUARIO ||--o{ FACTURA : "recibe (cliente)"
     FACTURA ||--o{ DETALLE_FACTURA : "contiene"
     TICKET ||--o{ DETALLE_FACTURA : "detalla"
+
+    USUARIO ||--o{ TECNICO_ESPECIALIDAD : "tiene (tecnico)"
+    ESPECIALIDAD ||--o{ TECNICO_ESPECIALIDAD : "asignada a"
+
+    USUARIO ||--o{ VISITA_TECNICA : "solicita (cliente)"
+    ESPECIALIDAD ||--o{ VISITA_TECNICA : "tipo de servicio"
+    USUARIO |o--o{ VISITA_TECNICA : "asignado (tecnico, opcional)"
+    TICKET |o--o{ VISITA_TECNICA : "vinculado al confirmar (opcional)"
 ```
 
-Notas de lectura del diagrama: las relaciones `DIAGNOSTICO`, `ENCUESTA_SATISFACCION` y `FACTURA` usan cardinalidad `o|` (cero-o-uno) porque además de ser FK tienen un `UNIQUE KEY` que fuerza 1:1 con `TICKET`/`COTIZACION`. `ARCHIVO_ADJUNTO` respecto de `ACTUALIZACION`/`NOTA_PRIVADA` y `AUDITORIA` respecto de `TICKET` usan `|o` del lado "uno" porque esas columnas FK son `NULL`-ables (la relación es opcional).
+Notas de lectura del diagrama: las relaciones `DIAGNOSTICO`, `ENCUESTA_SATISFACCION` y `FACTURA` usan cardinalidad `o|` (cero-o-uno) porque además de ser FK tienen un `UNIQUE KEY` que fuerza 1:1 con `TICKET`/`COTIZACION`. `ARCHIVO_ADJUNTO` respecto de `ACTUALIZACION`/`NOTA_PRIVADA`, `AUDITORIA` respecto de `TICKET`/`VISITA_TECNICA`, y `VISITA_TECNICA` respecto de `USUARIO` (técnico) y `TICKET` usan `|o` del lado "uno" porque esas columnas FK son `NULL`-ables (la relación es opcional hasta que Recepción confirma la visita).
 
 ## 5.3. Detalle de cada tabla
 
@@ -230,6 +242,7 @@ Log de acciones del sistema.
 | `accion` | `varchar(50)` | NO | | código de evento, ej. `TICKET_CREADO` |
 | `descripcion` | `text` | NO | | mensaje legible |
 | `id_ticket` | `int(11)` | sí | NULL | FK → `ticket.id_ticket`, `ON DELETE SET NULL` (opcional, hay eventos sin ticket) |
+| `id_visita` | `int(11)` | sí | NULL | FK → `visita_tecnica.id_visita`, `ON DELETE SET NULL` (agregada junto con el módulo de visitas técnicas — reusa este mismo log en vez de una tabla de historial aparte) |
 | `fecha` | `datetime` | sí | `current_timestamp()` | |
 
 Sin FK entrantes. Sin `POST` público — solo se escribe internamente desde otros servicios (ver [06-api.md](06-api.md), recurso `auditoria`).
@@ -310,6 +323,51 @@ Calificación del cliente sobre un ticket cerrado.
 | `fecha` | `datetime` | sí | `current_timestamp()` | |
 
 Sin FK entrantes. Sin endpoint de edición — una vez enviada, la calificación queda fija.
+
+### `especialidad`
+Catálogo de especialidades técnicas (Redes, Hardware, Software, Servidores, CCTV, Impresoras, Seguridad, Microsoft 365, Virtualización — las 9 sembradas inicialmente). Conceptualmente distinto de `usuario.especialidad` (texto libre, sigue existiendo sin cambios como campo de perfil/bio).
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `id_especialidad` | `int(11)` | NO | AUTO_INCREMENT | PK |
+| `nombre` | `varchar(100)` | NO | | `UNIQUE` |
+| `fecha_creacion` | `datetime` | sí | `current_timestamp()` | |
+
+FK entrantes: `tecnico_especialidad.id_especialidad`, `visita_tecnica.id_especialidad`.
+
+### `tecnico_especialidad`
+Relación M:N entre un técnico y sus especialidades.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `id_tecnico_especialidad` | `int(11)` | NO | AUTO_INCREMENT | PK (surrogate, sigue la convención `id_<tabla>` del resto del schema en vez de una PK compuesta) |
+| `id_usuario` | `int(11)` | NO | | FK → `usuario.id_usuario`, `ON DELETE CASCADE` (debe ser un Técnico) |
+| `id_especialidad` | `int(11)` | NO | | FK → `especialidad.id_especialidad`, `ON DELETE CASCADE` |
+
+Índice `UNIQUE (id_usuario, id_especialidad)` — evita asignar la misma especialidad dos veces al mismo técnico. Sin FK entrantes.
+
+### `visita_tecnica`
+Solicitud y programación de una visita presencial. El cliente solo pide (fecha/hora/dirección/motivo/especialidad); técnico y ticket quedan `NULL` hasta que Recepción o Administrador confirman la visita.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `id_visita` | `int(11)` | NO | AUTO_INCREMENT | PK |
+| `id_usuario` | `int(11)` | NO | | FK → `usuario.id_usuario` (cliente solicitante) |
+| `id_especialidad` | `int(11)` | NO | | FK → `especialidad.id_especialidad` (tipo de servicio pedido) |
+| `id_tecnico` | `int(11)` | sí | NULL | FK → `usuario.id_usuario`, `ON DELETE SET NULL` (asignado al confirmar, o antes si Recepción lo adelanta) |
+| `id_ticket` | `int(11)` | sí | NULL | FK → `ticket.id_ticket`, `ON DELETE SET NULL` (se crea o se vincula uno existente recién al confirmar) |
+| `fecha_solicitada` | `date` | NO | | |
+| `hora_solicitada` | `time` | NO | | |
+| `direccion` | `varchar(255)` | NO | | |
+| `motivo` | `text` | NO | | |
+| `estado` | `varchar(20)` | NO | `'Pendiente'` | `Pendiente` / `Confirmada` / `En camino` / `En progreso` / `Finalizada` / `Cancelada` / `Reprogramada` |
+| `fecha_creacion` | `datetime` | sí | `current_timestamp()` | |
+| `fecha_confirmacion` | `datetime` | sí | NULL | se setea al pasar a `Confirmada` |
+| `observaciones` | `text` | sí | NULL | notas del técnico sobre la visita en sí — distintas del diagnóstico/solución, que viven en el `ticket` vinculado |
+
+Índice `(id_tecnico, fecha_solicitada)` — soporta el chequeo de solapamiento de horarios y las vistas de calendario. Sin FK entrantes propias (pero es referenciada opcionalmente por `auditoria.id_visita`).
+
+**Por qué `visita_tecnica` no tiene sus propios campos de diagnóstico/solución**: la decisión de diseño fue que, al confirmarse, la visita se vincula a un `ticket` (nuevo o existente) — el diagnóstico, la cotización y la factura de esa visita se resuelven íntegramente con los módulos de `ticket` ya existentes, sin duplicar esos conceptos. `visita_tecnica` solo trackea la programación en sí. Ver el flujo completo en [09-flujo-sistema.md](09-flujo-sistema.md).
 
 ## 5.4. Convenciones del esquema
 

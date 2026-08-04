@@ -32,11 +32,13 @@ Este capítulo consolida todo lo que se detectó como bug real, código incomple
 
 **F. 3 comentarios `TODO` idénticos** (`auth.service.js`, `equipo.service.js`, `usuario.service.js`): extraer las validaciones manuales a una capa de validadores dedicada.
 
-**G. No hay middleware de manejo de errores global ni handler 404 en `app.js`.** Todo depende de que cada controller tenga su propio `try/catch` (se cumple, verificado) — pero sin red de seguridad arquitectónica: cualquier error no atrapado antes de llegar a un controller cae en el manejador por defecto de Express, que devuelve HTML, no el contrato JSON `{ success, message }` del resto de la API.
+**G. ~~No hay middleware de manejo de errores global ni handler 404 en `app.js`~~ — corregido.** Se detectó como real (no solo teórico) al verificar el módulo de visitas técnicas: cualquier `next(error)` que no pasara por un controller (por ejemplo el `403` que dispara `verificarRol` cuando el rol no coincide) caía en el manejador por defecto de Express, que devuelve HTML en vez del contrato `{ success, message }`. `app.js` ahora tiene un handler `404` para rutas de `/api` inexistentes y un manejador de errores global al final de la cadena de middleware.
 
 **O. Sin transacciones explícitas en operaciones multi-query.** Por ejemplo, `crearFactura` copia las líneas de `detalle_cotizacion` a `detalle_factura` en un loop secuencial sin `BEGIN`/`COMMIT` — si la conexión fallara a mitad de camino, quedaría una factura con solo algunas líneas copiadas, sin rollback automático. Aplica en general: ningún service usa `pool.getConnection()` + transacciones.
 
 **Q. `estadosEquipo.js` está vacío a propósito** — `equipo.estado` es texto libre sin validación, a diferencia de todos los demás campos "estado" del sistema.
+
+**R. Express 5 deja `req.body` como `undefined` (no `{}` como Express 4) cuando la petición no trae ningún body.** Cualquier controller que destructure `req.body` directamente (`const { motivo } = req.body`) explota con un `500` si el llamador no manda body — pasó de verdad al construir `PATCH /api/visita-tecnica/:id/cancelar` (el `motivo` es opcional, y la primera versión del frontend directamente omitía el body). Corregido ahí con `req.body || {}`; vale revisar el resto de los controllers que asumen un body siempre presente si en el futuro se los llama con un body genuinamente opcional.
 
 ### Asimetrías de alcance (posiblemente intencionales, pero notables)
 
@@ -65,6 +67,8 @@ Ver el detalle completo de estas y otras 4 particularidades menores en [05-base-
 **`reporte-estadisticas.js` no retematiza los gráficos de Chart.js en caliente** — los colores se leen de las *custom properties* una sola vez al cargar; si el usuario alterna modo claro/oscuro sin recargar la página, el gráfico se queda con la paleta vieja. Limitación reconocida en el propio comentario del archivo.
 
 **Recepcionista no tiene página de detalle de ticket** (`detalle-ticket.html` está protegida solo para `Tecnico,Administrador`). La "consulta rápida" de `dashboard-recepcion.html` compensa parcialmente pero no hay *drill-down* real. Decisión de alcance ya tomada, no un olvido, pero es una asimetría de cobertura real entre roles.
+
+**`UI.pedirTexto` exige texto no vacío** — bloquea el submit (`.is-invalid`) si el campo queda en blanco, no sirve para pedir un dato genuinamente opcional. Se detectó como bug real al construir el módulo de visitas técnicas: varias pantallas pedían un "motivo opcional" al cancelar con `pedirTexto`, y el usuario no podía confirmar sin escribir algo, sin ningún mensaje que lo explicara. Corregido usando `UI.confirmar` (sin campo de texto) donde el dato era realmente opcional, y dejando `pedirTexto` solo donde el texto es obligatorio de verdad.
 
 **Prefijos de `Codigos.reporte()` inconsistentes entre reportes**: la mayoría usa `RPT-XXX`, pero Resueltos usa `RSL`, Equipos usa `EQP` y Notificaciones usa `NOT`. Intencional según el propio comentario del código ("cada salida usa su propia familia"), pero se lee como falta de estándar único.
 

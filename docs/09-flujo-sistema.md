@@ -81,11 +81,67 @@ stateDiagram-v2
 
 `Vencida`, a diferencia de en `cotizacion`, **no es un estado terminal** en `factura` — puede seguir cambiando a `Pagada` o `Anulada`.
 
+## Recorrido típico de una visita técnica
+
+A diferencia de un ticket (siempre creado por staff), una visita técnica nace de una solicitud del propio Cliente — pero el ticket que la respalda sigue naciendo recién cuando staff confirma, preservando la regla de que el cliente nunca crea un ticket directamente:
+
+```mermaid
+flowchart TD
+    A["Cliente solicita una visita<br/>POST /api/visita-tecnica — especialidad, fecha/hora, dirección, motivo"] --> B["Estado inicial: Pendiente"]
+    B --> C["Recepción/Administrador revisa la agenda<br/>(agenda-visitas.html) y consulta disponibilidad<br/>GET /visita-tecnica/disponibilidad"]
+    C --> D["Confirma la visita: asigna técnico<br/>PATCH /visita-tecnica/:id/confirmar"]
+    D --> E{"¿La visita ya tenía<br/>un ticket vinculado?"}
+    E -->|No| F["Se crea un ticket nuevo<br/>con un equipo del cliente<br/>(o se vincula uno existente)"]
+    E -->|Sí| G["Se usa el ticket ya vinculado"]
+    F --> H["Estado: Confirmada"]
+    G --> H
+    H --> I["Técnico marca En camino<br/>PATCH /visita-tecnica/:id/estado"]
+    I --> J["Técnico marca En progreso"]
+    J --> K["Técnico registra diagnóstico<br/>en el ticket vinculado<br/>POST /api/diagnostico"]
+    K --> L["Técnico marca Finalizada<br/>(exige el diagnóstico ya registrado)"]
+    L --> M["A partir de acá, cotización/factura/cierre<br/>del ticket siguen el flujo normal de ticket<br/>(ver diagrama de arriba)"]
+
+    B -.->|Recepción reprograma| N["Estado: Reprogramada<br/>PATCH .../reprogramar"]
+    N -.-> C
+    B -.->|Cliente o staff cancela| O["Estado: Cancelada (terminal)"]
+    H -.->|Staff cancela| O
+```
+
+### Notas sobre el diagrama
+
+- **La visita no duplica diagnóstico/solución**: esos campos viven en el `ticket` vinculado, reusando los módulos ya existentes en vez de crear un circuito de facturación paralelo. `visita_tecnica.observaciones` es distinto — son notas del técnico sobre la visita en sí (ej. "cliente no estaba en el horario acordado"), no el diagnóstico técnico.
+- **`Reprogramada` es un desvío, no un estado final**: cambia fecha/hora y vuelve a pedir confirmación (mismo endpoint `/confirmar`).
+- **Cancelar tiene alcance distinto por rol**: el Cliente solo puede cancelar su propia visita mientras siga `Pendiente`/`Confirmada`; Recepción/Administrador pueden en cualquier estado no terminal. Ver [api/visita-tecnica.md](api/visita-tecnica.md).
+- **Disponibilidad es informativa, no bloqueante**: el endpoint de disponibilidad muestra horarios ya ocupados por especialidad+fecha, pero no impide crear una visita en un horario que se solape — el chequeo real queda a criterio de Recepción al confirmar.
+
+## Ciclo de vida de una visita técnica
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pendiente: solicitud del cliente
+    Pendiente --> Confirmada: staff confirma, asigna tecnico y ticket
+    Pendiente --> Reprogramada: staff reprograma
+    Pendiente --> Cancelada: cliente o staff cancela
+    Confirmada --> Reprogramada: staff reprograma
+    Confirmada --> EnCamino: tecnico avanza el estado
+    Confirmada --> Cancelada: staff cancela
+    Reprogramada --> Confirmada: staff confirma de nuevo
+    EnCamino --> EnProgreso: tecnico avanza el estado
+    EnCamino --> Cancelada: staff cancela
+    EnProgreso --> Finalizada: exige diagnostico ya registrado en el ticket
+    EnProgreso --> Cancelada: staff cancela
+    Finalizada --> [*]: estado final
+    Cancelada --> [*]: estado final
+
+    EnCamino: En camino
+    EnProgreso: En progreso
+```
+
 ## Trazabilidad: qué queda registrado en cada paso
 
 | Evento del flujo | Dónde queda |
 |---|---|
-| Casi cualquier acción relevante (crear ticket, cerrar, asignar, aprobar cotización, cambiar factura, eliminar archivo, calificar) | `auditoria` — automático, fire-and-forget, nunca bloquea la acción principal |
+| Casi cualquier acción relevante (crear ticket, cerrar, asignar, aprobar cotización, cambiar factura, eliminar archivo, calificar, solicitar/confirmar/reprogramar/reasignar/cancelar/avanzar una visita técnica) | `auditoria` — automático, fire-and-forget, nunca bloquea la acción principal (`id_ticket` o `id_visita` según corresponda) |
 | Cambios de estado del ticket con comentario | `actualizacion` — log público, visible al cliente si tiene `observaciones` |
 | Comentarios internos del staff | `nota_privada` — nunca visible al cliente |
 | Avisos puntuales a un usuario | `notificacion` — nunca automático, siempre creado explícitamente por staff |
