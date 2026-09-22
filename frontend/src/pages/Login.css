@@ -1,0 +1,72 @@
+.login-pantalla {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-tarjeta {
+  width: 100%;
+  max-width: 360px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-tarjeta h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  color: var(--color-accent);
+}
+
+.login-subtitulo {
+  margin: 0 0 24px;
+  color: var(--color-text-dim);
+  font-size: 14px;
+}
+
+.login-tarjeta label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.login-tarjeta input {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.login-tarjeta input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.login-error {
+  color: var(--color-danger);
+  font-size: 13px;
+  margin: -8px 0 16px;
+}
+
+.login-tarjeta button {
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-tarjeta button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
