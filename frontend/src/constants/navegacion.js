@@ -13,6 +13,13 @@ export const RUTA_INICIO = {
 // muestra las que el rol puede abrir; cada historia agrega las suyas aqui.
 export const SECCIONES = [
     {
+        ruta: "/usuarios",
+        etiqueta: "Usuarios",
+        icono: "usuarios",
+        roles: [ROLES.ADMINISTRADOR],
+        descripcion: "Crea, edita y desactiva las cuentas del sistema.",
+    },
+    {
         ruta: "/perfil",
         etiqueta: "Mi perfil",
         icono: "perfil",

@@ -1,0 +1,95 @@
+.usuarios-pagina {
+  max-width: 1100px;
+}
+
+.usuarios-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.usuarios-filtros {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.usuarios-filtros .campo {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
+.usuarios-tarjeta {
+  padding: 0;
+}
+
+.usuarios-contador {
+  margin: 0;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.usuarios-tabla-envoltorio {
+  overflow-x: auto;
+}
+
+.usuarios-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.usuarios-tabla th,
+.usuarios-tabla td {
+  padding: 12px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.usuarios-tabla th {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  background: var(--color-surface-2);
+  white-space: nowrap;
+}
+
+.usuarios-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.usuarios-vacio {
+  text-align: center !important;
+  color: var(--color-text-dim);
+}
+
+.usuarios-acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.insignia {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.insignia-activo {
+  background: var(--color-ok-soft);
+  color: var(--color-ok);
+}
+
+.insignia-inactivo {
+  background: var(--color-surface-2);
+  color: var(--color-text-dim);
+}

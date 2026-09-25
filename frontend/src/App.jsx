@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { TODOS_LOS_ROLES } from "./constants/roles";
+import { ROLES, TODOS_LOS_ROLES } from "./constants/roles";
 import { RUTA_INICIO } from "./constants/navegacion";
 import RequireAuth from "./routes/RequireAuth";
 import RequireRole from "./routes/RequireRole";
@@ -11,6 +11,7 @@ import Panel from "./pages/Panel";
 import NoAutorizado from "./pages/NoAutorizado";
 import Perfil from "./pages/Perfil";
 import CambiarContrasena from "./pages/CambiarContrasena";
+import Usuarios from "./pages/Usuarios";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -33,6 +34,10 @@ export default function App() {
                             <Route path={RUTA_INICIO[rol]} element={<Panel />} />
                         </Route>
                     ))}
+
+                    <Route element={<RequireRole roles={[ROLES.ADMINISTRADOR]} />}>
+                        <Route path="/usuarios" element={<Usuarios />} />
+                    </Route>
 
                     <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
                         <Route path="/perfil" element={<Perfil />} />

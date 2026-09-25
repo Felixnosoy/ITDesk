@@ -25,3 +25,42 @@ export async function cambiarContrasena(token, id, contraseñaActual, contraseñ
         body: { contraseñaActual, contraseñaNueva },
     });
 }
+
+export async function listarUsuarios(token) {
+    const respuesta = await apiFetch("/usuarios", { token });
+
+    return respuesta.data;
+}
+
+export async function crearUsuario(token, datos) {
+    const respuesta = await apiFetch("/usuarios", { method: "POST", token, body: datos });
+
+    return respuesta.data;
+}
+
+// PUT reemplaza todos los campos editables: hay que mandarlos completos
+export async function actualizarUsuario(token, id, datos) {
+    const respuesta = await apiFetch(`/usuarios/${id}`, { method: "PUT", token, body: datos });
+
+    return respuesta.data;
+}
+
+// los usuarios no se borran: se pasan a Activo o Inactivo
+export async function cambiarEstadoUsuario(token, id, estado) {
+    const respuesta = await apiFetch(`/usuarios/${id}/estado`, {
+        method: "PATCH",
+        token,
+        body: { estado },
+    });
+
+    return respuesta.data;
+}
+
+// un administrador fija una clave nueva sin conocer la anterior
+export async function resetearContrasena(token, id, contraseñaNueva) {
+    await apiFetch(`/usuarios/${id}/clave/reset`, {
+        method: "PATCH",
+        token,
+        body: { contraseñaNueva },
+    });
+}

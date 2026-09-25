@@ -1,0 +1,19 @@
+.formulario-grilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+}
+
+.formulario-ancho {
+  grid-column: 1 / -1;
+}
+
+.formulario-grilla .campo {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .formulario-grilla {
+    grid-template-columns: 1fr;
+  }
+}
