@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Panel from "./pages/Panel";
 import NoAutorizado from "./pages/NoAutorizado";
+import Perfil from "./pages/Perfil";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -31,6 +32,10 @@ export default function App() {
                             <Route path={RUTA_INICIO[rol]} element={<Panel />} />
                         </Route>
                     ))}
+
+                    <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
+                        <Route path="/perfil" element={<Perfil />} />
+                    </Route>
                 </Route>
             </Route>
 

@@ -1,4 +1,4 @@
-import { ROLES } from "./roles";
+import { ROLES, TODOS_LOS_ROLES } from "./roles";
 
 // Pantalla de inicio propia de cada rol: al iniciar sesion, cada uno aterriza
 // en la suya.
@@ -11,7 +11,15 @@ export const RUTA_INICIO = {
 
 // Secciones del menu lateral, ademas del inicio de cada rol. El menu solo
 // muestra las que el rol puede abrir; cada historia agrega las suyas aqui.
-export const SECCIONES = [];
+export const SECCIONES = [
+    {
+        ruta: "/perfil",
+        etiqueta: "Mi perfil",
+        icono: "perfil",
+        roles: TODOS_LOS_ROLES,
+        descripcion: "Consulta tus datos y actualiza tu teléfono y dirección.",
+    },
+];
 
 export const seccionesParaRol = (rol) =>
     SECCIONES.filter((seccion) => seccion.roles.includes(rol));

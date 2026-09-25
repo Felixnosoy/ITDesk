@@ -1,0 +1,29 @@
+.perfil-bloque {
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.perfil-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.perfil-datos div {
+  min-width: 0;
+}
+
+.perfil-datos dt {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+.perfil-datos dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
