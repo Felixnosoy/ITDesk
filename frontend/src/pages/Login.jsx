@@ -33,7 +33,7 @@ export default function Login() {
         <div className="login-pantalla">
             <form className="login-tarjeta" onSubmit={manejarSubmit}>
                 <h1>ITDesk</h1>
-                <p className="login-subtitulo">Iniciá sesión para continuar</p>
+                <p className="login-subtitulo">Inicia sesión para continuar</p>
 
                 <label htmlFor="correo">Correo</label>
                 <input

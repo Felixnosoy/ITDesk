@@ -1,0 +1,74 @@
+.panel-cuenta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.panel-cuenta div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.panel-cuenta strong {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.panel-etiqueta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+.panel-subtitulo {
+  margin: 28px 0 12px;
+  font-size: 16px;
+}
+
+.panel-accesos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.panel-acceso {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.panel-acceso:hover {
+  border-color: var(--color-accent);
+}
+
+.panel-acceso strong {
+  color: var(--color-accent);
+}
+
+.panel-acceso span {
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+
+.panel-proximamente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel-proximamente li {
+  padding: 6px 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: 99px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+}

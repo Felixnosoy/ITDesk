@@ -8,3 +8,11 @@ export const ROLES = {
 };
 
 export const TODOS_LOS_ROLES = Object.values(ROLES);
+
+// Nombre para mostrar en pantalla: el valor guardado no lleva tilde.
+export const ETIQUETA_ROL = {
+    [ROLES.ADMINISTRADOR]: "Administrador",
+    [ROLES.TECNICO]: "Técnico",
+    [ROLES.CLIENTE]: "Cliente",
+    [ROLES.RECEPCIONISTA]: "Recepcionista",
+};

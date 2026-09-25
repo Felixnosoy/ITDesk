@@ -1,10 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { TODOS_LOS_ROLES } from "./constants/roles";
+import { RUTA_INICIO } from "./constants/navegacion";
 import RequireAuth from "./routes/RequireAuth";
 import RequireRole from "./routes/RequireRole";
+import IrAlPanel from "./routes/IrAlPanel";
+import Layout from "./components/Layout";
 import Login from "./pages/Login";
-import Inicio from "./pages/Inicio";
+import Panel from "./pages/Panel";
 import NoAutorizado from "./pages/NoAutorizado";
 
 export default function App() {
@@ -18,12 +21,21 @@ export default function App() {
             />
 
             <Route element={<RequireAuth />}>
-                <Route path="/no-autorizado" element={<NoAutorizado />} />
+                <Route element={<Layout />}>
+                    <Route path="/" element={<IrAlPanel />} />
+                    <Route path="/no-autorizado" element={<NoAutorizado />} />
 
-                <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
-                    <Route path="/" element={<Inicio />} />
+                    {/* cada rol tiene su propio panel de inicio */}
+                    {TODOS_LOS_ROLES.map((rol) => (
+                        <Route key={rol} element={<RequireRole roles={[rol]} />}>
+                            <Route path={RUTA_INICIO[rol]} element={<Panel />} />
+                        </Route>
+                    ))}
                 </Route>
             </Route>
+
+            {/* cualquier otra direccion vuelve a la raiz, que decide segun la sesion */}
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

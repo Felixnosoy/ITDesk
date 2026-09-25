@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { EVENTO_SESION_EXPIRADA } from "../api/client";
 
 const AuthContext = createContext(null);
 
@@ -22,10 +23,17 @@ export function AuthProvider({ children }) {
         setSesion(nuevaSesion);
     };
 
-    const cerrarSesion = () => {
+    const cerrarSesion = useCallback(() => {
         localStorage.removeItem(CLAVE_SESION);
         setSesion(null);
-    };
+    }, []);
+
+    // si el servidor rechaza el token (vencido), se cierra la sesion y
+    // RequireAuth devuelve al usuario al login
+    useEffect(() => {
+        window.addEventListener(EVENTO_SESION_EXPIRADA, cerrarSesion);
+        return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, cerrarSesion);
+    }, [cerrarSesion]);
 
     return (
         <AuthContext.Provider value={{ sesion, iniciarSesion, cerrarSesion }}>
