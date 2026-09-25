@@ -143,3 +143,44 @@ describe("usuario.service.actualizarEstadoUsuario", () => {
         expect(argsUpdate[0]).toBe("Inactivo");
     });
 });
+
+describe("usuario.service.actualizarPerfilPropio", () => {
+    test("rechaza con 404 si el usuario no existe", async () => {
+        pool.query.mockResolvedValueOnce([[]]); // verificarUsuarioExiste
+
+        await expect(usuarioService.actualizarPerfilPropio(99, { telefono: "1", direccion: "2" }))
+            .rejects.toMatchObject({ status: 404 });
+    });
+
+    test("solo actualiza telefono y direccion, nunca rol ni correo", async () => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_usuario: 5 }]])                       // existe
+            .mockResolvedValueOnce([{ affectedRows: 1 }])                       // UPDATE
+            .mockResolvedValueOnce([[{ id_usuario: 5, telefono: "809-1", direccion: "Calle 1" }]]); // SELECT final
+
+        // aunque lleguen mas campos, el service solo lee telefono y direccion
+        await usuarioService.actualizarPerfilPropio(5, {
+            telefono: "809-1",
+            direccion: "Calle 1",
+            rol: "Administrador",
+            correo: "otro@itdesk.com"
+        });
+
+        const [sql, params] = pool.query.mock.calls[1];
+
+        expect(sql).toMatch(/SET telefono = \?, direccion = \?/);
+        expect(sql).not.toMatch(/rol|correo|estado/);
+        expect(params).toEqual(["809-1", "Calle 1", 5]);
+    });
+
+    test("un valor vacio se guarda como NULL", async () => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_usuario: 5 }]])
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([[{ id_usuario: 5 }]]);
+
+        await usuarioService.actualizarPerfilPropio(5, { telefono: "", direccion: "" });
+
+        expect(pool.query.mock.calls[1][1]).toEqual([null, null, 5]);
+    });
+});
