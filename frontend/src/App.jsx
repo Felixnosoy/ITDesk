@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Panel from "./pages/Panel";
 import NoAutorizado from "./pages/NoAutorizado";
 import Perfil from "./pages/Perfil";
+import CambiarContrasena from "./pages/CambiarContrasena";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -35,6 +36,7 @@ export default function App() {
 
                     <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
                         <Route path="/perfil" element={<Perfil />} />
+                        <Route path="/cambiar-contrasena" element={<CambiarContrasena />} />
                     </Route>
                 </Route>
             </Route>

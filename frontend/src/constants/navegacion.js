@@ -19,6 +19,13 @@ export const SECCIONES = [
         roles: TODOS_LOS_ROLES,
         descripcion: "Consulta tus datos y actualiza tu teléfono y dirección.",
     },
+    {
+        ruta: "/cambiar-contrasena",
+        etiqueta: "Cambiar contraseña",
+        icono: "llave",
+        roles: TODOS_LOS_ROLES,
+        descripcion: "Actualiza la contraseña con la que inicias sesión.",
+    },
 ];
 
 export const seccionesParaRol = (rol) =>
