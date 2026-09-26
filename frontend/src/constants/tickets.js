@@ -44,3 +44,6 @@ export const ETIQUETA_CATEGORIA = {
     [CATEGORIAS.RED]: "Red",
     [CATEGORIAS.OTRO]: "Otro",
 };
+
+// Estado inicial del panel de filtros del listado: sin ningun filtro aplicado.
+export const FILTROS_VACIOS = { busqueda: "", estado: "", categoria: "", prioridad: "" };
