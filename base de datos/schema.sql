@@ -4,11 +4,15 @@
 
 SET NAMES utf8mb4;
 
+-- se borran primero las tablas que dependen de otras (FK), para que el
+-- script se pueda volver a correr sobre una base ya creada
+DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `usuario`;
+
 --
 -- Tabla `usuario`
 --
 
-DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE `usuario` (
   `id_usuario` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
@@ -36,7 +40,6 @@ CREATE TABLE `usuario` (
 -- ALTER TABLE cuando esos modulos se construyan.
 --
 
-DROP TABLE IF EXISTS `auditoria`;
 CREATE TABLE `auditoria` (
   `id_auditoria` int(11) NOT NULL AUTO_INCREMENT,
   `id_usuario` int(11) NOT NULL,
