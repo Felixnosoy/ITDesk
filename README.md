@@ -94,16 +94,38 @@ Las pruebas usan una base de datos simulada, así que no necesitan MySQL.
 
 ## Cómo trabajamos en equipo
 
-- Nadie hace commits directos a `main`. Cada historia o subtarea va en su propia rama:
+Cada integrante tiene su propia rama y nadie hace commits en `main`. GitHub no lo permite: todo cambio entra por Pull Request con la aprobación del otro integrante.
 
-  ```bash
-  git switch main && git pull
-  git switch -c feat/hu07-nombre-corto
-  ```
+| Integrante | Rama |
+| --- | --- |
+| Felix | `felix` |
+| Marco | `marco` |
 
-- Al terminar, se sube la rama y se abre un Pull Request hacia `main`. El otro integrante lo revisa antes del merge.
-- `npm test` tiene que pasar antes de abrir el Pull Request.
-- Si `main` avanzó mientras trabajabas, trae esos cambios a tu rama con `git merge main` antes del Pull Request.
-- Commits en español, uno por tarea, con el formato `tipo(modulo): descripcion`. Por ejemplo: `feat(tickets): ...`, `fix(auth): ...`, `test(usuarios): ...`.
+### Antes de empezar una tarea
+
+Trae a tu rama lo último que se haya aprobado en `main`:
+
+```bash
+git switch marco            # o felix
+git pull                    # lo último de tu propia rama
+git pull origin main        # lo último aprobado en main
+```
+
+### Al terminar una tarea
+
+```bash
+cd backend && npm test      # tiene que pasar
+git push
+gh pr create --base main    # o desde la web de GitHub
+```
+
+El otro integrante revisa el Pull Request y lo aprueba. Después se hace el merge (solo está habilitado el merge commit). Si subes más commits después de la aprobación, hay que aprobarlo de nuevo.
+
+Cuando se haga el merge, los dos corren `git pull origin main` en su rama para quedar al día.
+
+### Reglas
+
+- Commits en español, con el formato `tipo(modulo): descripcion`. Por ejemplo: `feat(tickets): ...`, `fix(auth): ...`, `test(usuarios): ...`.
 - **Cambios en la base de datos:** todo cambio de tablas se agrega a `base de datos/schema.sql` en el mismo Pull Request, y se avisa al otro integrante para que actualice su base local. Cada uno tiene su propia base, así que un cambio no avisado rompe el backend del otro.
 - Las tareas se toman del tablero del proyecto en GitHub. Asígnate el issue antes de empezar para no trabajar los dos en lo mismo.
+- Pull Requests cortos, una historia o subtarea a la vez. Un PR grande es difícil de revisar y es más fácil que choque con el trabajo del otro.
