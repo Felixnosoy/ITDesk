@@ -1,5 +1,9 @@
 const pool = require("../config/database");
+const crearError = require("../utils/crearError");
 const ROLES = require("../constants/roles");
+const ESTADOS_TICKET = require("../constants/estadosTicket");
+const PRIORIDADES_TICKET = require("../constants/prioridadesTicket");
+const CATEGORIAS_TICKET = require("../constants/categoriasTicket");
 
 const COLUMNAS_TICKET = `
     t.id_ticket,
@@ -37,16 +41,53 @@ const JOIN_TICKET = `
         ON a.id_usuario = tec.id_usuario
 `;
 
+// filtros que acepta el listado: parametro de la URL -> columna y catalogo
+const FILTROS = {
+    estado: { columna: "t.estado", catalogo: Object.values(ESTADOS_TICKET) },
+    prioridad: { columna: "t.prioridad", catalogo: Object.values(PRIORIDADES_TICKET) },
+    categoria: { columna: "t.categoria", catalogo: Object.values(CATEGORIAS_TICKET) }
+};
+
+// Un valor fuera del catalogo responde 400 con el motivo en vez de devolver
+// una lista vacia, asi un error de escritura en el frontend no pasa por
+// "no hay tickets". Vacio o ausente significa sin filtro.
+const validarFiltros = (filtros = {}) => {
+    const validos = {};
+
+    for (const [nombre, { catalogo }] of Object.entries(FILTROS)) {
+        const valor = filtros[nombre];
+
+        if (valor === undefined || valor === "") continue;
+
+        if (typeof valor !== "string" || !catalogo.includes(valor)) {
+            throw crearError(
+                `Filtro de ${nombre} inválido. Debe ser uno de: ${catalogo.join(", ")}.`,
+                400
+            );
+        }
+
+        validos[nombre] = valor;
+    }
+
+    return validos;
+};
+
 // Listado de tickets segun quien consulta: el Cliente solo ve los suyos y
 // el personal del taller ve todos. El id del cliente sale del token, nunca
-// de un parametro, para que no pueda pedir los tickets de otro.
-const obtenerTickets = async (usuario) => {
+// de un parametro, para que no pueda pedir los tickets de otro. Los filtros
+// se suman a ese alcance, nunca lo amplian.
+const obtenerTickets = async (usuario, filtros = {}) => {
     const condiciones = [];
     const parametros = [];
 
     if (usuario.rol === ROLES.CLIENTE) {
         condiciones.push("t.id_usuario = ?");
         parametros.push(usuario.id_usuario);
+    }
+
+    for (const [nombre, valor] of Object.entries(validarFiltros(filtros))) {
+        condiciones.push(`${FILTROS[nombre].columna} = ?`);
+        parametros.push(valor);
     }
 
     const where = condiciones.length > 0

@@ -3,7 +3,13 @@ const responder = require("../utils/respuesta");
 
 const obtenerTickets = async (req, res) => {
     try {
-        const tickets = await ticketService.obtenerTickets(req.usuario);
+        const { estado, prioridad, categoria } = req.query;
+
+        const tickets = await ticketService.obtenerTickets(req.usuario, {
+            estado,
+            prioridad,
+            categoria
+        });
 
         responder(res, 200, {
             data: tickets

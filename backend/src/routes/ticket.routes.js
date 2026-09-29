@@ -9,7 +9,8 @@ const autenticarToken = require("../middleware/auth.middleware");
 router.use(autenticarToken);
 
 // listado de tickets: cualquier rol autenticado, el alcance (propios o
-// todos) lo decide el service segun el rol del token
+// todos) lo decide el service segun el rol del token.
+// Filtros opcionales: ?estado=&prioridad=&categoria=
 router.get(
     "/",
     ticketController.obtenerTickets
