@@ -2,6 +2,7 @@ const pool = require("../config/database")
 const bcrypt = require("bcrypt");
 const crearError = require("../utils/crearError");
 const ESTADOS_USUARIO = require("../constants/estadosUsuario");
+const ROLES = require("../constants/roles");
 const { verificarUsuarioExiste } = require("../validators/usuario.validator");
 
 // TODO: extraer las validaciones manuales de este service a una capa de
@@ -125,6 +126,66 @@ const obtenerUsuarios = async () => {
     return usuarios
 
 }
+
+const LONGITUD_MINIMA_BUSQUEDA = 2;
+const LIMITE_BUSQUEDA_CLIENTES = 20;
+
+// % y _ son comodines de LIKE: se escapan para que un documento como
+// "001_2" se busque literal y no como patron
+const escaparLike = (texto) => texto.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+// Busqueda de clientes para el registro de tickets en Recepcion: por
+// nombre, apellido, nombre completo, documento o correo. Solo clientes
+// activos, porque a un cliente desactivado no se le abren tickets nuevos.
+const buscarClientes = async (busqueda) => {
+    const texto = typeof busqueda === "string" ? busqueda.trim() : "";
+
+    if (texto.length < LONGITUD_MINIMA_BUSQUEDA) {
+        throw crearError(
+            `Escribe al menos ${LONGITUD_MINIMA_BUSQUEDA} caracteres para buscar.`,
+            400
+        );
+    }
+
+    const patron = `%${escaparLike(texto)}%`;
+
+    const [clientes] = await pool.query(
+        `
+        SELECT
+            id_usuario,
+            nombre,
+            apellido,
+            correo,
+            tipo_documento,
+            num_documento,
+            telefono
+        FROM usuario
+        WHERE rol = ?
+        AND estado = ?
+        AND (
+            nombre LIKE ?
+            OR apellido LIKE ?
+            OR CONCAT(nombre, ' ', apellido) LIKE ?
+            OR num_documento LIKE ?
+            OR correo LIKE ?
+        )
+        ORDER BY nombre, apellido
+        LIMIT ?
+        `,
+        [
+            ROLES.CLIENTE,
+            ESTADOS_USUARIO.ACTIVO,
+            patron,
+            patron,
+            patron,
+            patron,
+            patron,
+            LIMITE_BUSQUEDA_CLIENTES
+        ]
+    );
+
+    return clientes;
+};
 
 //funcion para obtener el usuario por Id
 const obtenerUsuarioPorId = async (id) => {
@@ -356,6 +417,7 @@ const resetearContrasena = async (id, contraseñaNueva) => {
 };
 
 module.exports = {
+    buscarClientes,
     crearUsuario,
     obtenerUsuarios,
     obtenerUsuarioPorId,

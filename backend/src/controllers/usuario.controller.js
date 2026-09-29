@@ -47,6 +47,21 @@ const obtenerUsuarios = async (req, res) => {
     }
 }
 
+const buscarClientes = async (req, res) => {
+    try {
+        const clientes = await usuarioService.buscarClientes(req.query.busqueda);
+
+        responder(res, 200, {
+            data: clientes
+        })
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        })
+    }
+}
+
 const ROLES_STAFF_CONSULTA = [ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA];
 
 const obtenerUsuarioPorId = async (req, res) => {
@@ -199,6 +214,7 @@ const actualizarPerfilPropio = async (req, res) => {
 }
 
 module.exports = {
+    buscarClientes,
     crearUsuario,
     obtenerUsuarios,
     obtenerUsuarioPorId,
