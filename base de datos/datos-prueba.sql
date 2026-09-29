@@ -49,3 +49,13 @@ INSERT INTO `ticket` (`id_usuario`, `id_equipo`, `titulo`, `descripcion`, `prior
   (@maria, @vivobook, 'Bateria no carga', 'Se queda en 0% conectada al cargador.', 'Alta', 'Hardware', 'Esperando aprobacion', NOW() - INTERVAL 7 DAY, NULL, NULL),
   (@maria, @vivobook, 'Recuperar archivos borrados', 'Se borro una carpeta de documentos por error.', 'Media', 'Otro', 'Resuelto', NOW() - INTERVAL 10 DAY, NOW() - INTERVAL 9 DAY, NULL),
   (@maria, @desktop, 'Revision general', 'Mantenimiento preventivo antes de fin de ano.', 'Baja', 'Otro', 'Cerrado', NOW() - INTERVAL 30 DAY, NOW() - INTERVAL 28 DAY, NOW() - INTERVAL 27 DAY);
+
+-- todos los tickets de ejemplo quedan asignados al tecnico de prueba,
+-- asignados por la recepcionista de prueba
+INSERT INTO `asignacion` (`id_ticket`, `id_usuario`, `id_asignado_por`)
+SELECT t.id_ticket, tec.id_usuario, rec.id_usuario
+FROM ticket t
+CROSS JOIN usuario tec
+CROSS JOIN usuario rec
+WHERE tec.correo = 'tecnico.prueba@itdesk.test'
+AND rec.correo = 'recepcionista.prueba@itdesk.test';

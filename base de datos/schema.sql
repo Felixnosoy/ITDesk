@@ -7,6 +7,7 @@ SET NAMES utf8mb4;
 -- se borran primero las tablas que dependen de otras (FK), para que el
 -- script se pueda volver a correr sobre una base ya creada
 DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `asignacion`;
 DROP TABLE IF EXISTS `ticket`;
 DROP TABLE IF EXISTS `equipo`;
 DROP TABLE IF EXISTS `usuario`;
@@ -110,3 +111,28 @@ CREATE TABLE `ticket` (
 ALTER TABLE `auditoria`
   ADD KEY `FK_Auditoria_Ticket` (`id_ticket`),
   ADD CONSTRAINT `FK_Auditoria_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Tabla `asignacion`
+--
+-- Historial de tecnicos asignados a cada ticket. Solo una fila por ticket
+-- tiene activa = 1 (el tecnico actual); al reasignar, la anterior pasa a 0
+-- en vez de borrarse, para no perder quien trabajo antes en el ticket.
+-- id_asignado_por guarda quien hizo la asignacion (Recepcion o Admin).
+--
+
+CREATE TABLE `asignacion` (
+  `id_asignacion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_asignado_por` int(11) NOT NULL,
+  `activa` tinyint(1) NOT NULL DEFAULT 1,
+  `fecha_asignacion` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_asignacion`),
+  KEY `IX_Asignacion_Ticket_Activa` (`id_ticket`, `activa`),
+  KEY `FK_Asignacion_Usuario` (`id_usuario`),
+  KEY `FK_Asignacion_AsignadoPor` (`id_asignado_por`),
+  CONSTRAINT `FK_Asignacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Asignacion_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Asignacion_AsignadoPor` FOREIGN KEY (`id_asignado_por`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
