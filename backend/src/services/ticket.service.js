@@ -4,6 +4,8 @@ const ROLES = require("../constants/roles");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
 const PRIORIDADES_TICKET = require("../constants/prioridadesTicket");
 const CATEGORIAS_TICKET = require("../constants/categoriasTicket");
+const ESTADOS_USUARIO = require("../constants/estadosUsuario");
+const { validarId, validarTexto } = require("../validators/comun.validator");
 
 const COLUMNAS_TICKET = `
     t.id_ticket,
@@ -108,6 +110,124 @@ const obtenerTickets = async (usuario, filtros = {}) => {
     return tickets;
 };
 
+const validarCatalogo = (valor, campo, catalogo) => {
+    if (typeof valor !== "string" || !catalogo.includes(valor.trim())) {
+        throw crearError(`El campo ${campo} debe ser uno de: ${catalogo.join(", ")}.`, 400);
+    }
+
+    return valor.trim();
+};
+
+// Valida todo lo que llega en el body antes de tocar la base, asi un error
+// de formato nunca deja nada a medias.
+const validarDatosTicket = (datos = {}) => ({
+    id_cliente: validarId(datos.id_cliente, "id_cliente"),
+    id_equipo: validarId(datos.id_equipo, "id_equipo"),
+    id_tecnico: validarId(datos.id_tecnico, "id_tecnico"),
+    titulo: validarTexto(datos.titulo, "titulo", 150),
+    descripcion: validarTexto(datos.descripcion, "descripcion"),
+    prioridad: validarCatalogo(datos.prioridad, "prioridad", Object.values(PRIORIDADES_TICKET)),
+    categoria: validarCatalogo(datos.categoria, "categoria", Object.values(CATEGORIAS_TICKET))
+});
+
+// Reglas que dependen de la base: cliente activo, equipo de ese cliente y
+// tecnico activo. El tecnico es obligatorio: un ticket sin responsable no
+// se crea.
+const verificarReferenciasTicket = async ({ id_cliente, id_equipo, id_tecnico }) => {
+    const [clientes] = await pool.query(
+        "SELECT estado FROM usuario WHERE id_usuario = ? AND rol = ?",
+        [id_cliente, ROLES.CLIENTE]
+    );
+
+    if (clientes.length === 0) {
+        throw crearError("El cliente no existe.", 404);
+    }
+
+    if (clientes[0].estado !== ESTADOS_USUARIO.ACTIVO) {
+        throw crearError("El cliente está inactivo.", 400);
+    }
+
+    const [equipos] = await pool.query(
+        "SELECT id_equipo FROM equipo WHERE id_equipo = ? AND id_usuario = ?",
+        [id_equipo, id_cliente]
+    );
+
+    if (equipos.length === 0) {
+        throw crearError("El equipo no existe o no pertenece a este cliente.", 400);
+    }
+
+    const [tecnicos] = await pool.query(
+        "SELECT id_usuario FROM usuario WHERE id_usuario = ? AND rol = ? AND estado = ?",
+        [id_tecnico, ROLES.TECNICO, ESTADOS_USUARIO.ACTIVO]
+    );
+
+    if (tecnicos.length === 0) {
+        throw crearError("El técnico asignado no existe o no está activo.", 400);
+    }
+};
+
+// Crea el ticket a nombre de un cliente, ya asignado a un tecnico. El
+// ticket y su asignacion se guardan en una sola transaccion: si falla la
+// asignacion no queda un ticket sin tecnico.
+const crearTicket = async (datos, id_asignado_por) => {
+    const ticket = validarDatosTicket(datos);
+
+    await verificarReferenciasTicket(ticket);
+
+    const conexion = await pool.getConnection();
+    let id_ticket;
+
+    try {
+        await conexion.beginTransaction();
+
+        const [resultado] = await conexion.query(
+            `
+            INSERT INTO ticket (id_usuario, id_equipo, titulo, descripcion, prioridad, categoria, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            `,
+            [
+                ticket.id_cliente,
+                ticket.id_equipo,
+                ticket.titulo,
+                ticket.descripcion,
+                ticket.prioridad,
+                ticket.categoria,
+                ESTADOS_TICKET.ABIERTO
+            ]
+        );
+
+        id_ticket = resultado.insertId;
+
+        await conexion.query(
+            `
+            INSERT INTO asignacion (id_ticket, id_usuario, id_asignado_por)
+            VALUES (?, ?, ?)
+            `,
+            [id_ticket, ticket.id_tecnico, id_asignado_por]
+        );
+
+        await conexion.commit();
+    } catch (error) {
+        await conexion.rollback();
+        throw error;
+    } finally {
+        conexion.release();
+    }
+
+    const [tickets] = await pool.query(
+        `
+        SELECT
+            ${COLUMNAS_TICKET}
+        ${JOIN_TICKET}
+        WHERE t.id_ticket = ?
+        `,
+        [id_ticket]
+    );
+
+    return tickets[0];
+};
+
 module.exports = {
-    obtenerTickets
+    obtenerTickets,
+    crearTicket
 };
