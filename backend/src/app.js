@@ -6,6 +6,7 @@ const responder = require('./utils/respuesta');
 const healthRoutes = require('./routes/health.routes')
 const usuarioRoutes = require('./routes/usuario.routes')
 const authRoutes = require("./routes/auth.routes");
+const ticketRoutes = require("./routes/ticket.routes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/health", healthRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 // ninguna ruta de arriba matcheo — recurso de la API inexistente
 app.use("/api", (req, res) => {
