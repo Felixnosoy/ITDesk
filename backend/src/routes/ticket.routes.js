@@ -4,6 +4,7 @@ const router = express.Router();
 
 const ticketController = require("../controllers/ticket.controller");
 const diagnosticoController = require("../controllers/diagnostico.controller");
+const seguimientoController = require("../controllers/seguimiento.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
@@ -34,6 +35,20 @@ router.put(
     "/:id/diagnostico",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
     diagnosticoController.registrarDiagnostico
+);
+
+// avance publico: lo escribe el taller y lo ve tambien el cliente
+router.post(
+    "/:id/actualizaciones",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    seguimientoController.crearActualizacion
+);
+
+// nota privada: solo el taller la escribe y la ve
+router.post(
+    "/:id/notas",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    seguimientoController.crearNota
 );
 
 module.exports = router;
