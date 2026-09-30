@@ -45,3 +45,32 @@ describe("detalle.service.obtenerDetalle", () => {
         expect(detalle.notas_privadas[0].adjuntos).toEqual([{ id_archivo: 51, url: "/api/archivos/51" }]);
     });
 });
+
+describe("detalle.service.obtenerDetalle (visibilidad del Cliente)", () => {
+    const cliente = { id_usuario: 5, rol: "Cliente" };
+
+    test("el Cliente dueño recibe el detalle sin la clave notas_privadas", async () => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado: "Abierto" }]])
+            .mockResolvedValueOnce([[]])                          // diagnostico
+            .mockResolvedValueOnce([[{ id_actualizacion: 1 }]])   // actualizaciones
+            .mockResolvedValueOnce([[]]);                         // adjuntos publicos
+
+        const detalle = await detalleService.obtenerDetalle("10", cliente);
+
+        expect(detalle).not.toHaveProperty("notas_privadas");
+        expect(detalle.actualizaciones).toHaveLength(1);
+        // nunca se consulta la tabla de notas ni los adjuntos privados
+        const consultas = pool.query.mock.calls.map(([sql]) => sql).join(" ");
+        expect(consultas).not.toContain("nota_privada");
+        expect(consultas).not.toContain("id_nota");
+    });
+
+    test("un ticket ajeno responde 404 sin consultar nada mas", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 99, estado: "Abierto" }]]);
+
+        await expect(detalleService.obtenerDetalle("10", cliente)).rejects.toMatchObject({ status: 404 });
+
+        expect(pool.query).toHaveBeenCalledTimes(1);
+    });
+});

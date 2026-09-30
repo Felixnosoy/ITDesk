@@ -32,10 +32,10 @@ router.post(
 );
 
 // detalle completo del ticket: resumen, diagnostico, linea de tiempo y
-// notas privadas. Por ahora solo el personal del taller.
+// notas privadas. Cualquier rol autenticado; el Cliente solo abre los
+// suyos y nunca recibe las notas privadas (lo decide el service).
 router.get(
     "/:id",
-    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
     ticketController.obtenerDetalle
 );
 
