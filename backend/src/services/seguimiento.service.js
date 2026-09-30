@@ -2,6 +2,7 @@ const pool = require("../config/database");
 const crearError = require("../utils/crearError");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
 const ticketService = require("./ticket.service");
+const archivoService = require("./archivo.service");
 const { validarTexto } = require("../validators/comun.validator");
 
 // Seguimiento del ticket: actualizaciones publicas (las ve el cliente) y
@@ -77,41 +78,90 @@ const obtenerNotas = async (id_ticket, condicion = "n.id_ticket = ?", parametro 
     return notas;
 };
 
-// Avance publico escrito por el tecnico. Guarda el estado que tenia el
-// ticket en ese momento, para que la linea de tiempo lo muestre.
-const crearActualizacion = async (idTicket, datos = {}, usuario) => {
-    const observaciones = validarTexto(datos.observaciones, "observaciones");
-    const ticket = await obtenerTicketAbierto(idTicket, usuario);
+// Guarda el padre (actualizacion o nota) y sus imagenes en una sola
+// transaccion. Si algo falla se deshace la fila y se borran del disco las
+// imagenes que ya se habian escrito.
+const guardarConAdjuntos = async ({ ticket, usuario, imagenes, insertarPadre, columnaPadre }) => {
+    const conexion = await pool.getConnection();
+    let rutas = [];
 
-    const [resultado] = await pool.query(
-        `
-        INSERT INTO actualizacion (id_ticket, id_usuario, tipo, estado, observaciones)
-        VALUES (?, ?, ?, ?, ?)
-        `,
-        [ticket.id_ticket, usuario.id_usuario, TIPOS_ACTUALIZACION.AVANCE, ticket.estado, observaciones]
-    );
+    try {
+        await conexion.beginTransaction();
 
-    const [actualizacion] = await obtenerActualizaciones(null, "a.id_actualizacion = ?", resultado.insertId);
+        const [resultado] = await insertarPadre(conexion);
+        const idPadre = resultado.insertId;
 
-    return actualizacion;
+        rutas = await archivoService.guardarAdjuntos(conexion, imagenes, {
+            id_ticket: ticket.id_ticket,
+            id_usuario: usuario.id_usuario,
+            [columnaPadre]: idPadre
+        });
+
+        await conexion.commit();
+
+        return idPadre;
+    } catch (error) {
+        await conexion.rollback();
+        await archivoService.borrarArchivos(rutas);
+        throw error;
+    } finally {
+        conexion.release();
+    }
 };
 
-// Nota interna del taller: nunca se devuelve al cliente.
-const crearNota = async (idTicket, datos = {}, usuario) => {
-    const contenido = validarTexto(datos.contenido, "contenido");
+// Avance publico escrito por el tecnico, con imagenes opcionales. Guarda
+// el estado que tenia el ticket en ese momento, para que la linea de
+// tiempo lo muestre.
+const crearActualizacion = async (idTicket, datos = {}, usuario, archivos = []) => {
+    const observaciones = validarTexto(datos.observaciones, "observaciones");
+    const imagenes = archivoService.validarImagenes(archivos);
     const ticket = await obtenerTicketAbierto(idTicket, usuario);
 
-    const [resultado] = await pool.query(
-        `
-        INSERT INTO nota_privada (id_ticket, id_usuario, contenido)
-        VALUES (?, ?, ?)
-        `,
-        [ticket.id_ticket, usuario.id_usuario, contenido]
-    );
+    const id = await guardarConAdjuntos({
+        ticket,
+        usuario,
+        imagenes,
+        columnaPadre: "id_actualizacion",
+        insertarPadre: (conexion) => conexion.query(
+            `
+            INSERT INTO actualizacion (id_ticket, id_usuario, tipo, estado, observaciones)
+            VALUES (?, ?, ?, ?, ?)
+            `,
+            [ticket.id_ticket, usuario.id_usuario, TIPOS_ACTUALIZACION.AVANCE, ticket.estado, observaciones]
+        )
+    });
 
-    const [nota] = await obtenerNotas(null, "n.id_nota = ?", resultado.insertId);
+    const [actualizacion] = await obtenerActualizaciones(null, "a.id_actualizacion = ?", id);
+    const adjuntos = await archivoService.obtenerAdjuntosPorPadre("id_actualizacion", [id]);
 
-    return nota;
+    return { ...actualizacion, adjuntos: adjuntos.get(id) };
+};
+
+// Nota interna del taller, con imagenes opcionales: nunca se devuelve al
+// cliente, y sus imagenes tampoco.
+const crearNota = async (idTicket, datos = {}, usuario, archivos = []) => {
+    const contenido = validarTexto(datos.contenido, "contenido");
+    const imagenes = archivoService.validarImagenes(archivos);
+    const ticket = await obtenerTicketAbierto(idTicket, usuario);
+
+    const id = await guardarConAdjuntos({
+        ticket,
+        usuario,
+        imagenes,
+        columnaPadre: "id_nota",
+        insertarPadre: (conexion) => conexion.query(
+            `
+            INSERT INTO nota_privada (id_ticket, id_usuario, contenido)
+            VALUES (?, ?, ?)
+            `,
+            [ticket.id_ticket, usuario.id_usuario, contenido]
+        )
+    });
+
+    const [nota] = await obtenerNotas(null, "n.id_nota = ?", id);
+    const adjuntos = await archivoService.obtenerAdjuntosPorPadre("id_nota", [id]);
+
+    return { ...nota, adjuntos: adjuntos.get(id) };
 };
 
 module.exports = {

@@ -8,6 +8,7 @@ const usuarioRoutes = require('./routes/usuario.routes')
 const authRoutes = require("./routes/auth.routes");
 const ticketRoutes = require("./routes/ticket.routes");
 const equipoRoutes = require("./routes/equipo.routes");
+const archivoRoutes = require("./routes/archivo.routes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/equipos", equipoRoutes);
+app.use("/api/archivos", archivoRoutes);
 
 // ninguna ruta de arriba matcheo — recurso de la API inexistente
 app.use("/api", (req, res) => {

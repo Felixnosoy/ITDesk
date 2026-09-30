@@ -5,8 +5,9 @@ const crearActualizacion = async (req, res) => {
     try {
         const actualizacion = await seguimientoService.crearActualizacion(
             req.params.id,
-            req.body,
-            req.usuario
+            req.body ?? {},
+            req.usuario,
+            req.files
         );
 
         responder(res, 201, {
@@ -25,8 +26,9 @@ const crearNota = async (req, res) => {
     try {
         const nota = await seguimientoService.crearNota(
             req.params.id,
-            req.body,
-            req.usuario
+            req.body ?? {},
+            req.usuario,
+            req.files
         );
 
         responder(res, 201, {

@@ -8,6 +8,7 @@ const seguimientoController = require("../controllers/seguimiento.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
+const subirImagenes = require("../middleware/subida.middleware");
 
 const ROLES = require("../constants/roles");
 
@@ -37,17 +38,20 @@ router.put(
     diagnosticoController.registrarDiagnostico
 );
 
-// avance publico: lo escribe el taller y lo ve tambien el cliente
+// avance publico: lo escribe el taller y lo ve tambien el cliente.
+// JSON o multipart con hasta 5 imagenes en el campo "imagenes".
 router.post(
     "/:id/actualizaciones",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    subirImagenes,
     seguimientoController.crearActualizacion
 );
 
-// nota privada: solo el taller la escribe y la ve
+// nota privada: solo el taller la escribe y la ve (imagenes igual que arriba)
 router.post(
     "/:id/notas",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    subirImagenes,
     seguimientoController.crearNota
 );
 
