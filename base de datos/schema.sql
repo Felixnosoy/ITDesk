@@ -7,6 +7,7 @@ SET NAMES utf8mb4;
 -- se borran primero las tablas que dependen de otras (FK), para que el
 -- script se pueda volver a correr sobre una base ya creada
 DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `diagnostico`;
 DROP TABLE IF EXISTS `archivo_adjunto`;
 DROP TABLE IF EXISTS `nota_privada`;
 DROP TABLE IF EXISTS `actualizacion`;
@@ -214,4 +215,28 @@ CREATE TABLE `archivo_adjunto` (
   CONSTRAINT `FK_Archivo_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
   CONSTRAINT `FK_Archivo_Actualizacion` FOREIGN KEY (`id_actualizacion`) REFERENCES `actualizacion` (`id_actualizacion`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Archivo_Nota` FOREIGN KEY (`id_nota`) REFERENCES `nota_privada` (`id_nota`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `diagnostico`
+--
+-- Un solo diagnostico vigente por ticket (UNIQUE en id_ticket): editarlo
+-- lo reemplaza en vez de sumar filas. id_usuario es quien lo escribio o
+-- edito por ultima vez. Sin diagnostico el ticket no se puede cotizar.
+--
+
+CREATE TABLE `diagnostico` (
+  `id_diagnostico` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `diagnostico` text NOT NULL,
+  `solucion` text DEFAULT NULL,
+  `observaciones` text DEFAULT NULL,
+  `fecha_diagnostico` datetime NOT NULL DEFAULT current_timestamp(),
+  `fecha_edicion` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_diagnostico`),
+  UNIQUE KEY `UQ_Diagnostico_Ticket` (`id_ticket`),
+  KEY `FK_Diagnostico_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Diagnostico_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Diagnostico_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

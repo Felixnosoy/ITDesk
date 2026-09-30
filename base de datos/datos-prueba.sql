@@ -85,3 +85,12 @@ INSERT INTO `nota_privada` (`id_ticket`, `id_usuario`, `contenido`, `fecha`)
 SELECT id_ticket, @tecnico, 'Bateria original agotada; cotizar reemplazo generico y original.', fecha_apertura + INTERVAL 2 HOUR
 FROM ticket WHERE titulo = 'Bateria no carga';
 
+-- diagnostico en todos los tickets que ya pasaron por diagnostico
+INSERT INTO `diagnostico` (`id_ticket`, `id_usuario`, `diagnostico`, `solucion`, `fecha_diagnostico`)
+SELECT id_ticket, @tecnico,
+  CONCAT('Revision de: ', LOWER(titulo), '. Se identifico la causa del problema.'),
+  'Reparar o reemplazar la pieza afectada.',
+  fecha_apertura + INTERVAL 90 MINUTE
+FROM ticket
+WHERE estado IN ('Esperando aprobacion', 'En reparacion', 'Resuelto', 'Cerrado');
+
