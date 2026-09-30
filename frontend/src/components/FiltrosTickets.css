@@ -1,0 +1,21 @@
+.filtros-tickets {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filtros-tickets .campo {
+  flex: 1 1 170px;
+  max-width: 220px;
+}
+
+.filtros-tickets .filtros-busqueda {
+  flex-basis: 240px;
+  max-width: 320px;
+}
+
+/* alineado con los campos, que tienen margen inferior */
+.filtros-limpiar {
+  margin-bottom: 16px;
+}

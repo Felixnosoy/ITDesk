@@ -1,0 +1,13 @@
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.paginacion-texto {
+  font-size: 13px;
+  color: var(--color-text-dim);
+}

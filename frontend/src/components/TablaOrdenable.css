@@ -1,0 +1,69 @@
+/* Mismo aspecto que la tabla de usuarios, para que todas las tablas del
+   sistema se vean iguales. */
+
+.tabla-envoltorio {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabla th,
+.tabla td {
+  padding: 12px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.tabla th {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  background: var(--color-surface-2);
+  white-space: nowrap;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* el encabezado ordenable es un boton para que tambien funcione con teclado */
+.tabla-orden {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tabla-orden:hover,
+.tabla-orden-activa {
+  color: var(--color-text);
+}
+
+.tabla-flecha {
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.tabla-orden-activa .tabla-flecha {
+  opacity: 1;
+  color: var(--color-accent);
+}
+
+.tabla-vacia {
+  text-align: center !important;
+  color: var(--color-text-dim);
+}

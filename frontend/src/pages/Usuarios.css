@@ -76,14 +76,6 @@
   flex-wrap: wrap;
 }
 
-.insignia {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .insignia-activo {
   background: var(--color-ok-soft);
   color: var(--color-ok);
