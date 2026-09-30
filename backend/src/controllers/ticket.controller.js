@@ -1,4 +1,5 @@
 const ticketService = require("../services/ticket.service");
+const detalleService = require("../services/detalle.service");
 const auditoriaService = require("../services/auditoria.service");
 const responder = require("../utils/respuesta");
 
@@ -47,7 +48,23 @@ const obtenerTickets = async (req, res) => {
     }
 };
 
+const obtenerDetalle = async (req, res) => {
+    try {
+        const detalle = await detalleService.obtenerDetalle(req.params.id, req.usuario);
+
+        responder(res, 200, {
+            data: detalle
+        });
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
+    obtenerDetalle,
     crearTicket,
     obtenerTickets
 };

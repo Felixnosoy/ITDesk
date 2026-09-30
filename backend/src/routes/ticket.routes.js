@@ -31,6 +31,14 @@ router.post(
     ticketController.crearTicket
 );
 
+// detalle completo del ticket: resumen, diagnostico, linea de tiempo y
+// notas privadas. Por ahora solo el personal del taller.
+router.get(
+    "/:id",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO, ROLES.RECEPCIONISTA),
+    ticketController.obtenerDetalle
+);
+
 // registrar o editar el diagnostico del ticket (uno solo vigente)
 router.put(
     "/:id/diagnostico",
