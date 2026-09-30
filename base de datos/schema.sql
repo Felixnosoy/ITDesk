@@ -240,3 +240,10 @@ CREATE TABLE `diagnostico` (
   CONSTRAINT `FK_Diagnostico_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Diagnostico_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Regla de cierre: un ticket solo pasa a Resuelto con una cotizacion
+-- aprobada y facturada, o declarando que el trabajo no tuvo costo. Esta
+-- columna guarda esa excepcion para poder auditarla despues.
+ALTER TABLE `ticket`
+  ADD COLUMN `resuelto_sin_costo` tinyint(1) NOT NULL DEFAULT 0 AFTER `fecha_cierre`;
+

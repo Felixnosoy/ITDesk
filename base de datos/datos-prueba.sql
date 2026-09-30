@@ -94,3 +94,7 @@ SELECT id_ticket, @tecnico,
 FROM ticket
 WHERE estado IN ('Esperando aprobacion', 'En reparacion', 'Resuelto', 'Cerrado');
 
+-- sin facturacion todavia, los tickets ya resueltos o cerrados de ejemplo
+-- solo pueden haberse resuelto con la excepcion sin costo
+UPDATE `ticket` SET `resuelto_sin_costo` = 1 WHERE `estado` IN ('Resuelto', 'Cerrado');
+

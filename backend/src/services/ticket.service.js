@@ -17,6 +17,7 @@ const COLUMNAS_TICKET = `
     t.fecha_apertura,
     t.fecha_resolucion,
     t.fecha_cierre,
+    t.resuelto_sin_costo,
     t.id_usuario,
     CONCAT(c.nombre, ' ', c.apellido) AS cliente,
     t.id_equipo,

@@ -56,24 +56,58 @@ const validarTransicion = (actual, nuevo) => {
     }
 };
 
-// Fechas que acompañan al cambio de estado. fecha_resolucion se pone al
+// Campos que acompañan al cambio de estado. fecha_resolucion se pone al
 // pasar a Resuelto y se borra si el ticket vuelve a reparacion (el
-// problema no estaba resuelto); fecha_cierre se pone al cerrar. Solo SQL
-// fijo, sin datos del usuario.
-const fechasPorEstado = (nuevo) => {
-    if (nuevo === RESUELTO) return "fecha_resolucion = NOW()";
+// problema no estaba resuelto), igual que la excepcion sin costo;
+// fecha_cierre se pone al cerrar. Solo SQL fijo, sin datos del usuario.
+const camposPorEstado = (nuevo, sinCosto) => {
+    if (nuevo === RESUELTO) {
+        return `fecha_resolucion = NOW(), resuelto_sin_costo = ${sinCosto ? 1 : 0}`;
+    }
     if (nuevo === CERRADO) return "fecha_cierre = NOW()";
-    return "fecha_resolucion = NULL";
+    return "fecha_resolucion = NULL, resuelto_sin_costo = 0";
+};
+
+// Cotizacion aprobada y facturada del ticket. La facturacion todavia no
+// existe (llega con HU16): hasta entonces ningun ticket la tiene y la unica
+// forma de resolver es declarar la excepcion sin costo.
+const tieneCotizacionFacturada = async () => false;
+
+// sin_costo es opcional, pero si viene tiene que ser booleano: un "si" o un
+// 1 mal enviados no deben poder saltarse la regla de cierre
+const validarSinCosto = (valor) => {
+    if (valor === undefined) return false;
+
+    if (typeof valor !== "boolean") {
+        throw crearError("El campo sin_costo debe ser true o false.", 400);
+    }
+
+    return valor;
 };
 
 // Cambia el estado del ticket siguiendo TRANSICIONES y lo deja anotado en
 // la linea de tiempo (actualizacion de tipo Estado), en una transaccion.
 const cambiarEstado = async (idTicket, datos = {}, usuario) => {
     const observaciones = validarTextoOpcional(datos.observaciones, "observaciones");
+    const sinCosto = validarSinCosto(datos.sin_costo);
     const ticket = await ticketService.obtenerTicketPorId(idTicket, usuario);
     const nuevo = datos.estado;
 
     validarTransicion(ticket.estado, nuevo);
+
+    // regla de cierre (issue HU13.2)
+    if (nuevo === RESUELTO && !sinCosto && !(await tieneCotizacionFacturada(ticket.id_ticket))) {
+        throw crearError(
+            "No se puede marcar como Resuelto sin una cotización aprobada y facturada. Si el trabajo no tuvo costo, indícalo con sin_costo.",
+            400
+        );
+    }
+
+    // la excepcion queda escrita en la linea de tiempo que ve el cliente
+    const esResueltoSinCosto = nuevo === RESUELTO && sinCosto;
+    const nota = esResueltoSinCosto
+        ? [observaciones, "Resuelto sin costo."].filter(Boolean).join(" ")
+        : observaciones;
 
     // sin diagnostico no hay nada que cotizar ni que el cliente apruebe
     if (nuevo === ESPERANDO_APROBACION) {
@@ -90,7 +124,7 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
         await conexion.beginTransaction();
 
         await conexion.query(
-            `UPDATE ticket SET estado = ?, ${fechasPorEstado(nuevo)} WHERE id_ticket = ?`,
+            `UPDATE ticket SET estado = ?, ${camposPorEstado(nuevo, esResueltoSinCosto)} WHERE id_ticket = ?`,
             [nuevo, ticket.id_ticket]
         );
 
@@ -99,7 +133,7 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
             INSERT INTO actualizacion (id_ticket, id_usuario, tipo, estado, observaciones)
             VALUES (?, ?, ?, ?, ?)
             `,
-            [ticket.id_ticket, usuario.id_usuario, TIPOS_ACTUALIZACION.ESTADO, nuevo, observaciones]
+            [ticket.id_ticket, usuario.id_usuario, TIPOS_ACTUALIZACION.ESTADO, nuevo, nota]
         );
 
         await conexion.commit();

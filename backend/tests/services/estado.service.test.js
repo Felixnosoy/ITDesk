@@ -94,4 +94,34 @@ describe("estado.service.cambiarEstado", () => {
 
         expect(pool.query.mock.calls[1][0]).toContain(fecha);
     });
+
+    test("no resuelve sin cotizacion facturada ni excepcion sin costo", async () => {
+        pool.query.mockResolvedValueOnce(ticketEn("En reparacion"));
+
+        await expect(estadoService.cambiarEstado("10", { estado: "Resuelto" }, tecnico))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("cotización aprobada y facturada") });
+
+        expect(pool.getConnection).not.toHaveBeenCalled();
+    });
+
+    test.each(["si", 1, "true", null])("rechaza un sin_costo que no es booleano (%p)", async (valor) => {
+        await expect(estadoService.cambiarEstado("10", { estado: "Resuelto", sin_costo: valor }, tecnico))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("sin_costo") });
+
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    test("resuelto sin costo: guarda la excepcion y la deja escrita en la linea de tiempo", async () => {
+        pool.query
+            .mockResolvedValueOnce(ticketEn("En reparacion"))
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([{ insertId: 1 }])
+            .mockResolvedValueOnce(ticketEn("Resuelto"));
+
+        await estadoService.cambiarEstado("10", { estado: "Resuelto", sin_costo: true, observaciones: "Era un cable suelto." }, tecnico);
+
+        expect(pool.query.mock.calls[1][0]).toContain("resuelto_sin_costo = 1");
+        expect(pool.query.mock.calls[2][1][4]).toBe("Era un cable suelto. Resuelto sin costo.");
+    });
 });
+
