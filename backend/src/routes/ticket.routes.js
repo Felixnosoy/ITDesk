@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const ticketController = require("../controllers/ticket.controller");
+const diagnosticoController = require("../controllers/diagnostico.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
@@ -26,6 +27,13 @@ router.post(
     "/",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA, ROLES.TECNICO),
     ticketController.crearTicket
+);
+
+// registrar o editar el diagnostico del ticket (uno solo vigente)
+router.put(
+    "/:id/diagnostico",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    diagnosticoController.registrarDiagnostico
 );
 
 module.exports = router;
