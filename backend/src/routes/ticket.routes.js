@@ -5,6 +5,7 @@ const router = express.Router();
 const ticketController = require("../controllers/ticket.controller");
 const diagnosticoController = require("../controllers/diagnostico.controller");
 const seguimientoController = require("../controllers/seguimiento.controller");
+const estadoController = require("../controllers/estado.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
@@ -44,6 +45,13 @@ router.put(
     "/:id/diagnostico",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
     diagnosticoController.registrarDiagnostico
+);
+
+// cambiar el estado siguiendo las transiciones permitidas (issue HU13.1)
+router.patch(
+    "/:id/estado",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    estadoController.cambiarEstado
 );
 
 // avance publico: lo escribe el taller y lo ve tambien el cliente.
