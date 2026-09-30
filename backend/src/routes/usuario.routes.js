@@ -25,6 +25,15 @@ router.get(
     usuarioController.obtenerUsuarios
 )
 
+// buscar clientes activos por nombre, documento o correo, para registrar
+// un ticket a su nombre. Va antes de /:id para que "clientes" no se tome
+// como un id.
+router.get(
+    '/clientes',
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA),
+    usuarioController.buscarClientes
+)
+
 // obtener usuario por su id (staff ve cualquiera; el resto solo su propia
 // cuenta — chequeo de ownership adentro del controller)
 router.get(
