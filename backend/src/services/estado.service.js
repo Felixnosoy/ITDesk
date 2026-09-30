@@ -56,6 +56,16 @@ const validarTransicion = (actual, nuevo) => {
     }
 };
 
+// Fechas que acompañan al cambio de estado. fecha_resolucion se pone al
+// pasar a Resuelto y se borra si el ticket vuelve a reparacion (el
+// problema no estaba resuelto); fecha_cierre se pone al cerrar. Solo SQL
+// fijo, sin datos del usuario.
+const fechasPorEstado = (nuevo) => {
+    if (nuevo === RESUELTO) return "fecha_resolucion = NOW()";
+    if (nuevo === CERRADO) return "fecha_cierre = NOW()";
+    return "fecha_resolucion = NULL";
+};
+
 // Cambia el estado del ticket siguiendo TRANSICIONES y lo deja anotado en
 // la linea de tiempo (actualizacion de tipo Estado), en una transaccion.
 const cambiarEstado = async (idTicket, datos = {}, usuario) => {
@@ -80,7 +90,7 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
         await conexion.beginTransaction();
 
         await conexion.query(
-            "UPDATE ticket SET estado = ? WHERE id_ticket = ?",
+            `UPDATE ticket SET estado = ?, ${fechasPorEstado(nuevo)} WHERE id_ticket = ?`,
             [nuevo, ticket.id_ticket]
         );
 

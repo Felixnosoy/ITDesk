@@ -78,4 +78,20 @@ describe("estado.service.cambiarEstado", () => {
         expect(pool.conexion.rollback).toHaveBeenCalled();
         expect(pool.conexion.release).toHaveBeenCalled();
     });
+
+    test.each([
+        ["Resuelto", "En reparacion", "fecha_resolucion = NOW()"],
+        ["Cerrado", "Resuelto", "fecha_cierre = NOW()"],
+        ["En reparacion", "Resuelto", "fecha_resolucion = NULL"]
+    ])("al pasar a %s ajusta la fecha (%s -> %s)", async (nuevo, actual, fecha) => {
+        pool.query
+            .mockResolvedValueOnce(ticketEn(actual))
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([{ insertId: 1 }])
+            .mockResolvedValueOnce(ticketEn(nuevo));
+
+        await estadoService.cambiarEstado("10", { estado: nuevo, sin_costo: true }, tecnico);
+
+        expect(pool.query.mock.calls[1][0]).toContain(fecha);
+    });
 });
