@@ -7,6 +7,9 @@ SET NAMES utf8mb4;
 -- se borran primero las tablas que dependen de otras (FK), para que el
 -- script se pueda volver a correr sobre una base ya creada
 DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `archivo_adjunto`;
+DROP TABLE IF EXISTS `nota_privada`;
+DROP TABLE IF EXISTS `actualizacion`;
 DROP TABLE IF EXISTS `asignacion`;
 DROP TABLE IF EXISTS `ticket`;
 DROP TABLE IF EXISTS `equipo`;
@@ -135,4 +138,80 @@ CREATE TABLE `asignacion` (
   CONSTRAINT `FK_Asignacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Asignacion_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
   CONSTRAINT `FK_Asignacion_AsignadoPor` FOREIGN KEY (`id_asignado_por`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `actualizacion`
+--
+-- Novedades publicas del ticket, las que tambien ve el cliente. tipo dice
+-- si es un avance escrito por el tecnico ('Avance') o un cambio de estado
+-- ('Estado'); estado guarda el estado del ticket en ese momento, asi la
+-- linea de tiempo se arma solo con esta tabla.
+--
+
+CREATE TABLE `actualizacion` (
+  `id_actualizacion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `tipo` varchar(20) NOT NULL,
+  `estado` varchar(30) NOT NULL,
+  `observaciones` text DEFAULT NULL,
+  `fecha` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_actualizacion`),
+  KEY `IX_Actualizacion_Ticket_Fecha` (`id_ticket`, `fecha`),
+  KEY `FK_Actualizacion_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Actualizacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Actualizacion_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `nota_privada`
+--
+-- Notas internas del taller: el cliente nunca las ve.
+--
+
+CREATE TABLE `nota_privada` (
+  `id_nota` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `contenido` text NOT NULL,
+  `fecha` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_nota`),
+  KEY `IX_NotaPrivada_Ticket_Fecha` (`id_ticket`, `fecha`),
+  KEY `FK_NotaPrivada_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_NotaPrivada_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_NotaPrivada_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `archivo_adjunto`
+--
+-- Cada adjunto cuelga de una actualizacion (publico) o de una nota privada
+-- (privado), nunca de las dos ni de ninguna: el CHECK lo garantiza. Asi la
+-- visibilidad del archivo es siempre la de su padre. nombre_archivo es el
+-- nombre generado en disco (backend/uploads), nombre_original el del usuario.
+--
+
+CREATE TABLE `archivo_adjunto` (
+  `id_archivo` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_actualizacion` int(11) DEFAULT NULL,
+  `id_nota` int(11) DEFAULT NULL,
+  `nombre_original` varchar(255) NOT NULL,
+  `nombre_archivo` varchar(100) NOT NULL,
+  `tipo_mime` varchar(50) NOT NULL,
+  `tamano_bytes` int(11) NOT NULL,
+  `fecha_subida` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_archivo`),
+  UNIQUE KEY `UQ_Archivo_Nombre` (`nombre_archivo`),
+  KEY `FK_Archivo_Ticket` (`id_ticket`),
+  KEY `FK_Archivo_Usuario` (`id_usuario`),
+  KEY `FK_Archivo_Actualizacion` (`id_actualizacion`),
+  KEY `FK_Archivo_Nota` (`id_nota`),
+  CONSTRAINT `CK_Archivo_UnSoloPadre` CHECK ((`id_actualizacion` IS NULL) <> (`id_nota` IS NULL)),
+  CONSTRAINT `FK_Archivo_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Archivo_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Archivo_Actualizacion` FOREIGN KEY (`id_actualizacion`) REFERENCES `actualizacion` (`id_actualizacion`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Archivo_Nota` FOREIGN KEY (`id_nota`) REFERENCES `nota_privada` (`id_nota`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
