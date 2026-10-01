@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { obtenerDetalle, registrarDiagnostico, cambiarEstado } from "../api/tickets";
+import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET } from "../constants/tickets";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
@@ -9,6 +9,7 @@ import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import CambioEstado from "../components/CambioEstado";
+import FormularioSeguimiento from "../components/FormularioSeguimiento";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -193,6 +194,23 @@ export default function TicketDetalle() {
                             </p>
                         )}
                     </div>
+
+                    {puedeEditar && (
+                        <div className="tarjeta">
+                            <h2>Registrar novedad</h2>
+                            <FormularioSeguimiento
+                                guardando={guardando}
+                                error={editando === "seguimiento" ? errorAccion : ""}
+                                onGuardar={(tipo, texto, imagenes) => {
+                                    setEditando("seguimiento");
+                                    return ejecutar(
+                                        () => registrarSeguimiento(token, ticket.id_ticket, tipo, texto, imagenes),
+                                        tipo === "notas" ? "Nota privada registrada." : "Avance registrado."
+                                    );
+                                }}
+                            />
+                        </div>
+                    )}
 
                     <div className="tarjeta">
                         <h2>Línea de tiempo</h2>

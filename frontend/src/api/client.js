@@ -6,8 +6,11 @@ export const EVENTO_SESION_EXPIRADA = "itdesk:sesion-expirada";
 
 // Envoltorio de fetch: agrega el token si existe, y traduce el contrato
 // { success, message, data } del backend en una respuesta o un error JS.
+// Un body FormData (imagenes) se manda tal cual: el navegador arma el
+// Content-Type multipart con su separador.
 export async function apiFetch(path, { method = "GET", body, token } = {}) {
-    const headers = { "Content-Type": "application/json" };
+    const esFormData = body instanceof FormData;
+    const headers = esFormData ? {} : { "Content-Type": "application/json" };
 
     if (token) {
         headers.Authorization = `Bearer ${token}`;
@@ -19,7 +22,7 @@ export async function apiFetch(path, { method = "GET", body, token } = {}) {
         respuesta = await fetch(`${BASE_URL}${path}`, {
             method,
             headers,
-            body: body ? JSON.stringify(body) : undefined,
+            body: esFormData ? body : body ? JSON.stringify(body) : undefined,
         });
     } catch {
         throw new Error("No se pudo conectar con el servidor.");

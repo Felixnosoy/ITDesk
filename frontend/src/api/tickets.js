@@ -42,3 +42,15 @@ export async function cambiarEstado(token, id, { estado, observaciones, sin_cost
 
     return respuesta.data;
 }
+
+// Avance publico o nota privada, con imagenes opcionales. tipo es
+// "actualizaciones" o "notas"; el texto va en el campo que espera cada uno.
+export async function registrarSeguimiento(token, id, tipo, texto, imagenes = []) {
+    const datos = new FormData();
+    datos.append(tipo === "notas" ? "contenido" : "observaciones", texto);
+    imagenes.forEach((imagen) => datos.append("imagenes", imagen));
+
+    const respuesta = await apiFetch(`/tickets/${id}/${tipo}`, { method: "POST", token, body: datos });
+
+    return respuesta.data;
+}

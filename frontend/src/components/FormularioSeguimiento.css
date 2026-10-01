@@ -1,0 +1,80 @@
+.seguimiento-tipos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.seguimiento-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seguimiento-tipo input {
+  margin: 0;
+}
+
+.seguimiento-tipo.activo {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: #0b5d73;
+}
+
+.seguimiento-imagenes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.seguimiento-imagenes li {
+  position: relative;
+}
+
+.seguimiento-imagenes img {
+  display: block;
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.seguimiento-imagenes button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-text);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.seguimiento-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seguimiento-contador {
+  font-size: 12px;
+  color: var(--color-text-dim);
+}
+
+.seguimiento-acciones .boton[type="submit"] {
+  margin-left: auto;
+}
