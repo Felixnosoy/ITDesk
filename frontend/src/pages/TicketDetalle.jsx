@@ -10,6 +10,7 @@ import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import CambioEstado from "../components/CambioEstado";
 import FormularioSeguimiento from "../components/FormularioSeguimiento";
+import Adjuntos from "../components/Adjuntos";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -214,7 +215,10 @@ export default function TicketDetalle() {
 
                     <div className="tarjeta">
                         <h2>Línea de tiempo</h2>
-                        <LineaTiempo actualizaciones={detalle.actualizaciones} />
+                        <LineaTiempo
+                            actualizaciones={detalle.actualizaciones}
+                            renderAdjuntos={(adjuntos) => <Adjuntos adjuntos={adjuntos} />}
+                        />
                     </div>
 
                     {esTaller && (
@@ -230,6 +234,7 @@ export default function TicketDetalle() {
                                     {detalle.notas_privadas.map((nota) => (
                                         <li key={nota.id_nota}>
                                             <p className="detalle-texto">{nota.contenido}</p>
+                                            {nota.adjuntos.length > 0 && <Adjuntos adjuntos={nota.adjuntos} />}
                                             <span className="detalle-autor">
                                                 {nota.usuario} · {formatearFechaHora(nota.fecha)}
                                             </span>
