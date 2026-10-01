@@ -7,7 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:integracion": "jest --config jest.integracion.config.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,10 @@
     "clearMocks": true,
     "testMatch": [
       "**/tests/**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/integracion/"
     ]
   },
   "dependencies": {
