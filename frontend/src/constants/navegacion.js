@@ -20,6 +20,13 @@ export const SECCIONES = [
         descripcion: "Busca, filtra y abre los tickets del taller.",
     },
     {
+        ruta: "/tickets/nuevo",
+        etiqueta: "Registrar ticket",
+        icono: "nuevo",
+        roles: [ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
+        descripcion: "Registra el problema de un cliente y asígnalo a un técnico.",
+    },
+    {
         ruta: "/usuarios",
         etiqueta: "Usuarios",
         icono: "usuarios",
@@ -66,6 +73,6 @@ export const PANELES = {
     [ROLES.RECEPCIONISTA]: {
         titulo: "Panel de recepción",
         resumen: "Tu espacio para recibir clientes y registrar sus casos.",
-        proximamente: ["Registro de tickets", "Clientes y equipos"],
+        proximamente: ["Agenda de visitas técnicas", "Cobro de facturas"],
     },
 };

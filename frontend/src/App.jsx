@@ -14,6 +14,7 @@ import CambiarContrasena from "./pages/CambiarContrasena";
 import Usuarios from "./pages/Usuarios";
 import Tickets from "./pages/Tickets";
 import TicketDetalle from "./pages/TicketDetalle";
+import RegistrarTicket from "./pages/RegistrarTicket";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -39,6 +40,10 @@ export default function App() {
 
                     <Route element={<RequireRole roles={[ROLES.ADMINISTRADOR]} />}>
                         <Route path="/usuarios" element={<Usuarios />} />
+                    </Route>
+
+                    <Route element={<RequireRole roles={[ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR]} />}>
+                        <Route path="/tickets/nuevo" element={<RegistrarTicket />} />
                     </Route>
 
                     <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>

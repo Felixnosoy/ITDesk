@@ -54,3 +54,29 @@ export async function registrarSeguimiento(token, id, tipo, texto, imagenes = []
 
     return respuesta.data;
 }
+
+// clientes activos por nombre, documento o correo (minimo 2 caracteres)
+export async function buscarClientes(token, busqueda) {
+    const respuesta = await apiFetch(`/usuarios/clientes?busqueda=${encodeURIComponent(busqueda)}`, { token });
+
+    return respuesta.data;
+}
+
+export async function listarEquipos(token, idCliente) {
+    const respuesta = await apiFetch(`/equipos?id_cliente=${idCliente}`, { token });
+
+    return respuesta.data;
+}
+
+export async function crearEquipo(token, datos) {
+    const respuesta = await apiFetch("/equipos", { method: "POST", token, body: datos });
+
+    return respuesta.data;
+}
+
+// ticket a nombre de un cliente, ya asignado a un tecnico
+export async function crearTicket(token, datos) {
+    const respuesta = await apiFetch("/tickets", { method: "POST", token, body: datos });
+
+    return respuesta.data;
+}

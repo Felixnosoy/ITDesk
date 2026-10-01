@@ -27,11 +27,13 @@ function valoresIniciales(usuario) {
 }
 
 // Formulario de alta y de edicion. En la edicion no hay contrasena ni estado:
-// esos cambios tienen su propia accion en el listado.
+// esos cambios tienen su propia accion en el listado. soloCliente oculta el
+// rol y deja siempre Cliente (alta rapida desde el registro de tickets).
 export default function FormularioUsuario({
     modo,
     usuario,
     esPropiaCuenta,
+    soloCliente = false,
     guardando,
     error,
     onGuardar,
@@ -115,19 +117,21 @@ export default function FormularioUsuario({
                     </div>
                 )}
 
-                <div className="campo">
-                    <label htmlFor="uf-rol">Rol</label>
-                    <select id="uf-rol" value={valores.rol} onChange={cambiar("rol")} disabled={esPropiaCuenta}>
-                        {TODOS_LOS_ROLES.map((rol) => (
-                            <option key={rol} value={rol}>
-                                {ETIQUETA_ROL[rol]}
-                            </option>
-                        ))}
-                    </select>
-                    {esPropiaCuenta && (
-                        <span className="campo-ayuda">No puedes cambiar tu propio rol.</span>
-                    )}
-                </div>
+                {!soloCliente && (
+                    <div className="campo">
+                        <label htmlFor="uf-rol">Rol</label>
+                        <select id="uf-rol" value={valores.rol} onChange={cambiar("rol")} disabled={esPropiaCuenta}>
+                            {TODOS_LOS_ROLES.map((rol) => (
+                                <option key={rol} value={rol}>
+                                    {ETIQUETA_ROL[rol]}
+                                </option>
+                            ))}
+                        </select>
+                        {esPropiaCuenta && (
+                            <span className="campo-ayuda">No puedes cambiar tu propio rol.</span>
+                        )}
+                    </div>
+                )}
 
                 {valores.rol === ROLES.TECNICO && (
                     <div className="campo">
