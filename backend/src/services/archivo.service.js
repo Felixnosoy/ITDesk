@@ -6,7 +6,9 @@ const crearError = require("../utils/crearError");
 const ROLES = require("../constants/roles");
 const { validarId } = require("../validators/comun.validator");
 
-const CARPETA_UPLOADS = path.join(__dirname, "..", "..", "uploads");
+// backend/uploads salvo que UPLOADS_DIR diga otra carpeta (las pruebas de
+// integracion usan una temporal para no mezclar archivos)
+const CARPETA_UPLOADS = process.env.UPLOADS_DIR || path.join(__dirname, "..", "..", "uploads");
 
 const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024;
 const MAXIMO_IMAGENES = 5;
