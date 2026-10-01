@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle } from "../api/tickets";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
+import LineaTiempo from "../components/LineaTiempo";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -117,6 +118,11 @@ export default function TicketDetalle() {
                                     : "El técnico todavía está revisando tu equipo."}
                             </p>
                         )}
+                    </div>
+
+                    <div className="tarjeta">
+                        <h2>Línea de tiempo</h2>
+                        <LineaTiempo actualizaciones={detalle.actualizaciones} />
                     </div>
 
                     {esTaller && (
