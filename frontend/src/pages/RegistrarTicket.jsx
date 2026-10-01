@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import SelectorCliente from "../components/SelectorCliente";
+import SelectorEquipo from "../components/SelectorEquipo";
 import "./RegistrarTicket.css";
 
 const Paso = ({ numero, titulo, activo, children }) => (
@@ -21,6 +22,13 @@ export default function RegistrarTicket() {
     const { token } = sesion;
 
     const [cliente, setCliente] = useState(null);
+    const [equipo, setEquipo] = useState(null);
+
+    // otro cliente: el equipo elegido ya no corresponde
+    const elegirCliente = (nuevo) => {
+        setCliente(nuevo);
+        setEquipo(null);
+    };
 
     return (
         <div className="pagina registro-pagina">
@@ -32,7 +40,19 @@ export default function RegistrarTicket() {
             </div>
 
             <Paso numero={1} titulo="Cliente" activo>
-                <SelectorCliente token={token} cliente={cliente} onSeleccionar={setCliente} />
+                <SelectorCliente token={token} cliente={cliente} onSeleccionar={elegirCliente} />
+            </Paso>
+
+            <Paso numero={2} titulo="Equipo" activo={Boolean(cliente)}>
+                {cliente && (
+                    <SelectorEquipo
+                        key={cliente.id_usuario}
+                        token={token}
+                        cliente={cliente}
+                        equipo={equipo}
+                        onSeleccionar={setEquipo}
+                    />
+                )}
             </Paso>
         </div>
     );
