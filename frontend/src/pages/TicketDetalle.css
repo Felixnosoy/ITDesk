@@ -1,0 +1,84 @@
+.detalle-pagina {
+  max-width: 1100px;
+}
+
+.detalle-volver {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.detalle-volver:hover {
+  text-decoration: underline;
+}
+
+.detalle-codigo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-dim);
+}
+
+.detalle-insignias {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.detalle-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.detalle-principal,
+.detalle-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.detalle-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.detalle-dato dt {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+.detalle-dato dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* respeta los saltos de linea que escribio el tecnico o el cliente */
+.detalle-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.detalle-vacio {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-dim);
+}
+
+@media (max-width: 860px) {
+  .detalle-columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

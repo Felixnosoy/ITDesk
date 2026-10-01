@@ -13,6 +13,7 @@ import Perfil from "./pages/Perfil";
 import CambiarContrasena from "./pages/CambiarContrasena";
 import Usuarios from "./pages/Usuarios";
 import Tickets from "./pages/Tickets";
+import TicketDetalle from "./pages/TicketDetalle";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -42,6 +43,7 @@ export default function App() {
 
                     <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
                         <Route path="/tickets" element={<Tickets />} />
+                        <Route path="/tickets/:id" element={<TicketDetalle />} />
                         <Route path="/perfil" element={<Perfil />} />
                         <Route path="/cambiar-contrasena" element={<CambiarContrasena />} />
                     </Route>

@@ -13,3 +13,10 @@ export async function listarTickets(token, filtros = {}) {
 
     return respuesta.data;
 }
+
+// detalle completo; para el Cliente no trae notas_privadas ni estados_siguientes
+export async function obtenerDetalle(token, id) {
+    const respuesta = await apiFetch(`/tickets/${id}`, { token });
+
+    return respuesta.data;
+}
