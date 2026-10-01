@@ -13,6 +13,20 @@ export const RUTA_INICIO = {
 // muestra las que el rol puede abrir; cada historia agrega las suyas aqui.
 export const SECCIONES = [
     {
+        ruta: "/tickets",
+        etiqueta: "Tickets",
+        icono: "tickets",
+        roles: TODOS_LOS_ROLES,
+        descripcion: "Busca, filtra y abre los tickets del taller.",
+    },
+    {
+        ruta: "/tickets/nuevo",
+        etiqueta: "Registrar ticket",
+        icono: "nuevo",
+        roles: [ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR],
+        descripcion: "Registra el problema de un cliente y asígnalo a un técnico.",
+    },
+    {
         ruta: "/usuarios",
         etiqueta: "Usuarios",
         icono: "usuarios",
@@ -49,16 +63,16 @@ export const PANELES = {
     [ROLES.TECNICO]: {
         titulo: "Panel del técnico",
         resumen: "Tu espacio de trabajo dentro del taller.",
-        proximamente: ["Cola de tickets", "Diagnósticos y cotizaciones"],
+        proximamente: ["Cotizaciones", "Facturación"],
     },
     [ROLES.CLIENTE]: {
         titulo: "Panel del cliente",
         resumen: "Aquí seguirás el estado de tus equipos en el taller.",
-        proximamente: ["Mis tickets", "Cotizaciones y facturas"],
+        proximamente: ["Cotizaciones y facturas", "Pago en línea"],
     },
     [ROLES.RECEPCIONISTA]: {
         titulo: "Panel de recepción",
         resumen: "Tu espacio para recibir clientes y registrar sus casos.",
-        proximamente: ["Registro de tickets", "Clientes y equipos"],
+        proximamente: ["Agenda de visitas técnicas", "Cobro de facturas"],
     },
 };

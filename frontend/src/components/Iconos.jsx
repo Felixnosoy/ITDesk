@@ -24,6 +24,11 @@ const TRAZOS = {
         "M21 12H9",
     ],
     menu: ["M3 6h18", "M3 12h18", "M3 18h18"],
+    tickets: [
+        "M4 4h16a1 1 0 0 1 1 1v4a2 2 0 0 0 0 4v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a2 2 0 0 0 0-4V5a1 1 0 0 1 1-1z",
+        "M9 4v14",
+    ],
+    nuevo: ["M12 5v14", "M5 12h14"],
 };
 
 export default function Icono({ nombre, tamano = 18 }) {

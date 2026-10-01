@@ -1,0 +1,60 @@
+.tickets-pagina {
+  max-width: 1200px;
+}
+
+.tickets-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* un Link con aspecto de boton */
+.tickets-cabecera .boton {
+  text-decoration: none;
+}
+
+.tickets-filtros {
+  margin-bottom: 16px;
+  padding-bottom: 4px;
+}
+
+.tickets-tarjeta {
+  padding: 0;
+}
+
+.tickets-contador {
+  margin: 0;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tickets-tarjeta .tabla a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tickets-tarjeta .tabla a:hover {
+  text-decoration: underline;
+}
+
+.tickets-tarjeta .tabla th,
+.tickets-tarjeta .tabla td {
+  padding: 12px 14px;
+}
+
+.tickets-tarjeta .tabla th:first-child,
+.tickets-tarjeta .tabla td:first-child {
+  padding-left: 20px;
+  white-space: nowrap;
+}
+
+.tickets-secundario {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-dim);
+}

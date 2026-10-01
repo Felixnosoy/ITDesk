@@ -98,7 +98,7 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
     // regla de cierre (issue HU13.2)
     if (nuevo === RESUELTO && !sinCosto && !(await tieneCotizacionFacturada(ticket.id_ticket))) {
         throw crearError(
-            "No se puede marcar como Resuelto sin una cotización aprobada y facturada. Si el trabajo no tuvo costo, indícalo con sin_costo.",
+            "No se puede marcar como Resuelto sin una cotización aprobada y facturada. Si el trabajo no tuvo costo, decláralo como trabajo sin costo.",
             400
         );
     }
@@ -114,7 +114,7 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
         const diagnostico = await diagnosticoService.obtenerDiagnosticoDeTicket(ticket.id_ticket);
 
         if (!diagnostico) {
-            throw crearError("El ticket necesita un diagnóstico antes de pasar a Esperando aprobacion.", 400);
+            throw crearError("El ticket necesita un diagnóstico antes de pasar a Esperando aprobación.", 400);
         }
     }
 
