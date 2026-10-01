@@ -59,3 +59,42 @@ CROSS JOIN usuario tec
 CROSS JOIN usuario rec
 WHERE tec.correo = 'tecnico.prueba@itdesk.test'
 AND rec.correo = 'recepcionista.prueba@itdesk.test';
+
+SET @tecnico = (SELECT id_usuario FROM usuario WHERE correo = 'tecnico.prueba@itdesk.test');
+
+-- linea de tiempo: un cambio de estado por cada ticket que ya avanzo, y
+-- algunos avances y notas privadas de ejemplo
+INSERT INTO `actualizacion` (`id_ticket`, `id_usuario`, `tipo`, `estado`, `observaciones`, `fecha`)
+SELECT id_ticket, @tecnico, 'Estado', estado, NULL, fecha_apertura + INTERVAL 1 HOUR
+FROM ticket
+WHERE estado <> 'Abierto';
+
+INSERT INTO `actualizacion` (`id_ticket`, `id_usuario`, `tipo`, `estado`, `observaciones`, `fecha`)
+SELECT id_ticket, @tecnico, 'Avance', estado, 'Se reviso el equipo; el disco tiene sectores dañados.', fecha_apertura + INTERVAL 2 HOUR
+FROM ticket WHERE titulo = 'Windows muy lento';
+
+INSERT INTO `actualizacion` (`id_ticket`, `id_usuario`, `tipo`, `estado`, `observaciones`, `fecha`)
+SELECT id_ticket, @tecnico, 'Avance', estado, 'Se reemplazo la fuente del router; queda en observacion 24 horas.', fecha_apertura + INTERVAL 3 HOUR
+FROM ticket WHERE titulo = 'Sin conexion a internet';
+
+INSERT INTO `nota_privada` (`id_ticket`, `id_usuario`, `contenido`, `fecha`)
+SELECT id_ticket, @tecnico, 'El cliente pidio no reinstalar Windows si se puede evitar.', fecha_apertura + INTERVAL 2 HOUR
+FROM ticket WHERE titulo = 'Windows muy lento';
+
+INSERT INTO `nota_privada` (`id_ticket`, `id_usuario`, `contenido`, `fecha`)
+SELECT id_ticket, @tecnico, 'Bateria original agotada; cotizar reemplazo generico y original.', fecha_apertura + INTERVAL 2 HOUR
+FROM ticket WHERE titulo = 'Bateria no carga';
+
+-- diagnostico en todos los tickets que ya pasaron por diagnostico
+INSERT INTO `diagnostico` (`id_ticket`, `id_usuario`, `diagnostico`, `solucion`, `fecha_diagnostico`)
+SELECT id_ticket, @tecnico,
+  CONCAT('Revision de: ', LOWER(titulo), '. Se identifico la causa del problema.'),
+  'Reparar o reemplazar la pieza afectada.',
+  fecha_apertura + INTERVAL 90 MINUTE
+FROM ticket
+WHERE estado IN ('Esperando aprobacion', 'En reparacion', 'Resuelto', 'Cerrado');
+
+-- sin facturacion todavia, los tickets ya resueltos o cerrados de ejemplo
+-- solo pueden haberse resuelto con la excepcion sin costo
+UPDATE `ticket` SET `resuelto_sin_costo` = 1 WHERE `estado` IN ('Resuelto', 'Cerrado');
+

@@ -90,7 +90,15 @@ Todas usan la contraseña `Prueba123!`.
 cd backend && npm test
 ```
 
-Las pruebas usan una base de datos simulada, así que no necesitan MySQL.
+Las pruebas unitarias usan una base de datos simulada, así que no necesitan MySQL.
+
+Las pruebas de integración prueban la API real contra MySQL:
+
+```bash
+cd backend && npm run test:integracion
+```
+
+Crean desde cero una base aparte, `itdesk_test`, con `schema.sql` y `datos-prueba.sql`. Para usar otro nombre se define `DB_NAME_TEST` en `backend/.env`. Ese nombre tiene que terminar en `_test`, así nunca tocan la base de trabajo. Las imágenes que suben van a una carpeta temporal.
 
 ## Cómo trabajamos en equipo
 

@@ -3,9 +3,13 @@ const express = require("express");
 const router = express.Router();
 
 const ticketController = require("../controllers/ticket.controller");
+const diagnosticoController = require("../controllers/diagnostico.controller");
+const seguimientoController = require("../controllers/seguimiento.controller");
+const estadoController = require("../controllers/estado.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
+const subirImagenes = require("../middleware/subida.middleware");
 
 const ROLES = require("../constants/roles");
 
@@ -26,6 +30,45 @@ router.post(
     "/",
     verificarRol(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA, ROLES.TECNICO),
     ticketController.crearTicket
+);
+
+// detalle completo del ticket: resumen, diagnostico, linea de tiempo y
+// notas privadas. Cualquier rol autenticado; el Cliente solo abre los
+// suyos y nunca recibe las notas privadas (lo decide el service).
+router.get(
+    "/:id",
+    ticketController.obtenerDetalle
+);
+
+// registrar o editar el diagnostico del ticket (uno solo vigente)
+router.put(
+    "/:id/diagnostico",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    diagnosticoController.registrarDiagnostico
+);
+
+// cambiar el estado siguiendo las transiciones permitidas (issue HU13.1)
+router.patch(
+    "/:id/estado",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    estadoController.cambiarEstado
+);
+
+// avance publico: lo escribe el taller y lo ve tambien el cliente.
+// JSON o multipart con hasta 5 imagenes en el campo "imagenes".
+router.post(
+    "/:id/actualizaciones",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    subirImagenes,
+    seguimientoController.crearActualizacion
+);
+
+// nota privada: solo el taller la escribe y la ve (imagenes igual que arriba)
+router.post(
+    "/:id/notas",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    subirImagenes,
+    seguimientoController.crearNota
 );
 
 module.exports = router;

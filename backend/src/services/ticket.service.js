@@ -17,6 +17,7 @@ const COLUMNAS_TICKET = `
     t.fecha_apertura,
     t.fecha_resolucion,
     t.fecha_cierre,
+    t.resuelto_sin_costo,
     t.id_usuario,
     CONCAT(c.nombre, ' ', c.apellido) AS cliente,
     t.id_equipo,
@@ -108,6 +109,32 @@ const obtenerTickets = async (usuario, filtros = {}) => {
     );
 
     return tickets;
+};
+
+// Un ticket por id, con los mismos campos del listado. Si quien consulta es
+// un Cliente y el ticket no es suyo responde 404 igual que si no existiera,
+// para no revelar que ese id esta en uso.
+const obtenerTicketPorId = async (idTicket, usuario) => {
+    const id_ticket = validarId(idTicket, "id_ticket");
+
+    const [tickets] = await pool.query(
+        `
+        SELECT
+            ${COLUMNAS_TICKET}
+        ${JOIN_TICKET}
+        WHERE t.id_ticket = ?
+        `,
+        [id_ticket]
+    );
+
+    const ticket = tickets[0];
+    const esAjeno = usuario?.rol === ROLES.CLIENTE && ticket?.id_usuario !== usuario.id_usuario;
+
+    if (!ticket || esAjeno) {
+        throw crearError("Ticket no encontrado.", 404);
+    }
+
+    return ticket;
 };
 
 const validarCatalogo = (valor, campo, catalogo) => {
@@ -229,5 +256,6 @@ const crearTicket = async (datos, id_asignado_por) => {
 
 module.exports = {
     obtenerTickets,
+    obtenerTicketPorId,
     crearTicket
 };
