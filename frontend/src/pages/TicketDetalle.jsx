@@ -15,6 +15,10 @@ const Dato = ({ etiqueta, children }) => (
 
 // Detalle de un ticket en una sola pantalla: resumen, cliente, equipo,
 // tecnico, descripcion y diagnostico.
+//
+// Vista del taller o del cliente: no se decide por el rol sino por lo que
+// manda el servidor. Al Cliente no le llegan notas_privadas, asi que la
+// pantalla nunca puede mostrarle algo que el backend no le dio.
 export default function TicketDetalle() {
     const { id } = useParams();
     const { sesion } = useAuth();
@@ -61,6 +65,7 @@ export default function TicketDetalle() {
     }
 
     const { ticket, diagnostico } = detalle;
+    const esTaller = "notas_privadas" in detalle;
 
     return (
         <div className="pagina detalle-pagina">
@@ -106,9 +111,36 @@ export default function TicketDetalle() {
                                 </Dato>
                             </dl>
                         ) : (
-                            <p className="detalle-vacio">Todavía no tiene diagnóstico.</p>
+                            <p className="detalle-vacio">
+                                {esTaller
+                                    ? "Todavía no tiene diagnóstico. Sin diagnóstico el ticket no se puede cotizar."
+                                    : "El técnico todavía está revisando tu equipo."}
+                            </p>
                         )}
                     </div>
+
+                    {esTaller && (
+                        <div className="tarjeta detalle-privado">
+                            <div className="detalle-titulo-fila">
+                                <h2>Notas privadas</h2>
+                                <span className="detalle-etiqueta-privada">Solo el taller</span>
+                            </div>
+                            {detalle.notas_privadas.length === 0 ? (
+                                <p className="detalle-vacio">No hay notas privadas.</p>
+                            ) : (
+                                <ul className="detalle-notas">
+                                    {detalle.notas_privadas.map((nota) => (
+                                        <li key={nota.id_nota}>
+                                            <p className="detalle-texto">{nota.contenido}</p>
+                                            <span className="detalle-autor">
+                                                {nota.usuario} · {formatearFechaHora(nota.fecha)}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <aside className="detalle-lateral">
@@ -124,7 +156,7 @@ export default function TicketDetalle() {
                             )}
                             {ticket.fecha_cierre && <Dato etiqueta="Cierre">{formatearFecha(ticket.fecha_cierre)}</Dato>}
                             <Dato etiqueta="Técnico asignado">{ticket.tecnico ?? "Sin asignar"}</Dato>
-                            <Dato etiqueta="Cliente">{ticket.cliente}</Dato>
+                            {esTaller && <Dato etiqueta="Cliente">{ticket.cliente}</Dato>}
                         </dl>
                     </div>
 
