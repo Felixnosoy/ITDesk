@@ -3,6 +3,7 @@ import { buscarClientes } from "../api/tickets";
 import { crearUsuario } from "../api/usuarios";
 import Modal from "./Modal";
 import FormularioUsuario from "./FormularioUsuario";
+import { etiquetaDocumento } from "../utils/formato";
 
 const LONGITUD_MINIMA = 2;
 const ESPERA_MS = 300;
@@ -64,7 +65,7 @@ export default function SelectorCliente({ token, cliente, onSeleccionar }) {
                         {cliente.nombre} {cliente.apellido}
                     </strong>
                     <span>
-                        {cliente.tipo_documento} {cliente.num_documento} · {cliente.correo}
+                        {etiquetaDocumento(cliente.tipo_documento)} {cliente.num_documento} · {cliente.correo}
                     </span>
                 </div>
                 <button type="button" className="boton boton-chico boton-secundario" onClick={() => onSeleccionar(null)}>
@@ -123,7 +124,7 @@ export default function SelectorCliente({ token, cliente, onSeleccionar }) {
                                     {c.nombre} {c.apellido}
                                 </strong>
                                 <span>
-                                    {c.tipo_documento} {c.num_documento} · {c.correo}
+                                    {etiquetaDocumento(c.tipo_documento)} {c.num_documento} · {c.correo}
                                 </span>
                             </button>
                         </li>

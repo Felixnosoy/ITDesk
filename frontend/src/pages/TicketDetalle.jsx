@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { ROLES } from "../constants/roles";
@@ -28,12 +28,14 @@ const Dato = ({ etiqueta, children }) => (
 // pantalla nunca puede mostrarle algo que el backend no le dio.
 export default function TicketDetalle() {
     const { id } = useParams();
+    const location = useLocation();
     const { sesion } = useAuth();
     const { token } = sesion;
 
     const [detalle, setDetalle] = useState(null);
     const [error, setError] = useState("");
-    const [aviso, setAviso] = useState("");
+    // al llegar desde el registro, el aviso de confirmacion viene en el state
+    const [aviso, setAviso] = useState(() => location.state?.aviso ?? "");
 
     // seccion que se esta editando ("diagnostico"...) y su estado de guardado
     const [editando, setEditando] = useState(null);

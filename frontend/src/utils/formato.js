@@ -24,3 +24,6 @@ export const normalizar = (texto) =>
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+
+// el valor guardado no lleva tilde
+export const etiquetaDocumento = (tipo) => (tipo === "Cedula" ? "Cédula" : tipo);
