@@ -165,4 +165,5 @@ select:focus-visible {
   border-radius: 99px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
