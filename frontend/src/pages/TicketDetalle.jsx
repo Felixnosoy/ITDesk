@@ -42,8 +42,6 @@ export default function TicketDetalle() {
     const [guardando, setGuardando] = useState(false);
     const [errorAccion, setErrorAccion] = useState("");
 
-    // se incrementa despues de cada cambio para volver a pedir el detalle
-    const [version, setVersion] = useState(0);
 
     useEffect(() => {
         let vigente = true;
@@ -61,7 +59,7 @@ export default function TicketDetalle() {
         return () => {
             vigente = false;
         };
-    }, [token, id, version]);
+    }, [token, id]);
 
     const abrirEdicion = (seccion) => {
         setAviso("");
@@ -69,7 +67,8 @@ export default function TicketDetalle() {
         setEditando(seccion);
     };
 
-    // ejecuta una accion contra el servidor y recarga el detalle; si falla
+    // ejecuta una accion contra el servidor y vuelve a pedir el detalle antes
+    // de avisar, asi el aviso nunca aparece junto a datos viejos; si falla
     // deja el formulario abierto con el mensaje del servidor
     const ejecutar = async (accion, mensajeExito) => {
         setGuardando(true);
@@ -77,9 +76,9 @@ export default function TicketDetalle() {
 
         try {
             await accion();
+            setDetalle(await obtenerDetalle(token, id));
             setEditando(null);
             setAviso(mensajeExito);
-            setVersion((v) => v + 1);
             return true;
         } catch (err) {
             setErrorAccion(err.message);
