@@ -31,3 +31,14 @@ export async function registrarDiagnostico(token, id, { diagnostico, solucion, o
 
     return respuesta.data;
 }
+
+// sin_costo solo se manda al pasar a Resuelto
+export async function cambiarEstado(token, id, { estado, observaciones, sin_costo }) {
+    const respuesta = await apiFetch(`/tickets/${id}/estado`, {
+        method: "PATCH",
+        token,
+        body: { estado, observaciones, sin_costo },
+    });
+
+    return respuesta.data;
+}

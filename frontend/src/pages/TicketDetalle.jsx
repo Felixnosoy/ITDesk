@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { obtenerDetalle, registrarDiagnostico } from "../api/tickets";
+import { obtenerDetalle, registrarDiagnostico, cambiarEstado } from "../api/tickets";
+import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET } from "../constants/tickets";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
+import CambioEstado from "../components/CambioEstado";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -106,6 +108,9 @@ export default function TicketDetalle() {
     const esTaller = "notas_privadas" in detalle;
     const estaCerrado = ticket.estado === ESTADOS_TICKET.CERRADO;
     const puedeEditar = esTaller && !estaCerrado;
+    // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
+    const puedeCambiarEstado =
+        [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol) && detalle.estados_siguientes?.length > 0;
 
     return (
         <div className="pagina detalle-pagina">
@@ -233,6 +238,13 @@ export default function TicketDetalle() {
                             <Dato etiqueta="Técnico asignado">{ticket.tecnico ?? "Sin asignar"}</Dato>
                             {esTaller && <Dato etiqueta="Cliente">{ticket.cliente}</Dato>}
                         </dl>
+                        {puedeCambiarEstado && (
+                            <div className="detalle-acciones-estado">
+                                <button type="button" className="boton" onClick={() => abrirEdicion("estado")}>
+                                    Cambiar estado
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="tarjeta">
@@ -247,6 +259,20 @@ export default function TicketDetalle() {
                     </div>
                 </aside>
             </div>
+
+            {editando === "estado" && (
+                <CambioEstado
+                    estadoActual={ticket.estado}
+                    siguientes={detalle.estados_siguientes}
+                    tieneDiagnostico={Boolean(diagnostico)}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onGuardar={(datos) =>
+                        ejecutar(() => cambiarEstado(token, ticket.id_ticket, datos), "Estado actualizado.")
+                    }
+                />
+            )}
         </div>
     );
 }
