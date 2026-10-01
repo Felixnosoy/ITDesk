@@ -34,7 +34,8 @@ button {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
@@ -87,7 +88,8 @@ select:focus-visible {
 }
 
 .campo input,
-.campo select {
+.campo select,
+.campo textarea {
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -95,6 +97,11 @@ select:focus-visible {
   color: var(--color-text);
   font: inherit;
   font-size: 14px;
+}
+
+.campo textarea {
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .campo input:disabled,

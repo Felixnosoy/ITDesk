@@ -20,3 +20,14 @@ export async function obtenerDetalle(token, id) {
 
     return respuesta.data;
 }
+
+// registra o reemplaza el diagnostico (uno solo vigente por ticket)
+export async function registrarDiagnostico(token, id, { diagnostico, solucion, observaciones }) {
+    const respuesta = await apiFetch(`/tickets/${id}/diagnostico`, {
+        method: "PUT",
+        token,
+        body: { diagnostico, solucion, observaciones },
+    });
+
+    return respuesta.data;
+}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { obtenerDetalle } from "../api/tickets";
+import { obtenerDetalle, registrarDiagnostico } from "../api/tickets";
+import { ESTADOS_TICKET } from "../constants/tickets";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
+import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -27,6 +29,15 @@ export default function TicketDetalle() {
 
     const [detalle, setDetalle] = useState(null);
     const [error, setError] = useState("");
+    const [aviso, setAviso] = useState("");
+
+    // seccion que se esta editando ("diagnostico"...) y su estado de guardado
+    const [editando, setEditando] = useState(null);
+    const [guardando, setGuardando] = useState(false);
+    const [errorAccion, setErrorAccion] = useState("");
+
+    // se incrementa despues de cada cambio para volver a pedir el detalle
+    const [version, setVersion] = useState(0);
 
     useEffect(() => {
         let vigente = true;
@@ -44,7 +55,33 @@ export default function TicketDetalle() {
         return () => {
             vigente = false;
         };
-    }, [token, id]);
+    }, [token, id, version]);
+
+    const abrirEdicion = (seccion) => {
+        setAviso("");
+        setErrorAccion("");
+        setEditando(seccion);
+    };
+
+    // ejecuta una accion contra el servidor y recarga el detalle; si falla
+    // deja el formulario abierto con el mensaje del servidor
+    const ejecutar = async (accion, mensajeExito) => {
+        setGuardando(true);
+        setErrorAccion("");
+
+        try {
+            await accion();
+            setEditando(null);
+            setAviso(mensajeExito);
+            setVersion((v) => v + 1);
+            return true;
+        } catch (err) {
+            setErrorAccion(err.message);
+            return false;
+        } finally {
+            setGuardando(false);
+        }
+    };
 
     if (error) {
         return (
@@ -67,6 +104,8 @@ export default function TicketDetalle() {
 
     const { ticket, diagnostico } = detalle;
     const esTaller = "notas_privadas" in detalle;
+    const estaCerrado = ticket.estado === ESTADOS_TICKET.CERRADO;
+    const puedeEditar = esTaller && !estaCerrado;
 
     return (
         <div className="pagina detalle-pagina">
@@ -82,6 +121,12 @@ export default function TicketDetalle() {
                 </div>
             </div>
 
+            {aviso && (
+                <div className="aviso aviso-ok" role="status">
+                    {aviso}
+                </div>
+            )}
+
             <div className="detalle-columnas">
                 <div className="detalle-principal">
                     <div className="tarjeta">
@@ -90,8 +135,32 @@ export default function TicketDetalle() {
                     </div>
 
                     <div className="tarjeta">
-                        <h2>Diagnóstico</h2>
-                        {diagnostico ? (
+                        <div className="detalle-titulo-fila">
+                            <h2>Diagnóstico</h2>
+                            {puedeEditar && editando !== "diagnostico" && (
+                                <button
+                                    type="button"
+                                    className="boton boton-chico boton-secundario"
+                                    onClick={() => abrirEdicion("diagnostico")}
+                                >
+                                    {diagnostico ? "Editar" : "Registrar diagnóstico"}
+                                </button>
+                            )}
+                        </div>
+                        {editando === "diagnostico" ? (
+                            <FormularioDiagnostico
+                                diagnostico={diagnostico}
+                                guardando={guardando}
+                                error={errorAccion}
+                                onCancelar={() => setEditando(null)}
+                                onGuardar={(valores) =>
+                                    ejecutar(
+                                        () => registrarDiagnostico(token, ticket.id_ticket, valores),
+                                        diagnostico ? "Diagnóstico actualizado." : "Diagnóstico registrado."
+                                    )
+                                }
+                            />
+                        ) : diagnostico ? (
                             <dl className="detalle-datos">
                                 <Dato etiqueta="Diagnóstico">
                                     <span className="detalle-texto">{diagnostico.diagnostico}</span>
