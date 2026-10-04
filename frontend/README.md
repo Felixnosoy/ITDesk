@@ -11,3 +11,10 @@ npm run dev
 ```
 
 Requiere el backend (`../backend`) corriendo aparte.
+
+## Impresión
+
+Al imprimir cualquier pantalla (Ctrl+P) se ocultan el menú lateral, los botones de acción, los formularios y los avisos. Dos clases sirven para ajustar una pantalla:
+
+- `no-imprimir`: el elemento se ve en pantalla pero no en papel.
+- `solo-imprimir`: el elemento aparece solo en papel.

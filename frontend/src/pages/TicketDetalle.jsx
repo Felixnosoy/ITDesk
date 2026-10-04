@@ -91,7 +91,7 @@ export default function TicketDetalle() {
     if (error) {
         return (
             <div className="pagina">
-                <Link to="/tickets" className="detalle-volver">← Volver a tickets</Link>
+                <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
                 <div className="aviso aviso-error" role="alert">
                     {error}
                 </div>
@@ -117,7 +117,7 @@ export default function TicketDetalle() {
 
     return (
         <div className="pagina detalle-pagina">
-            <Link to="/tickets" className="detalle-volver">← Volver a tickets</Link>
+            <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
 
             <div className="pagina-cabecera detalle-cabecera">
                 <span className="detalle-codigo">{codigoTicket(ticket.id_ticket)}</span>
@@ -198,7 +198,7 @@ export default function TicketDetalle() {
                     </div>
 
                     {puedeEditar && (
-                        <div className="tarjeta">
+                        <div className="tarjeta no-imprimir">
                             <h2>Registrar novedad</h2>
                             <FormularioSeguimiento
                                 guardando={guardando}

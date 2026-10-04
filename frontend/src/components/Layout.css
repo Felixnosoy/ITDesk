@@ -186,3 +186,18 @@
     padding: 20px 16px;
   }
 }
+
+/* ---------- impresion: el contenido ocupa toda la hoja, sin menu ---------- */
+
+@media print {
+  .layout-topbar,
+  .layout-fondo,
+  .layout-lateral {
+    display: none !important;
+  }
+
+  .layout-contenido {
+    margin-left: 0;
+    padding: 0;
+  }
+}

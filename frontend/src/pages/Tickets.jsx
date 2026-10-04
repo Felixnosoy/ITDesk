@@ -145,7 +145,7 @@ export default function Tickets() {
                 )}
             </div>
 
-            <div className="tarjeta tickets-filtros">
+            <div className="tarjeta tickets-filtros no-imprimir">
                 <FiltrosTickets valores={filtros} onCambiar={cambiarFiltros} />
             </div>
 
