@@ -187,3 +187,93 @@ describe("HU15: aprobar o rechazar la cotizacion", () => {
         expect(body.message).toMatch(/decisión del cliente/);
     });
 });
+
+// ticket con su cotizacion ya aprobada por el cliente
+const ticketAprobado = async () => {
+    const { id, idCotizacion } = await ticketCotizado();
+    await decidir(id, idCotizacion, { estado: "Aprobada" });
+    return id;
+};
+
+const facturar = (id, token = api.tokens.tecnico) => api.pedir("POST", `/tickets/${id}/factura`, token);
+
+describe("HU16: generar la factura", () => {
+    test("copia las lineas y el total de la cotizacion aprobada", async () => {
+        const id = await ticketAprobado();
+        const { status, body } = await facturar(id);
+
+        expect(status).toBe(201);
+        expect(body.data).toEqual(expect.objectContaining({ subtotal: 6000.5, itbis: 1080.09, total: 7080.59 }));
+        expect(body.data.lineas.map((l) => [l.descripcion, l.cantidad, l.importe])).toEqual([
+            ["Placa madre", 1, 4500],
+            ["Mano de obra", 2, 1500.5]
+        ]);
+    });
+
+    test("el administrador tambien puede facturar", async () => {
+        const id = await ticketAprobado();
+        const { status } = await facturar(id, api.tokens.administrador);
+
+        expect(status).toBe(201);
+    });
+
+    test("con la cotizacion pendiente o rechazada se rechaza", async () => {
+        const { id, idCotizacion } = await ticketCotizado();
+        expect((await facturar(id)).status).toBe(400);
+
+        await decidir(id, idCotizacion, { estado: "Rechazada" });
+        expect((await facturar(id)).status).toBe(400);
+    });
+
+    test("no se factura dos veces", async () => {
+        const id = await ticketAprobado();
+        await facturar(id);
+
+        expect((await facturar(id)).status).toBe(409);
+    });
+
+    test.each(["cliente", "recepcionista"])("%s no puede facturar", async (cuenta) => {
+        const id = await ticketAprobado();
+
+        expect((await facturar(id, api.tokens[cuenta])).status).toBe(403);
+    });
+
+    test("con la factura emitida el ticket se resuelve sin declarar la excepcion", async () => {
+        const id = await ticketAprobado();
+
+        const antes = await api.pedir("PATCH", `/tickets/${id}/estado`, api.tokens.tecnico, { estado: "Resuelto" });
+        expect(antes.status).toBe(400);
+
+        await facturar(id);
+        const despues = await api.pedir("PATCH", `/tickets/${id}/estado`, api.tokens.tecnico, { estado: "Resuelto" });
+
+        expect(despues.status).toBe(200);
+        expect(despues.body.data).toEqual(expect.objectContaining({ estado: "Resuelto", resuelto_sin_costo: 0 }));
+    });
+
+    test("el cliente consulta su factura y otro cliente no", async () => {
+        const id = await ticketAprobado();
+        await facturar(id);
+
+        const propia = await api.pedir("GET", `/tickets/${id}/factura`, api.tokens.cliente);
+        expect(propia.status).toBe(200);
+        expect(propia.body.data.total).toBe(7080.59);
+
+        const detalle = await api.pedir("GET", `/tickets/${id}`, api.tokens.cliente);
+        expect(detalle.body.data.factura.id_factura).toBe(propia.body.data.id_factura);
+        expect(detalle.body.data).not.toHaveProperty("facturable");
+
+        expect((await api.pedir("GET", `/tickets/${id}/factura`, api.tokens.maria)).status).toBe(404);
+    });
+
+    test("el taller ve facturable solo mientras falta la factura", async () => {
+        const id = await ticketAprobado();
+
+        const antes = await api.pedir("GET", `/tickets/${id}`, api.tokens.tecnico);
+        expect(antes.body.data.facturable).toBe(true);
+
+        await facturar(id);
+        const despues = await api.pedir("GET", `/tickets/${id}`, api.tokens.tecnico);
+        expect(despues.body.data.facturable).toBe(false);
+    });
+});

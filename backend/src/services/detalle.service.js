@@ -4,6 +4,7 @@ const diagnosticoService = require("./diagnostico.service");
 const seguimientoService = require("./seguimiento.service");
 const archivoService = require("./archivo.service");
 const cotizacionService = require("./cotizacion.service");
+const facturaService = require("./factura.service");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
 const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
 const { estadosSiguientes } = require("./estado.service");
@@ -26,7 +27,9 @@ const esCotizable = (ticket, diagnostico, cotizaciones) =>
 // pasar el ticket (para que la pantalla ofrezca solo esos). cotizaciones
 // trae todas las del ticket con sus lineas, de la mas nueva a la mas vieja.
 // cotizable dice si ahora mismo se puede armar una: tiene diagnostico, no
-// esta resuelto ni cerrado y no hay otra Pendiente o Aprobada.
+// esta resuelto ni cerrado y no hay otra Pendiente o Aprobada. factura es
+// la del ticket o null; facturable (solo para el taller) dice si ya se
+// puede generar: hay una cotizacion Aprobada sin facturar.
 //
 // Visibilidad del Cliente: un ticket ajeno responde 404 (lo resuelve
 // obtenerTicketPorId) y las notas privadas ni siquiera se consultan, asi
@@ -35,9 +38,10 @@ const obtenerDetalle = async (idTicket, usuario) => {
     const ticket = await ticketService.obtenerTicketPorId(idTicket, usuario);
     const esCliente = usuario.rol === ROLES.CLIENTE;
 
-    const [diagnostico, cotizaciones, actualizaciones, notas] = await Promise.all([
+    const [diagnostico, cotizaciones, factura, actualizaciones, notas] = await Promise.all([
         diagnosticoService.obtenerDiagnosticoDeTicket(ticket.id_ticket),
         cotizacionService.obtenerCotizacionesDeTicket(ticket.id_ticket),
+        facturaService.obtenerFacturaDeTicket(ticket.id_ticket),
         seguimientoService.obtenerActualizaciones(ticket.id_ticket),
         esCliente ? null : seguimientoService.obtenerNotas(ticket.id_ticket)
     ]);
@@ -47,12 +51,16 @@ const obtenerDetalle = async (idTicket, usuario) => {
         diagnostico,
         cotizable: esCotizable(ticket, diagnostico, cotizaciones),
         cotizaciones,
+        factura,
         actualizaciones: await conAdjuntos(actualizaciones, "id_actualizacion", "id_actualizacion")
     };
 
     if (!esCliente) {
         detalle.notas_privadas = await conAdjuntos(notas, "id_nota", "id_nota");
         detalle.estados_siguientes = estadosSiguientes(ticket.estado);
+        detalle.facturable = factura === null
+            && ticket.estado !== ESTADOS_TICKET.CERRADO
+            && cotizaciones.some((c) => c.estado === ESTADOS_COTIZACION.APROBADA);
     }
 
     return detalle;

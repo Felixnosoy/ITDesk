@@ -10,6 +10,7 @@ const respuestas = ({ estado = "En reparacion", diagnostico = [], cotizaciones =
         .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado }]])
         .mockResolvedValueOnce([diagnostico])
         .mockResolvedValueOnce([cotizaciones])
+        .mockResolvedValueOnce([[]])                       // factura
         .mockResolvedValueOnce([actualizaciones])
         .mockResolvedValueOnce([notas]);
 
@@ -79,6 +80,7 @@ describe("detalle.service.obtenerDetalle (visibilidad del Cliente)", () => {
             .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado: "Abierto" }]])
             .mockResolvedValueOnce([[]])                          // diagnostico
             .mockResolvedValueOnce([[]])                          // cotizaciones
+            .mockResolvedValueOnce([[]])                          // factura
             .mockResolvedValueOnce([[{ id_actualizacion: 1 }]])   // actualizaciones
             .mockResolvedValueOnce([[]]);                         // adjuntos publicos
 

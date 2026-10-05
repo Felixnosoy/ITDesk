@@ -96,7 +96,9 @@ describe("estado.service.cambiarEstado", () => {
     });
 
     test("no resuelve sin cotizacion facturada ni excepcion sin costo", async () => {
-        pool.query.mockResolvedValueOnce(ticketEn("En reparacion"));
+        pool.query
+            .mockResolvedValueOnce(ticketEn("En reparacion"))
+            .mockResolvedValueOnce([[]]);   // sin factura
 
         await expect(estadoService.cambiarEstado("10", { estado: "Resuelto" }, tecnico))
             .rejects.toMatchObject({ status: 400, message: expect.stringContaining("cotización aprobada y facturada") });
@@ -146,5 +148,19 @@ describe("estado.service.cambiarEstado", () => {
         const { ticket } = await estadoService.cambiarEstado("10", { estado: "En diagnostico" }, tecnico);
 
         expect(ticket.estado).toBe("En diagnostico");
+    });
+
+    test("con la factura emitida ya se puede resolver sin la excepcion", async () => {
+        pool.query
+            .mockResolvedValueOnce(ticketEn("En reparacion"))
+            .mockResolvedValueOnce([[{ id_factura: 4 }]])   // tiene factura
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([{ insertId: 1 }])
+            .mockResolvedValueOnce(ticketEn("Resuelto"));
+
+        const { ticket } = await estadoService.cambiarEstado("10", { estado: "Resuelto" }, tecnico);
+
+        expect(ticket.estado).toBe("Resuelto");
+        expect(pool.query.mock.calls[2][0]).toContain("resuelto_sin_costo = 0");
     });
 });

@@ -7,6 +7,7 @@ const diagnosticoController = require("../controllers/diagnostico.controller");
 const seguimientoController = require("../controllers/seguimiento.controller");
 const estadoController = require("../controllers/estado.controller");
 const cotizacionController = require("../controllers/cotizacion.controller");
+const facturaController = require("../controllers/factura.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
@@ -90,6 +91,19 @@ router.patch(
     "/:id/cotizaciones/:idCotizacion",
     verificarRol(ROLES.CLIENTE),
     cotizacionController.decidirCotizacion
+);
+
+// factura del ticket: el Cliente solo la de los suyos
+router.get(
+    "/:id/factura",
+    facturaController.consultarFactura
+);
+
+// generar la factura desde la cotizacion aprobada (issue HU16)
+router.post(
+    "/:id/factura",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    facturaController.generarFactura
 );
 
 module.exports = router;

@@ -4,6 +4,7 @@ const ESTADOS_TICKET = require("../constants/estadosTicket");
 const ticketService = require("./ticket.service");
 const diagnosticoService = require("./diagnostico.service");
 const cotizacionService = require("./cotizacion.service");
+const facturaService = require("./factura.service");
 const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
 const { TIPOS_ACTUALIZACION } = require("./seguimiento.service");
 const { validarTextoOpcional } = require("../validators/comun.validator");
@@ -70,11 +71,6 @@ const camposPorEstado = (nuevo, sinCosto) => {
     return "fecha_resolucion = NULL, resuelto_sin_costo = 0";
 };
 
-// Cotizacion aprobada y facturada del ticket. La facturacion todavia no
-// existe (llega con HU16): hasta entonces ningun ticket la tiene y la unica
-// forma de resolver es declarar la excepcion sin costo.
-const tieneCotizacionFacturada = async () => false;
-
 // sin_costo es opcional, pero si viene tiene que ser booleano: un "si" o un
 // 1 mal enviados no deben poder saltarse la regla de cierre
 const validarSinCosto = (valor) => {
@@ -97,8 +93,9 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
 
     validarTransicion(ticket.estado, nuevo);
 
-    // regla de cierre (issue HU13.2)
-    if (nuevo === RESUELTO && !sinCosto && !(await tieneCotizacionFacturada(ticket.id_ticket))) {
+    // regla de cierre (issue HU13.2): solo se factura una cotizacion
+    // aprobada, asi que tener factura cubre las dos condiciones
+    if (nuevo === RESUELTO && !sinCosto && !(await facturaService.tieneFactura(ticket.id_ticket))) {
         throw crearError(
             "No se puede marcar como Resuelto sin una cotización aprobada y facturada. Si el trabajo no tuvo costo, decláralo como trabajo sin costo.",
             400
