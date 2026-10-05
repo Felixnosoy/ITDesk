@@ -3,6 +3,8 @@ const crearError = require("../utils/crearError");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
 const ticketService = require("./ticket.service");
 const diagnosticoService = require("./diagnostico.service");
+const cotizacionService = require("./cotizacion.service");
+const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
 const { TIPOS_ACTUALIZACION } = require("./seguimiento.service");
 const { validarTextoOpcional } = require("../validators/comun.validator");
 
@@ -108,6 +110,16 @@ const cambiarEstado = async (idTicket, datos = {}, usuario) => {
     const nota = esResueltoSinCosto
         ? [observaciones, "Resuelto sin costo."].filter(Boolean).join(" ")
         : observaciones;
+
+    // con una cotizacion pendiente el ticket sale de Esperando aprobacion
+    // solo por la decision del cliente (issue HU15), no a mano
+    if (ticket.estado === ESPERANDO_APROBACION) {
+        const vigente = await cotizacionService.obtenerCotizacionVigente(ticket.id_ticket);
+
+        if (vigente?.estado === ESTADOS_COTIZACION.PENDIENTE) {
+            throw crearError("La cotización está esperando la decisión del cliente. El ticket cambia de estado cuando el cliente la apruebe o la rechace.", 400);
+        }
+    }
 
     // sin diagnostico no hay nada que cotizar ni que el cliente apruebe
     if (nuevo === ESPERANDO_APROBACION) {

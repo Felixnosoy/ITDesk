@@ -85,4 +85,11 @@ router.post(
     cotizacionController.crearCotizacion
 );
 
+// el cliente dueño aprueba o rechaza una cotizacion pendiente (issue HU15)
+router.patch(
+    "/:id/cotizaciones/:idCotizacion",
+    verificarRol(ROLES.CLIENTE),
+    cotizacionController.decidirCotizacion
+);
+
 module.exports = router;

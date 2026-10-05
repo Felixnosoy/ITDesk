@@ -5,7 +5,7 @@ const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
 const ticketService = require("./ticket.service");
 const diagnosticoService = require("./diagnostico.service");
 const { TIPOS_ACTUALIZACION } = require("./seguimiento.service");
-const { validarTextoOpcional } = require("../validators/comun.validator");
+const { validarId, validarTextoOpcional } = require("../validators/comun.validator");
 const { validarLineas, calcularMontos, conMontosNumericos } = require("../utils/montos");
 
 const COLUMNAS_COTIZACION = `
@@ -207,7 +207,84 @@ const crearCotizacion = async (idTicket, datos = {}, usuario) => {
     return obtenerCotizacionPorId(id_cotizacion);
 };
 
+// Que pasa con el ticket segun la decision del cliente: aprobada, a
+// reparar; rechazada, de vuelta a diagnostico para que el taller pueda
+// armar otra cotizacion (issue HU15.2).
+const EFECTO_DECISION = {
+    [ESTADOS_COTIZACION.APROBADA]: {
+        estado: ESTADOS_TICKET.EN_REPARACION,
+        nota: () => "El cliente aprobó la cotización."
+    },
+    [ESTADOS_COTIZACION.RECHAZADA]: {
+        estado: ESTADOS_TICKET.EN_DIAGNOSTICO,
+        nota: (motivo) => ["El cliente rechazó la cotización.", motivo && `Motivo: ${motivo}`].filter(Boolean).join(" ")
+    }
+};
+
+// El cliente dueño aprueba o rechaza una cotizacion Pendiente (issue
+// HU15.1). Que sea el Cliente lo exige la ruta; que sea el dueño lo
+// resuelve obtenerTicketPorId (un ticket ajeno responde 404). La fila se
+// bloquea para que dos clics seguidos no decidan dos veces.
+const decidirCotizacion = async (idTicket, idCotizacion, datos = {}, usuario) => {
+    const decision = datos.estado;
+
+    if (!Object.keys(EFECTO_DECISION).includes(decision)) {
+        throw crearError(`El campo estado debe ser ${Object.keys(EFECTO_DECISION).join(" o ")}.`, 400);
+    }
+
+    const motivo = decision === ESTADOS_COTIZACION.RECHAZADA
+        ? validarTextoOpcional(datos.motivo, "motivo")
+        : null;
+    const id_cotizacion = validarId(idCotizacion, "id_cotizacion");
+    const ticket = await ticketService.obtenerTicketPorId(idTicket, usuario);
+    const efecto = EFECTO_DECISION[decision];
+
+    const anterior = await enTransaccion(async (conexion) => {
+        const [filas] = await conexion.query(
+            "SELECT estado FROM cotizacion WHERE id_cotizacion = ? AND id_ticket = ? FOR UPDATE",
+            [id_cotizacion, ticket.id_ticket]
+        );
+
+        if (filas.length === 0) {
+            throw crearError("Cotización no encontrada.", 404);
+        }
+
+        if (filas[0].estado !== ESTADOS_COTIZACION.PENDIENTE) {
+            throw crearError(`Esta cotización ya fue ${filas[0].estado.toLowerCase()}.`, 409);
+        }
+
+        await conexion.query(
+            `
+            UPDATE cotizacion
+            SET estado = ?, motivo_rechazo = ?, fecha_decision = NOW()
+            WHERE id_cotizacion = ?
+            `,
+            [decision, motivo, id_cotizacion]
+        );
+
+        // si el ticket no esta esperando la decision (no deberia pasar,
+        // estado.service no lo deja salir de ahi con una pendiente) se
+        // registra la decision pero no se toca su estado
+        if (ticket.estado === ESTADOS_TICKET.ESPERANDO_APROBACION) {
+            await moverTicket(conexion, {
+                id_ticket: ticket.id_ticket,
+                id_usuario: usuario.id_usuario,
+                estado: efecto.estado,
+                observaciones: efecto.nota(motivo)
+            });
+        }
+
+        return filas[0].estado;
+    });
+
+    return {
+        anterior,
+        cotizacion: await obtenerCotizacionPorId(id_cotizacion)
+    };
+};
+
 module.exports = {
+    decidirCotizacion,
     obtenerCotizacionesDeTicket,
     obtenerCotizacionPorId,
     obtenerCotizacionVigente,

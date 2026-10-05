@@ -123,5 +123,28 @@ describe("estado.service.cambiarEstado", () => {
         expect(pool.query.mock.calls[1][0]).toContain("resuelto_sin_costo = 1");
         expect(pool.query.mock.calls[2][1][4]).toBe("Era un cable suelto. Resuelto sin costo.");
     });
-});
 
+    test("con una cotizacion pendiente no sale de Esperando aprobacion a mano", async () => {
+        pool.query
+            .mockResolvedValueOnce(ticketEn("Esperando aprobacion"))
+            .mockResolvedValueOnce([[{ id_cotizacion: 4, estado: "Pendiente" }]]);
+
+        await expect(estadoService.cambiarEstado("10", { estado: "En reparacion" }, tecnico))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("decisión del cliente") });
+
+        expect(pool.getConnection).not.toHaveBeenCalled();
+    });
+
+    test("sin cotizacion pendiente si puede salir de Esperando aprobacion", async () => {
+        pool.query
+            .mockResolvedValueOnce(ticketEn("Esperando aprobacion"))
+            .mockResolvedValueOnce([[]])                    // sin cotizacion vigente
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([{ insertId: 1 }])
+            .mockResolvedValueOnce(ticketEn("En diagnostico"));
+
+        const { ticket } = await estadoService.cambiarEstado("10", { estado: "En diagnostico" }, tecnico);
+
+        expect(ticket.estado).toBe("En diagnostico");
+    });
+});

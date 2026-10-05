@@ -115,3 +115,75 @@ describe("HU14: crear una cotizacion", () => {
         expect(ajeno.status).toBe(404);
     });
 });
+
+// ticket con una cotizacion pendiente recien creada
+const ticketCotizado = async () => {
+    const id = await nuevoTicket();
+    const { body } = await cotizar(id);
+    return { id, idCotizacion: body.data.id_cotizacion };
+};
+
+const decidir = (id, idCotizacion, datos, token = api.tokens.cliente) =>
+    api.pedir("PATCH", `/tickets/${id}/cotizaciones/${idCotizacion}`, token, datos);
+
+describe("HU15: aprobar o rechazar la cotizacion", () => {
+    test("el cliente aprueba y el ticket pasa a En reparacion", async () => {
+        const { id, idCotizacion } = await ticketCotizado();
+        const { status, body } = await decidir(id, idCotizacion, { estado: "Aprobada" });
+
+        expect(status).toBe(200);
+        expect(body.data.estado).toBe("Aprobada");
+        expect(body.data.fecha_decision).not.toBeNull();
+
+        const detalle = await api.pedir("GET", `/tickets/${id}`, api.tokens.cliente);
+        expect(detalle.body.data.ticket.estado).toBe("En reparacion");
+    });
+
+    test("un rechazo deja el ticket en diagnostico y se puede recotizar", async () => {
+        const { id, idCotizacion } = await ticketCotizado();
+        const { body } = await decidir(id, idCotizacion, { estado: "Rechazada", motivo: "Muy caro" });
+
+        expect(body.data).toEqual(expect.objectContaining({ estado: "Rechazada", motivo_rechazo: "Muy caro" }));
+
+        const detalle = await api.pedir("GET", `/tickets/${id}`, api.tokens.tecnico);
+        expect(detalle.body.data.ticket.estado).toBe("En diagnostico");
+        expect(detalle.body.data.cotizable).toBe(true);
+
+        const nueva = await cotizar(id, api.tokens.tecnico, [{ descripcion: "Repuesto generico", cantidad: 1, precio_unitario: 2000 }]);
+        expect(nueva.status).toBe(201);
+
+        const lista = await api.pedir("GET", `/tickets/${id}/cotizaciones`, api.tokens.cliente);
+        expect(lista.body.data.map((c) => c.estado)).toEqual(["Pendiente", "Rechazada"]);
+    });
+
+    test("no se puede decidir dos veces", async () => {
+        const { id, idCotizacion } = await ticketCotizado();
+        await decidir(id, idCotizacion, { estado: "Aprobada" });
+
+        const { status } = await decidir(id, idCotizacion, { estado: "Rechazada" });
+
+        expect(status).toBe(409);
+    });
+
+    test("otro cliente no puede decidir sobre ella", async () => {
+        const { id, idCotizacion } = await ticketCotizado();
+        const { status } = await decidir(id, idCotizacion, { estado: "Aprobada" }, api.tokens.maria);
+
+        expect(status).toBe(404);
+    });
+
+    test.each(["tecnico", "administrador"])("%s no decide por el cliente", async (cuenta) => {
+        const { id, idCotizacion } = await ticketCotizado();
+        const { status } = await decidir(id, idCotizacion, { estado: "Aprobada" }, api.tokens[cuenta]);
+
+        expect(status).toBe(403);
+    });
+
+    test("el tecnico no puede sacar el ticket de Esperando aprobacion a mano", async () => {
+        const { id } = await ticketCotizado();
+        const { status, body } = await api.pedir("PATCH", `/tickets/${id}/estado`, api.tokens.tecnico, { estado: "En reparacion" });
+
+        expect(status).toBe(400);
+        expect(body.message).toMatch(/decisión del cliente/);
+    });
+});

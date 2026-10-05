@@ -148,3 +148,74 @@ describe("cotizacion.service.listarCotizaciones", () => {
         expect(pool.query).toHaveBeenCalledTimes(2);
     });
 });
+
+describe("cotizacion.service.decidirCotizacion", () => {
+    const cliente = { id_usuario: 5, rol: "Cliente" };
+
+    // ticket del cliente esperando su decision y la cotizacion bloqueada
+    const hastaDecidir = (estadoCotizacion = "Pendiente") => {
+        pool.query
+            .mockResolvedValueOnce(ticket("Esperando aprobacion"))
+            .mockResolvedValueOnce([estadoCotizacion ? [{ estado: estadoCotizacion }] : []]);
+    };
+
+    const decidir = async (datos) => {
+        hastaDecidir();
+        pool.query
+            .mockResolvedValueOnce([{}])    // UPDATE cotizacion
+            .mockResolvedValueOnce([{}])    // UPDATE ticket
+            .mockResolvedValueOnce([{}])    // INSERT actualizacion
+            .mockResolvedValueOnce([[{ id_cotizacion: 7, id_ticket: 10, estado: datos.estado, total: "100.00" }]])
+            .mockResolvedValueOnce([[]]);
+
+        return cotizacionService.decidirCotizacion("10", "7", datos, cliente);
+    };
+
+    test.each([undefined, "Pendiente", "aprobada", "Vencida"])("rechaza la decision %p sin consultar la base", async (estado) => {
+        await expect(cotizacionService.decidirCotizacion("10", "7", { estado }, cliente))
+            .rejects.toMatchObject({ status: 400 });
+
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    test("un cliente no decide sobre la cotizacion de un ticket ajeno", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 99, estado: "Esperando aprobacion" }]]);
+
+        await expect(cotizacionService.decidirCotizacion("10", "7", { estado: "Aprobada" }, cliente))
+            .rejects.toMatchObject({ status: 404 });
+
+        expect(pool.getConnection).not.toHaveBeenCalled();
+    });
+
+    test("una cotizacion de otro ticket responde 404", async () => {
+        hastaDecidir(null);
+
+        await expect(cotizacionService.decidirCotizacion("10", "7", { estado: "Aprobada" }, cliente))
+            .rejects.toMatchObject({ status: 404 });
+
+        expect(pool.conexion.rollback).toHaveBeenCalled();
+    });
+
+    test("una cotizacion ya decidida responde 409", async () => {
+        hastaDecidir("Aprobada");
+
+        await expect(cotizacionService.decidirCotizacion("10", "7", { estado: "Rechazada" }, cliente))
+            .rejects.toMatchObject({ status: 409, message: expect.stringContaining("aprobada") });
+    });
+
+    test("aprobar pasa el ticket a En reparacion e ignora el motivo", async () => {
+        await decidir({ estado: "Aprobada", motivo: "no aplica" });
+
+        expect(sqlDe("UPDATE cotizacion")[1]).toEqual(["Aprobada", null, 7]);
+        expect(sqlDe("UPDATE ticket SET estado")[1]).toEqual(["En reparacion", 10]);
+        expect(pool.conexion.commit).toHaveBeenCalled();
+    });
+
+    test("rechazar guarda el motivo y devuelve el ticket a diagnostico", async () => {
+        await decidir({ estado: "Rechazada", motivo: " Muy caro " });
+
+        expect(sqlDe("UPDATE cotizacion")[1]).toEqual(["Rechazada", "Muy caro", 7]);
+        expect(sqlDe("UPDATE ticket SET estado")[1]).toEqual(["En diagnostico", 10]);
+        expect(sqlDe("INSERT INTO actualizacion")[1][4]).toBe("El cliente rechazó la cotización. Motivo: Muy caro");
+    });
+});
