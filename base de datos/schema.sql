@@ -7,6 +7,8 @@ SET NAMES utf8mb4;
 -- se borran primero las tablas que dependen de otras (FK), para que el
 -- script se pueda volver a correr sobre una base ya creada
 DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `factura_linea`;
+DROP TABLE IF EXISTS `factura`;
 DROP TABLE IF EXISTS `cotizacion_linea`;
 DROP TABLE IF EXISTS `cotizacion`;
 DROP TABLE IF EXISTS `diagnostico`;
@@ -299,4 +301,51 @@ CREATE TABLE `cotizacion_linea` (
   CONSTRAINT `CK_CotizacionLinea_Cantidad` CHECK (`cantidad` > 0),
   CONSTRAINT `CK_CotizacionLinea_Precio` CHECK (`precio_unitario` >= 0),
   CONSTRAINT `FK_CotizacionLinea_Cotizacion` FOREIGN KEY (`id_cotizacion`) REFERENCES `cotizacion` (`id_cotizacion`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `factura`
+--
+-- Se genera desde una cotizacion Aprobada y copia sus montos: lo que se
+-- cobra es exactamente lo que el cliente aprobo. Una sola factura por
+-- cotizacion (UNIQUE). id_ticket se repite para poder saber rapido si un
+-- ticket esta facturado (regla de cierre); id_usuario es quien la emitio.
+-- Sin ON DELETE en la cotizacion: una cotizacion facturada no se borra.
+--
+
+CREATE TABLE `factura` (
+  `id_factura` int(11) NOT NULL AUTO_INCREMENT,
+  `id_cotizacion` int(11) NOT NULL,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `itbis` decimal(10,2) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `fecha_emision` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_factura`),
+  UNIQUE KEY `UQ_Factura_Cotizacion` (`id_cotizacion`),
+  KEY `FK_Factura_Ticket` (`id_ticket`),
+  KEY `FK_Factura_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Factura_Cotizacion` FOREIGN KEY (`id_cotizacion`) REFERENCES `cotizacion` (`id_cotizacion`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Factura_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Factura_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `factura_linea`
+--
+-- Copia de las lineas de la cotizacion al momento de facturar, para que
+-- la factura no cambie aunque despues se toque la cotizacion.
+--
+
+CREATE TABLE `factura_linea` (
+  `id_linea` int(11) NOT NULL AUTO_INCREMENT,
+  `id_factura` int(11) NOT NULL,
+  `descripcion` varchar(255) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id_linea`),
+  KEY `FK_FacturaLinea_Factura` (`id_factura`),
+  CONSTRAINT `FK_FacturaLinea_Factura` FOREIGN KEY (`id_factura`) REFERENCES `factura` (`id_factura`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
