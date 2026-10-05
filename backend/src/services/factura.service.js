@@ -16,7 +16,11 @@ const COLUMNAS_FACTURA = `
     f.subtotal,
     f.itbis,
     f.total,
-    f.fecha_emision
+    f.estado,
+    f.fecha_emision,
+    f.fecha_pago,
+    f.referencia_pago,
+    f.tarjeta_ultimos4
 `;
 
 const MONTOS_FACTURA = ["subtotal", "itbis", "total"];

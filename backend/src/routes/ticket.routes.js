@@ -106,4 +106,11 @@ router.post(
     facturaController.generarFactura
 );
 
+// pago en linea simulado de la factura: solo el cliente dueño (issue HU17)
+router.post(
+    "/:id/factura/pago",
+    verificarRol(ROLES.CLIENTE),
+    facturaController.pagarFactura
+);
+
 module.exports = router;

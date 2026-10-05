@@ -277,3 +277,91 @@ describe("HU16: generar la factura", () => {
         expect(despues.body.data.facturable).toBe(false);
     });
 });
+
+const TARJETA = {
+    numero_tarjeta: "4242 4242 4242 4242",
+    titular: "Cliente Prueba",
+    vencimiento: "12/30",
+    cvv: "123"
+};
+
+// ticket con su factura emitida y pendiente de pago
+const ticketFacturado = async () => {
+    const id = await ticketAprobado();
+    await facturar(id);
+    return id;
+};
+
+const pagar = (id, token = api.tokens.cliente, tarjeta = TARJETA) =>
+    api.pedir("POST", `/tickets/${id}/factura/pago`, token, tarjeta);
+
+describe("HU17: pagar la factura en linea", () => {
+    test("la factura recien emitida esta Pendiente", async () => {
+        const id = await ticketFacturado();
+        const { body } = await api.pedir("GET", `/tickets/${id}/factura`, api.tokens.cliente);
+
+        expect(body.data).toEqual(expect.objectContaining({ estado: "Pendiente", fecha_pago: null, referencia_pago: null }));
+    });
+
+    test("con la tarjeta de prueba pasa a Pagada con su fecha y referencia", async () => {
+        const id = await ticketFacturado();
+        const { status, body } = await pagar(id);
+
+        expect(status).toBe(200);
+        expect(body.data).toEqual(expect.objectContaining({
+            estado: "Pagada",
+            tarjeta_ultimos4: "4242",
+            referencia_pago: expect.stringMatching(/^PAG-/)
+        }));
+        expect(body.data.fecha_pago).not.toBeNull();
+    });
+
+    test("no se guarda el numero completo, el vencimiento ni el CVV", async () => {
+        const id = await ticketFacturado();
+        await pagar(id);
+
+        const [[fila]] = await pool.query("SELECT * FROM factura WHERE id_ticket = ?", [id]);
+        expect(JSON.stringify(fila)).not.toMatch(/4242424242424242|12\/30/);
+        expect(Object.keys(fila)).not.toEqual(expect.arrayContaining(["cvv"]));
+    });
+
+    test("una factura ya pagada no se cobra de nuevo", async () => {
+        const id = await ticketFacturado();
+        await pagar(id);
+
+        const { status } = await pagar(id);
+
+        expect(status).toBe(409);
+    });
+
+    test("otro cliente no puede pagarla", async () => {
+        const id = await ticketFacturado();
+
+        expect((await pagar(id, api.tokens.maria)).status).toBe(404);
+    });
+
+    test.each(["tecnico", "administrador", "recepcionista"])("%s no paga por el cliente", async (cuenta) => {
+        const id = await ticketFacturado();
+
+        expect((await pagar(id, api.tokens[cuenta])).status).toBe(403);
+    });
+
+    test("una tarjeta real o la de rechazo no cambian la factura", async () => {
+        const id = await ticketFacturado();
+
+        const real = await pagar(id, api.tokens.cliente, { ...TARJETA, numero_tarjeta: "5555 5555 5555 4444" });
+        expect(real.status).toBe(400);
+
+        const rechazada = await pagar(id, api.tokens.cliente, { ...TARJETA, numero_tarjeta: "4000 0000 0000 0002" });
+        expect(rechazada.status).toBe(402);
+
+        const { body } = await api.pedir("GET", `/tickets/${id}/factura`, api.tokens.cliente);
+        expect(body.data.estado).toBe("Pendiente");
+    });
+
+    test("sin factura todavia responde 404", async () => {
+        const id = await ticketAprobado();
+
+        expect((await pagar(id)).status).toBe(404);
+    });
+});
