@@ -349,3 +349,14 @@ CREATE TABLE `factura_linea` (
   KEY `FK_FacturaLinea_Factura` (`id_factura`),
   CONSTRAINT `FK_FacturaLinea_Factura` FOREIGN KEY (`id_factura`) REFERENCES `factura` (`id_factura`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pago en linea simulado (issue HU17). La factura nace Pendiente y pasa a
+-- Pagada con su fecha y una referencia generada por el sistema. De la
+-- tarjeta solo se guardan los ultimos 4 digitos para el comprobante;
+-- numero completo, vencimiento y CVV nunca se guardan.
+ALTER TABLE `factura`
+  ADD COLUMN `estado` varchar(20) NOT NULL DEFAULT 'Pendiente' AFTER `total`,
+  ADD COLUMN `fecha_pago` datetime DEFAULT NULL AFTER `fecha_emision`,
+  ADD COLUMN `referencia_pago` varchar(30) DEFAULT NULL AFTER `fecha_pago`,
+  ADD COLUMN `tarjeta_ultimos4` char(4) DEFAULT NULL AFTER `referencia_pago`,
+  ADD UNIQUE KEY `UQ_Factura_ReferenciaPago` (`referencia_pago`);
