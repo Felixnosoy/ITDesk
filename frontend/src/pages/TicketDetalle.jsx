@@ -7,7 +7,13 @@ import { generarFactura, pagarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
 import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
-import { codigoCotizacion, codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
+import {
+    codigoCotizacion,
+    codigoFactura,
+    codigoTicket,
+    formatearFecha,
+    formatearFechaHora,
+} from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
@@ -323,6 +329,15 @@ export default function TicketDetalle() {
                         <div className="tarjeta">
                             <div className="detalle-titulo-fila">
                                 <h2>Factura</h2>
+                                {factura && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario detalle-imprimir"
+                                        onClick={() => setImprimiendo("factura")}
+                                    >
+                                        Imprimir
+                                    </button>
+                                )}
                                 {puedeFacturar && (
                                     <button type="button" className="boton boton-chico" onClick={() => abrirEdicion("factura")}>
                                         Generar factura
@@ -514,6 +529,32 @@ export default function TicketDetalle() {
                     <footer className="documento-pie">
                         <p>Montos en pesos dominicanos (RD$). El total incluye ITBIS del 18%.</p>
                         <p>Preparada por {cotizacionActual.creada_por}.</p>
+                    </footer>
+                </DocumentoImprimible>
+            )}
+
+            {imprimiendo === "factura" && factura && (
+                <DocumentoImprimible
+                    titulo="Factura"
+                    numero={codigoFactura(factura.id_factura)}
+                    fecha={factura.fecha_emision}
+                    ticket={ticket}
+                    estado={<Insignia tipo="factura" valor={factura.estado} />}
+                    documento={factura}
+                >
+                    {factura.estado === ESTADOS_FACTURA.PAGADA ? (
+                        <p className="documento-nota">
+                            <strong>Pagada</strong> el {formatearFechaHora(factura.fecha_pago)} con la tarjeta terminada
+                            en {factura.tarjeta_ultimos4}. Referencia del pago: {factura.referencia_pago}.
+                        </p>
+                    ) : (
+                        <p className="documento-nota">
+                            <strong>Pendiente de pago.</strong>
+                        </p>
+                    )}
+                    <footer className="documento-pie">
+                        <p>Montos en pesos dominicanos (RD$). El total incluye ITBIS del 18%.</p>
+                        <p>Emitida por {factura.emitida_por}.</p>
                     </footer>
                 </DocumentoImprimible>
             )}
