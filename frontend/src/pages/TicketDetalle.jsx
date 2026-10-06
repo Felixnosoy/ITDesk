@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
+import { crearCotizacion } from "../api/cotizaciones";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET } from "../constants/tickets";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
@@ -11,6 +12,8 @@ import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import CambioEstado from "../components/CambioEstado";
 import FormularioSeguimiento from "../components/FormularioSeguimiento";
 import Adjuntos from "../components/Adjuntos";
+import EditorCotizacion from "../components/EditorCotizacion";
+import { SeccionCotizaciones } from "../components/Cotizacion";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -114,6 +117,12 @@ export default function TicketDetalle() {
     // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
     const puedeCambiarEstado =
         [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol) && detalle.estados_siguientes?.length > 0;
+    const cotizaciones = detalle.cotizaciones ?? [];
+    // cotizable ya dice si se puede cotizar ahora (hay diagnostico, no hay
+    // otra vigente, no esta resuelto); el rol es porque Recepcion no cotiza
+    const puedeCotizar = detalle.cotizable && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
+    // el cliente solo ve la tarjeta cuando ya tiene algo que mirar
+    const mostrarCotizacion = cotizaciones.length > 0 || (esTaller && Boolean(diagnostico));
 
     return (
         <div className="pagina detalle-pagina">
@@ -196,6 +205,41 @@ export default function TicketDetalle() {
                             </p>
                         )}
                     </div>
+
+                    {mostrarCotizacion && (
+                        <div className="tarjeta">
+                            <div className="detalle-titulo-fila">
+                                <h2>Cotización</h2>
+                                {puedeCotizar && editando !== "cotizacion" && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario"
+                                        onClick={() => abrirEdicion("cotizacion")}
+                                    >
+                                        {cotizaciones.length > 0 ? "Nueva cotización" : "Crear cotización"}
+                                    </button>
+                                )}
+                            </div>
+                            {editando === "cotizacion" ? (
+                                <EditorCotizacion
+                                    guardando={guardando}
+                                    error={errorAccion}
+                                    onCancelar={() => setEditando(null)}
+                                    onGuardar={(valores) =>
+                                        ejecutar(
+                                            () => crearCotizacion(token, ticket.id_ticket, valores),
+                                            "Cotización enviada. El ticket queda esperando la aprobación del cliente."
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <SeccionCotizaciones
+                                    cotizaciones={cotizaciones}
+                                    vacio="Todavía no hay cotización para este ticket."
+                                />
+                            )}
+                        </div>
+                    )}
 
                     {puedeEditar && (
                         <div className="tarjeta no-imprimir">

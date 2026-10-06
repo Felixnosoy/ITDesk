@@ -15,6 +15,16 @@ export const formatearFecha = (valor) => (valor ? FORMATO_FECHA.format(new Date(
 
 export const formatearFechaHora = (valor) => (valor ? FORMATO_FECHA_HORA.format(new Date(valor)) : "—");
 
+// pesos dominicanos con dos decimales: RD$7,080.59
+const FORMATO_MONTO = new Intl.NumberFormat("es-DO", {
+    style: "currency",
+    currency: "DOP",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+});
+
+export const formatearMonto = (valor) => FORMATO_MONTO.format(Number(valor) || 0);
+
 export const nombreEquipo = (ticket) =>
     [ticket.equipo_tipo, ticket.equipo_marca, ticket.equipo_modelo].filter(Boolean).join(" ");
 

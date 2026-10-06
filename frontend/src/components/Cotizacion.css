@@ -1,0 +1,211 @@
+/* ---------- tabla de lineas (vista y editor) ---------- */
+
+.cotizacion-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.cotizacion-tabla th,
+.cotizacion-tabla td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.cotizacion-tabla th {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  background: var(--color-surface-2);
+  white-space: nowrap;
+}
+
+/* los montos se alinean a la derecha para comparar cifras de un vistazo */
+.cotizacion-tabla .cotizacion-monto,
+.cotizacion-tabla .cotizacion-cantidad {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cotizacion-numero {
+  width: 28px;
+  color: var(--color-text-dim);
+}
+
+.cotizacion-editor td {
+  vertical-align: top;
+}
+
+.cotizacion-editor td:not(.cotizacion-numero) {
+  padding-top: 6px;
+}
+
+.cotizacion-editor input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.cotizacion-editor .cotizacion-cantidad input {
+  width: 72px;
+  text-align: right;
+}
+
+.cotizacion-editor .cotizacion-monto input {
+  width: 130px;
+  text-align: right;
+}
+
+.cotizacion-editor .cotizacion-numero,
+.cotizacion-editor td.cotizacion-monto:not(:has(input)) {
+  padding-top: 15px;
+}
+
+.cotizacion-editor input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.cotizacion-error-campo {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-danger);
+  text-align: left;
+  white-space: normal;
+}
+
+.cotizacion-quitar {
+  width: 30px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-dim);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cotizacion-quitar:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.cotizacion-quitar:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ---------- totales ---------- */
+
+.cotizacion-pie {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 16px;
+}
+
+.cotizacion-totales {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  margin: 12px 0 0 auto;
+  font-size: 14px;
+}
+
+.cotizacion-pie .cotizacion-totales {
+  margin-top: 0;
+}
+
+.cotizacion-totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cotizacion-totales dt {
+  color: var(--color-text-dim);
+}
+
+.cotizacion-totales dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cotizacion-total {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cotizacion-total dt {
+  color: var(--color-text);
+}
+
+/* ---------- vista ---------- */
+
+.cotizacion-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cotizacion-cabecera .detalle-autor {
+  margin: 0;
+}
+
+.cotizacion-nota,
+.cotizacion-decision {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.cotizacion-decision {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-surface-2);
+}
+
+.cotizacion-historial {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cotizacion-historial summary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.cotizacion-historial .cotizacion {
+  margin-top: 16px;
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  .cotizacion-pie {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cotizacion-totales {
+    min-width: 0;
+    margin-left: 0;
+  }
+}
