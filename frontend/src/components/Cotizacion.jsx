@@ -64,8 +64,9 @@ export default function Cotizacion({ cotizacion }) {
 
 // Tarjeta completa del detalle del ticket: la cotizacion actual arriba y las
 // anteriores (por ejemplo una rechazada) plegadas debajo, para que el
-// historial no tape la que esta en juego.
-export function SeccionCotizaciones({ cotizaciones, vacio }) {
+// historial no tape la que esta en juego. "acciones" va debajo de la actual
+// (los botones del cliente o el aviso de espera del taller).
+export function SeccionCotizaciones({ cotizaciones, vacio, acciones }) {
     if (cotizaciones.length === 0) {
         return <p className="detalle-vacio">{vacio}</p>;
     }
@@ -75,6 +76,7 @@ export function SeccionCotizaciones({ cotizaciones, vacio }) {
     return (
         <>
             <Cotizacion cotizacion={actual} />
+            {acciones}
             {anteriores.length > 0 && (
                 <details className="cotizacion-historial">
                     <summary>

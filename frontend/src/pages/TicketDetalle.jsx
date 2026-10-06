@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
-import { crearCotizacion } from "../api/cotizaciones";
+import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
 import { ROLES } from "../constants/roles";
-import { ESTADOS_TICKET } from "../constants/tickets";
+import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
+import { ESTADOS_COTIZACION } from "../constants/cotizaciones";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
@@ -14,6 +15,7 @@ import FormularioSeguimiento from "../components/FormularioSeguimiento";
 import Adjuntos from "../components/Adjuntos";
 import EditorCotizacion from "../components/EditorCotizacion";
 import { SeccionCotizaciones } from "../components/Cotizacion";
+import DecisionCotizacion from "../components/DecisionCotizacion";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -123,6 +125,17 @@ export default function TicketDetalle() {
     const puedeCotizar = detalle.cotizable && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
     // el cliente solo ve la tarjeta cuando ya tiene algo que mirar
     const mostrarCotizacion = cotizaciones.length > 0 || (esTaller && Boolean(diagnostico));
+    const pendiente = cotizaciones[0]?.estado === ESTADOS_COTIZACION.PENDIENTE ? cotizaciones[0] : null;
+    // solo el cliente dueno decide; al personal el servidor le responde 403
+    const puedeDecidir = pendiente && sesion.usuario.rol === ROLES.CLIENTE;
+
+    // el aviso dice en que quedo el ticket, que es lo que le importa al cliente
+    const decidir = (datos) =>
+        ejecutar(async () => {
+            await decidirCotizacion(token, ticket.id_ticket, pendiente.id_cotizacion, datos);
+        }, datos.estado === ESTADOS_COTIZACION.APROBADA
+            ? `Aprobaste la cotización. Tu ticket pasó a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_REPARACION]}".`
+            : `Rechazaste la cotización. Tu ticket volvió a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_DIAGNOSTICO]}" y el técnico puede prepararte otra.`);
 
     return (
         <div className="pagina detalle-pagina">
@@ -236,6 +249,32 @@ export default function TicketDetalle() {
                                 <SeccionCotizaciones
                                     cotizaciones={cotizaciones}
                                     vacio="Todavía no hay cotización para este ticket."
+                                    acciones={
+                                        puedeDecidir ? (
+                                            <div className="cotizacion-acciones no-imprimir">
+                                                <p>¿Autorizas la reparación por este monto?</p>
+                                                <button
+                                                    type="button"
+                                                    className="boton boton-secundario"
+                                                    onClick={() => abrirEdicion(ESTADOS_COTIZACION.RECHAZADA)}
+                                                >
+                                                    Rechazar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="boton"
+                                                    onClick={() => abrirEdicion(ESTADOS_COTIZACION.APROBADA)}
+                                                >
+                                                    Aprobar
+                                                </button>
+                                            </div>
+                                        ) : pendiente && esTaller ? (
+                                            <p className="cotizacion-espera">
+                                                Esperando la decisión del cliente. El ticket se mueve solo cuando
+                                                apruebe o rechace.
+                                            </p>
+                                        ) : null
+                                    }
                                 />
                             )}
                         </div>
@@ -327,6 +366,17 @@ export default function TicketDetalle() {
                     </div>
                 </aside>
             </div>
+
+            {puedeDecidir && [ESTADOS_COTIZACION.APROBADA, ESTADOS_COTIZACION.RECHAZADA].includes(editando) && (
+                <DecisionCotizacion
+                    cotizacion={pendiente}
+                    decision={editando}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onConfirmar={decidir}
+                />
+            )}
 
             {editando === "estado" && (
                 <CambioEstado

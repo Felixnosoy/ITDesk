@@ -209,3 +209,41 @@
     margin-left: 0;
   }
 }
+
+/* ---------- decision del cliente ---------- */
+
+.cotizacion-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cotizacion-acciones p {
+  flex: 1 1 220px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.cotizacion-espera {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fbf0d9;
+  color: #5c3900;
+  font-size: 14px;
+}
+
+.decision-total {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+.decision-texto {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}

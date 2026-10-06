@@ -18,3 +18,15 @@ export async function crearCotizacion(token, idTicket, { lineas, observaciones }
 
     return respuesta.data;
 }
+
+// Solo el cliente dueno decide. estado es "Aprobada" o "Rechazada"; el
+// motivo solo viaja al rechazar y es opcional.
+export async function decidirCotizacion(token, idTicket, idCotizacion, { estado, motivo }) {
+    const respuesta = await apiFetch(`/tickets/${idTicket}/cotizaciones/${idCotizacion}`, {
+        method: "PATCH",
+        token,
+        body: { estado, motivo: motivo?.trim() || undefined },
+    });
+
+    return respuesta.data;
+}
