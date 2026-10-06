@@ -3,10 +3,10 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
-import { generarFactura } from "../api/facturas";
+import { generarFactura, pagarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
-import { ESTADOS_COTIZACION } from "../constants/cotizaciones";
+import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
 import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
@@ -19,6 +19,7 @@ import { SeccionCotizaciones } from "../components/Cotizacion";
 import DecisionCotizacion from "../components/DecisionCotizacion";
 import Factura from "../components/Factura";
 import ConfirmarFactura from "../components/ConfirmarFactura";
+import FormularioPago from "../components/FormularioPago";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -138,6 +139,8 @@ export default function TicketDetalle() {
     const puedeFacturar =
         detalle.facturable && aprobada && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
     const mostrarFactura = Boolean(factura) || Boolean(detalle.facturable);
+    // solo el cliente dueno paga; al personal el servidor le responde 403
+    const puedePagar = factura?.estado === ESTADOS_FACTURA.PENDIENTE && sesion.usuario.rol === ROLES.CLIENTE;
 
     // el aviso dice en que quedo el ticket, que es lo que le importa al cliente
     const decidir = (datos) =>
@@ -301,7 +304,19 @@ export default function TicketDetalle() {
                                 )}
                             </div>
                             {factura ? (
-                                <Factura factura={factura} />
+                                <Factura
+                                    factura={factura}
+                                    pie={
+                                        puedePagar && (
+                                            <div className="factura-pie no-imprimir">
+                                                <p>Esta factura está pendiente de pago.</p>
+                                                <button type="button" className="boton" onClick={() => abrirEdicion("pago")}>
+                                                    Pagar en línea
+                                                </button>
+                                            </div>
+                                        )
+                                    }
+                                />
                             ) : (
                                 <p className="detalle-vacio">
                                     La cotización está aprobada y todavía no se emitió la factura.
@@ -420,6 +435,18 @@ export default function TicketDetalle() {
                             () => generarFactura(token, ticket.id_ticket),
                             "Factura generada. Ya se puede pasar el ticket a Resuelto."
                         )
+                    }
+                />
+            )}
+
+            {puedePagar && editando === "pago" && (
+                <FormularioPago
+                    factura={factura}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onPagar={(datos) =>
+                        ejecutar(() => pagarFactura(token, ticket.id_ticket, datos), "Pago recibido. Tu factura quedó pagada.")
                     }
                 />
             )}

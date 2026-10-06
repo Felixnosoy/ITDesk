@@ -1,4 +1,5 @@
-import { codigoFactura, formatearFechaHora } from "../utils/formato";
+import { ESTADOS_FACTURA } from "../constants/cotizaciones";
+import { codigoFactura, formatearFechaHora, formatearMonto } from "../utils/formato";
 import Insignia from "./Insignia";
 import Totales from "./Totales";
 import TablaLineas from "./TablaLineas";
@@ -22,7 +23,29 @@ export default function Factura({ factura, pie }) {
 
             <Totales montos={factura} />
 
+            {factura.estado === ESTADOS_FACTURA.PAGADA && <Comprobante factura={factura} />}
+
             {pie}
+        </div>
+    );
+}
+
+// Comprobante del pago: solo lo que guardo el servidor (referencia, fecha y
+// ultimos 4 digitos). El numero completo de la tarjeta nunca se guarda.
+function Comprobante({ factura }) {
+    return (
+        <div className="comprobante">
+            <h3>Pago recibido</h3>
+            <dl>
+                <dt>Fecha</dt>
+                <dd>{formatearFechaHora(factura.fecha_pago)}</dd>
+                <dt>Monto</dt>
+                <dd>{formatearMonto(factura.total)}</dd>
+                <dt>Referencia</dt>
+                <dd>{factura.referencia_pago}</dd>
+                <dt>Tarjeta</dt>
+                <dd>Terminada en {factura.tarjeta_ultimos4}</dd>
+            </dl>
         </div>
     );
 }
