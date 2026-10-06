@@ -2,7 +2,8 @@
 // se lee y se dicta mejor que un numero suelto.
 export const codigoTicket = (id) => `TK-${String(id).padStart(4, "0")}`;
 
-// mismo criterio para el numero de factura (FAC-0004)
+// mismo criterio para la cotizacion (COT-0007) y la factura (FAC-0004)
+export const codigoCotizacion = (id) => `COT-${String(id).padStart(4, "0")}`;
 export const codigoFactura = (id) => `FAC-${String(id).padStart(4, "0")}`;
 
 const FORMATO_FECHA = new Intl.DateTimeFormat("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });

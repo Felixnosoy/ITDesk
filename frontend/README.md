@@ -32,3 +32,5 @@ Al imprimir cualquier pantalla (Ctrl+P) se ocultan el menú lateral, los botones
 
 - `no-imprimir`: el elemento se ve en pantalla pero no en papel.
 - `solo-imprimir`: el elemento aparece solo en papel.
+
+En el detalle del ticket, el botón "Imprimir" de la cotización y de la factura saca en papel solo ese documento (cliente, equipo, líneas y total): mientras se imprime, la página queda en `no-imprimir` y el documento (`components/DocumentoImprimible.jsx`) en `solo-imprimir`.

@@ -7,7 +7,7 @@ import { generarFactura, pagarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
 import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
-import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
+import { codigoCotizacion, codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
@@ -20,6 +20,7 @@ import DecisionCotizacion from "../components/DecisionCotizacion";
 import Factura from "../components/Factura";
 import ConfirmarFactura from "../components/ConfirmarFactura";
 import FormularioPago from "../components/FormularioPago";
+import DocumentoImprimible from "../components/DocumentoImprimible";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -50,6 +51,20 @@ export default function TicketDetalle() {
     const [editando, setEditando] = useState(null);
     const [guardando, setGuardando] = useState(false);
     const [errorAccion, setErrorAccion] = useState("");
+    // documento que se esta imprimiendo ("cotizacion"...): mientras dura, la
+    // pantalla queda en no-imprimir y en papel sale solo el documento
+    const [imprimiendo, setImprimiendo] = useState(null);
+
+    useEffect(() => {
+        if (!imprimiendo) return undefined;
+
+        // afterprint llega al cerrar el dialogo, se imprima o se cancele
+        const terminar = () => setImprimiendo(null);
+        window.addEventListener("afterprint", terminar);
+        window.print();
+
+        return () => window.removeEventListener("afterprint", terminar);
+    }, [imprimiendo]);
 
 
     useEffect(() => {
@@ -150,8 +165,10 @@ export default function TicketDetalle() {
             ? `Aprobaste la cotización. Tu ticket pasó a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_REPARACION]}".`
             : `Rechazaste la cotización. Tu ticket volvió a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_DIAGNOSTICO]}" y el técnico puede prepararte otra.`);
 
+    const cotizacionActual = cotizaciones[0];
+
     return (
-        <div className="pagina detalle-pagina">
+        <div className={`pagina detalle-pagina${imprimiendo ? " no-imprimir" : ""}`}>
             <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
 
             <div className="pagina-cabecera detalle-cabecera">
@@ -236,6 +253,15 @@ export default function TicketDetalle() {
                         <div className="tarjeta">
                             <div className="detalle-titulo-fila">
                                 <h2>Cotización</h2>
+                                {cotizacionActual && editando !== "cotizacion" && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario detalle-imprimir"
+                                        onClick={() => setImprimiendo("cotizacion")}
+                                    >
+                                        Imprimir
+                                    </button>
+                                )}
                                 {puedeCotizar && editando !== "cotizacion" && (
                                     <button
                                         type="button"
@@ -464,6 +490,32 @@ export default function TicketDetalle() {
                         ejecutar(() => cambiarEstado(token, ticket.id_ticket, datos), "Estado actualizado.")
                     }
                 />
+            )}
+
+            {imprimiendo === "cotizacion" && cotizacionActual && (
+                <DocumentoImprimible
+                    titulo="Cotización"
+                    numero={codigoCotizacion(cotizacionActual.id_cotizacion)}
+                    fecha={cotizacionActual.fecha_creacion}
+                    ticket={ticket}
+                    estado={<Insignia tipo="cotizacion" valor={cotizacionActual.estado} />}
+                    documento={cotizacionActual}
+                >
+                    {cotizacionActual.observaciones && (
+                        <p className="documento-nota">
+                            <strong>Observaciones:</strong> {cotizacionActual.observaciones}
+                        </p>
+                    )}
+                    {cotizacionActual.motivo_rechazo && (
+                        <p className="documento-nota">
+                            <strong>Motivo del rechazo:</strong> {cotizacionActual.motivo_rechazo}
+                        </p>
+                    )}
+                    <footer className="documento-pie">
+                        <p>Montos en pesos dominicanos (RD$). El total incluye ITBIS del 18%.</p>
+                        <p>Preparada por {cotizacionActual.creada_por}.</p>
+                    </footer>
+                </DocumentoImprimible>
             )}
         </div>
     );
