@@ -6,6 +6,8 @@ const ticketController = require("../controllers/ticket.controller");
 const diagnosticoController = require("../controllers/diagnostico.controller");
 const seguimientoController = require("../controllers/seguimiento.controller");
 const estadoController = require("../controllers/estado.controller");
+const cotizacionController = require("../controllers/cotizacion.controller");
+const facturaController = require("../controllers/factura.controller");
 
 const autenticarToken = require("../middleware/auth.middleware");
 const verificarRol = require("../middleware/rol.middleware");
@@ -69,6 +71,46 @@ router.post(
     verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
     subirImagenes,
     seguimientoController.crearNota
+);
+
+// cotizaciones del ticket con sus lineas: el Cliente solo las de los suyos
+router.get(
+    "/:id/cotizaciones",
+    cotizacionController.listarCotizaciones
+);
+
+// armar la cotizacion de un ticket diagnosticado (issue HU14)
+router.post(
+    "/:id/cotizaciones",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    cotizacionController.crearCotizacion
+);
+
+// el cliente dueño aprueba o rechaza una cotizacion pendiente (issue HU15)
+router.patch(
+    "/:id/cotizaciones/:idCotizacion",
+    verificarRol(ROLES.CLIENTE),
+    cotizacionController.decidirCotizacion
+);
+
+// factura del ticket: el Cliente solo la de los suyos
+router.get(
+    "/:id/factura",
+    facturaController.consultarFactura
+);
+
+// generar la factura desde la cotizacion aprobada (issue HU16)
+router.post(
+    "/:id/factura",
+    verificarRol(ROLES.ADMINISTRADOR, ROLES.TECNICO),
+    facturaController.generarFactura
+);
+
+// pago en linea simulado de la factura: solo el cliente dueño (issue HU17)
+router.post(
+    "/:id/factura/pago",
+    verificarRol(ROLES.CLIENTE),
+    facturaController.pagarFactura
 );
 
 module.exports = router;

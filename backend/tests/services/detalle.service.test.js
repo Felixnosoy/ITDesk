@@ -5,12 +5,17 @@ const detalleService = require("../../src/services/detalle.service");
 
 // respuestas en el orden en que obtenerDetalle consulta la base; los
 // adjuntos solo se consultan si hay novedades o notas a las que pegarlos
-const respuestas = ({ diagnostico = [], actualizaciones = [], notas = [], adjuntosAct = [], adjuntosNota = [] } = {}) => {
+const respuestas = ({ estado = "En reparacion", diagnostico = [], cotizaciones = [], actualizaciones = [], notas = [], adjuntosAct = [], adjuntosNota = [] } = {}) => {
     pool.query
-        .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado: "En reparacion" }]])
+        .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado }]])
         .mockResolvedValueOnce([diagnostico])
+        .mockResolvedValueOnce([cotizaciones])
+        .mockResolvedValueOnce([[]])                       // factura
         .mockResolvedValueOnce([actualizaciones])
         .mockResolvedValueOnce([notas]);
+
+    // las lineas solo se buscan si hay cotizaciones
+    if (cotizaciones.length > 0) pool.query.mockResolvedValueOnce([[]]);
 
     if (actualizaciones.length > 0) pool.query.mockResolvedValueOnce([adjuntosAct]);
     if (notas.length > 0) pool.query.mockResolvedValueOnce([adjuntosNota]);
@@ -44,6 +49,27 @@ describe("detalle.service.obtenerDetalle", () => {
         expect(detalle.actualizaciones[1].adjuntos).toEqual([{ id_archivo: 50, url: "/api/archivos/50" }]);
         expect(detalle.notas_privadas[0].adjuntos).toEqual([{ id_archivo: 51, url: "/api/archivos/51" }]);
     });
+
+    test.each([
+        ["una cotizacion pendiente", "En reparacion", [{ id_cotizacion: 1, estado: "Pendiente" }]],
+        ["una cotizacion aprobada", "En reparacion", [{ id_cotizacion: 1, estado: "Aprobada" }]],
+        ["el ticket resuelto", "Resuelto", []]
+    ])("con %s ya no es cotizable", async (_caso, estado, cotizaciones) => {
+        respuestas({ estado, diagnostico: [{ id_diagnostico: 1 }], cotizaciones });
+
+        const detalle = await detalleService.obtenerDetalle("10", tecnico);
+
+        expect(detalle.cotizable).toBe(false);
+        expect(detalle.cotizaciones).toHaveLength(cotizaciones.length);
+    });
+
+    test("tras un rechazo se puede volver a cotizar", async () => {
+        respuestas({ diagnostico: [{ id_diagnostico: 1 }], cotizaciones: [{ id_cotizacion: 1, estado: "Rechazada" }] });
+
+        const detalle = await detalleService.obtenerDetalle("10", tecnico);
+
+        expect(detalle.cotizable).toBe(true);
+    });
 });
 
 describe("detalle.service.obtenerDetalle (visibilidad del Cliente)", () => {
@@ -53,6 +79,8 @@ describe("detalle.service.obtenerDetalle (visibilidad del Cliente)", () => {
         pool.query
             .mockResolvedValueOnce([[{ id_ticket: 10, id_usuario: 5, estado: "Abierto" }]])
             .mockResolvedValueOnce([[]])                          // diagnostico
+            .mockResolvedValueOnce([[]])                          // cotizaciones
+            .mockResolvedValueOnce([[]])                          // factura
             .mockResolvedValueOnce([[{ id_actualizacion: 1 }]])   // actualizaciones
             .mockResolvedValueOnce([[]]);                         // adjuntos publicos
 
