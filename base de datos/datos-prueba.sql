@@ -94,7 +94,86 @@ SELECT id_ticket, @tecnico,
 FROM ticket
 WHERE estado IN ('Esperando aprobacion', 'En reparacion', 'Resuelto', 'Cerrado');
 
--- sin facturacion todavia, los tickets ya resueltos o cerrados de ejemplo
--- solo pueden haberse resuelto con la excepcion sin costo
-UPDATE `ticket` SET `resuelto_sin_costo` = 1 WHERE `estado` IN ('Resuelto', 'Cerrado');
+-- cotizaciones, facturas y pagos de ejemplo, uno por cada situacion:
+--   Atasco de papel            una rechazada y otra pendiente (recotizado)
+--   Bateria no carga           pendiente (Maria)
+--   Ventilador ruidoso         aprobada, falta facturar (Maria)
+--   Sin conexion a internet    aprobada y facturada, falta pagar
+--   Teclado con teclas muertas resuelto con factura pendiente de pago
+--   Instalar controlador       cerrado con factura pagada
+-- Los montos ya vienen calculados como los calcula el backend
+-- (ITBIS 18%).
+SET @atasco = (SELECT id_ticket FROM ticket WHERE titulo = 'Atasco de papel');
+SET @bateria = (SELECT id_ticket FROM ticket WHERE titulo = 'Bateria no carga');
+SET @ventilador = (SELECT id_ticket FROM ticket WHERE titulo = 'Ventilador ruidoso');
+SET @router_t = (SELECT id_ticket FROM ticket WHERE titulo = 'Sin conexion a internet');
+SET @teclado = (SELECT id_ticket FROM ticket WHERE titulo = 'Teclado con teclas muertas');
+SET @controlador = (SELECT id_ticket FROM ticket WHERE titulo = 'Instalar controlador');
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `motivo_rechazo`, `fecha_creacion`, `fecha_decision`) VALUES
+  (@atasco, @tecnico, 'Rechazada', 3500.00, 630.00, 4130.00, 'Prefiero un repuesto generico.', NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 3 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Rodillo de arrastre original', 1, 3500.00, 3500.00);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`) VALUES
+  (@atasco, @tecnico, 'Pendiente', 2600.00, 468.00, 3068.00, NOW() - INTERVAL 2 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Rodillo de arrastre generico', 1, 1800.00, 1800.00),
+  (@c, 'Mano de obra', 1, 800.00, 800.00);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`) VALUES
+  (@bateria, @tecnico, 'Pendiente', 3500.00, 630.00, 4130.00, NOW() - INTERVAL 6 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Bateria generica 3 celdas', 1, 2900.00, 2900.00),
+  (@c, 'Mano de obra', 1, 600.00, 600.00);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`, `fecha_decision`) VALUES
+  (@ventilador, @tecnico, 'Aprobada', 1900.00, 342.00, 2242.00, NOW() - INTERVAL 3 DAY, NOW() - INTERVAL 2 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Ventilador de CPU', 1, 1200.00, 1200.00),
+  (@c, 'Limpieza interna', 1, 700.00, 700.00);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`, `fecha_decision`) VALUES
+  (@router_t, @tecnico, 'Aprobada', 1450.00, 261.00, 1711.00, NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Fuente de poder 12V', 1, 950.00, 950.00),
+  (@c, 'Configuracion del router', 1, 500.00, 500.00);
+INSERT INTO `factura` (`id_cotizacion`, `id_ticket`, `id_usuario`, `subtotal`, `itbis`, `total`, `fecha_emision`) VALUES
+  (@c, @router_t, @tecnico, 1450.00, 261.00, 1711.00, NOW() - INTERVAL 4 DAY);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`, `fecha_decision`) VALUES
+  (@teclado, @tecnico, 'Aprobada', 3000.00, 540.00, 3540.00, NOW() - INTERVAL 11 DAY, NOW() - INTERVAL 10 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Teclado de reemplazo', 1, 2500.00, 2500.00),
+  (@c, 'Mano de obra', 1, 500.00, 500.00);
+INSERT INTO `factura` (`id_cotizacion`, `id_ticket`, `id_usuario`, `subtotal`, `itbis`, `total`, `fecha_emision`) VALUES
+  (@c, @teclado, @tecnico, 3000.00, 540.00, 3540.00, NOW() - INTERVAL 8 DAY);
+
+INSERT INTO `cotizacion` (`id_ticket`, `id_usuario`, `estado`, `subtotal`, `itbis`, `total`, `fecha_creacion`, `fecha_decision`) VALUES
+  (@controlador, @tecnico, 'Aprobada', 600.00, 108.00, 708.00, NOW() - INTERVAL 19 DAY, NOW() - INTERVAL 19 DAY);
+SET @c = LAST_INSERT_ID();
+INSERT INTO `cotizacion_linea` (`id_cotizacion`, `descripcion`, `cantidad`, `precio_unitario`, `importe`) VALUES
+  (@c, 'Instalacion de controlador', 1, 600.00, 600.00);
+INSERT INTO `factura` (`id_cotizacion`, `id_ticket`, `id_usuario`, `subtotal`, `itbis`, `total`, `estado`, `fecha_emision`, `fecha_pago`, `referencia_pago`, `tarjeta_ultimos4`) VALUES
+  (@c, @controlador, @tecnico, 600.00, 108.00, 708.00, 'Pagada', NOW() - INTERVAL 18 DAY, NOW() - INTERVAL 17 DAY, 'PAG-EJEMPLO001', '4242');
+
+-- las lineas de cada factura son copia de las de su cotizacion
+INSERT INTO `factura_linea` (`id_factura`, `descripcion`, `cantidad`, `precio_unitario`, `importe`)
+SELECT f.id_factura, l.descripcion, l.cantidad, l.precio_unitario, l.importe
+FROM factura f
+INNER JOIN cotizacion_linea l
+  ON l.id_cotizacion = f.id_cotizacion
+ORDER BY f.id_factura, l.id_linea;
+
+-- los resueltos o cerrados sin factura se resolvieron con la excepcion
+-- sin costo (regla de cierre)
+UPDATE `ticket` SET `resuelto_sin_costo` = 1
+WHERE `estado` IN ('Resuelto', 'Cerrado')
+AND `id_ticket` NOT IN (SELECT `id_ticket` FROM `factura`);
 

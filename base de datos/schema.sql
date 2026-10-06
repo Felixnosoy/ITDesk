@@ -7,6 +7,10 @@ SET NAMES utf8mb4;
 -- se borran primero las tablas que dependen de otras (FK), para que el
 -- script se pueda volver a correr sobre una base ya creada
 DROP TABLE IF EXISTS `auditoria`;
+DROP TABLE IF EXISTS `factura_linea`;
+DROP TABLE IF EXISTS `factura`;
+DROP TABLE IF EXISTS `cotizacion_linea`;
+DROP TABLE IF EXISTS `cotizacion`;
 DROP TABLE IF EXISTS `diagnostico`;
 DROP TABLE IF EXISTS `archivo_adjunto`;
 DROP TABLE IF EXISTS `nota_privada`;
@@ -247,3 +251,112 @@ CREATE TABLE `diagnostico` (
 ALTER TABLE `ticket`
   ADD COLUMN `resuelto_sin_costo` tinyint(1) NOT NULL DEFAULT 0 AFTER `fecha_cierre`;
 
+
+--
+-- Tabla `cotizacion`
+--
+-- Presupuesto de un ticket que el cliente aprueba o rechaza. Un ticket
+-- puede tener varias (cada rechazo permite armar otra), pero solo una
+-- Pendiente o Aprobada a la vez; eso lo controla el backend. Los montos
+-- los calcula el servidor a partir de las lineas: subtotal, ITBIS (18%)
+-- y total. id_usuario es quien la armo.
+--
+
+CREATE TABLE `cotizacion` (
+  `id_cotizacion` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `estado` varchar(20) NOT NULL DEFAULT 'Pendiente',
+  `subtotal` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `itbis` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `observaciones` text DEFAULT NULL,
+  `motivo_rechazo` text DEFAULT NULL,
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
+  `fecha_decision` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_cotizacion`),
+  KEY `IX_Cotizacion_Ticket_Estado` (`id_ticket`, `estado`),
+  KEY `FK_Cotizacion_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Cotizacion_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_Cotizacion_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `cotizacion_linea`
+--
+-- Cada linea es un trabajo o repuesto: descripcion, cantidad y precio
+-- unitario. importe = cantidad * precio_unitario, guardado para que la
+-- cotizacion quede tal como el cliente la vio.
+--
+
+CREATE TABLE `cotizacion_linea` (
+  `id_linea` int(11) NOT NULL AUTO_INCREMENT,
+  `id_cotizacion` int(11) NOT NULL,
+  `descripcion` varchar(255) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id_linea`),
+  KEY `FK_CotizacionLinea_Cotizacion` (`id_cotizacion`),
+  CONSTRAINT `CK_CotizacionLinea_Cantidad` CHECK (`cantidad` > 0),
+  CONSTRAINT `CK_CotizacionLinea_Precio` CHECK (`precio_unitario` >= 0),
+  CONSTRAINT `FK_CotizacionLinea_Cotizacion` FOREIGN KEY (`id_cotizacion`) REFERENCES `cotizacion` (`id_cotizacion`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `factura`
+--
+-- Se genera desde una cotizacion Aprobada y copia sus montos: lo que se
+-- cobra es exactamente lo que el cliente aprobo. Una sola factura por
+-- cotizacion (UNIQUE). id_ticket se repite para poder saber rapido si un
+-- ticket esta facturado (regla de cierre); id_usuario es quien la emitio.
+-- Sin ON DELETE en la cotizacion: una cotizacion facturada no se borra.
+--
+
+CREATE TABLE `factura` (
+  `id_factura` int(11) NOT NULL AUTO_INCREMENT,
+  `id_cotizacion` int(11) NOT NULL,
+  `id_ticket` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `itbis` decimal(10,2) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `fecha_emision` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_factura`),
+  UNIQUE KEY `UQ_Factura_Cotizacion` (`id_cotizacion`),
+  KEY `FK_Factura_Ticket` (`id_ticket`),
+  KEY `FK_Factura_Usuario` (`id_usuario`),
+  CONSTRAINT `FK_Factura_Cotizacion` FOREIGN KEY (`id_cotizacion`) REFERENCES `cotizacion` (`id_cotizacion`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Factura_Ticket` FOREIGN KEY (`id_ticket`) REFERENCES `ticket` (`id_ticket`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Factura_Usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tabla `factura_linea`
+--
+-- Copia de las lineas de la cotizacion al momento de facturar, para que
+-- la factura no cambie aunque despues se toque la cotizacion.
+--
+
+CREATE TABLE `factura_linea` (
+  `id_linea` int(11) NOT NULL AUTO_INCREMENT,
+  `id_factura` int(11) NOT NULL,
+  `descripcion` varchar(255) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id_linea`),
+  KEY `FK_FacturaLinea_Factura` (`id_factura`),
+  CONSTRAINT `FK_FacturaLinea_Factura` FOREIGN KEY (`id_factura`) REFERENCES `factura` (`id_factura`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pago en linea simulado (issue HU17). La factura nace Pendiente y pasa a
+-- Pagada con su fecha y una referencia generada por el sistema. De la
+-- tarjeta solo se guardan los ultimos 4 digitos para el comprobante;
+-- numero completo, vencimiento y CVV nunca se guardan.
+ALTER TABLE `factura`
+  ADD COLUMN `estado` varchar(20) NOT NULL DEFAULT 'Pendiente' AFTER `total`,
+  ADD COLUMN `fecha_pago` datetime DEFAULT NULL AFTER `fecha_emision`,
+  ADD COLUMN `referencia_pago` varchar(30) DEFAULT NULL AFTER `fecha_pago`,
+  ADD COLUMN `tarjeta_ultimos4` char(4) DEFAULT NULL AFTER `referencia_pago`,
+  ADD UNIQUE KEY `UQ_Factura_ReferenciaPago` (`referencia_pago`);

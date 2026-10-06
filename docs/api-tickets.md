@@ -104,6 +104,7 @@ La búsqueda por texto y el orden por columnas se hacen en el navegador con `uti
 ```
 
 - `diagnostico` es `null` si todavía no hay. En ese caso `cotizable` es `false`.
+- Desde el Sprint 3 el detalle también trae `cotizaciones`, `factura` y (solo el taller) `facturable`, y `cotizable` tiene reglas nuevas. Ver [api-cotizaciones.md](api-cotizaciones.md).
 - `actualizaciones` es la **línea de tiempo** (HU10.5), ya ordenada de la más vieja a la más nueva. `tipo` es `Avance` (lo escribió el técnico) o `Estado` (cambio de estado; `estado` es el estado al que pasó). `estado` en un avance es el estado que tenía el ticket en ese momento.
 - **Cliente (HU10.4):** solo puede abrir sus tickets; uno ajeno responde 404. Su respuesta **no trae** `notas_privadas` ni `estados_siguientes`. La vista del cliente se decide por la ausencia de esas claves, sin comparar el rol.
 
@@ -188,8 +189,9 @@ El Cliente solo puede descargar las imágenes de los avances de sus tickets. Las
 | Cerrado | ninguno |
 
 - **Para el selector (HU13.4),** usar `estados_siguientes` del detalle. No hay que repetir esta tabla en el frontend.
-- **`Esperando aprobacion` exige diagnóstico.** Sin él responde 400.
-- **Regla de cierre:** `Resuelto` exige una cotización aprobada y facturada. Esa parte llega en el Sprint 3, así que por ahora la única forma de resolver es mandar `"sin_costo": true`. Sin eso responde 400 con el motivo, que se puede mostrar tal cual. `sin_costo` tiene que ser booleano.
+- **`Esperando aprobacion` exige diagnóstico.** Sin él responde 400. Lo normal es no usar esta transición a mano: crear la cotización ya pasa el ticket a `Esperando aprobacion`.
+- **Con una cotización pendiente el ticket no sale de `Esperando aprobacion` a mano** (400). Lo mueve la decisión del cliente.
+- **Regla de cierre:** `Resuelto` exige que el ticket tenga factura (solo se factura una cotización aprobada) o mandar `"sin_costo": true`. Sin ninguna de las dos responde 400 con el motivo, que se puede mostrar tal cual. `sin_costo` tiene que ser booleano.
 - **Respuesta:** 200 con el ticket actualizado. `fecha_resolucion` se llena al resolver y se vacía si el ticket vuelve a reparación; `fecha_cierre` se llena al cerrar.
 - **Línea de tiempo:** cada cambio agrega una entrada de tipo `Estado`, que también ve el cliente.
 
