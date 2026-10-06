@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
+import { generarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
 import { ESTADOS_COTIZACION } from "../constants/cotizaciones";
@@ -16,6 +17,8 @@ import Adjuntos from "../components/Adjuntos";
 import EditorCotizacion from "../components/EditorCotizacion";
 import { SeccionCotizaciones } from "../components/Cotizacion";
 import DecisionCotizacion from "../components/DecisionCotizacion";
+import Factura from "../components/Factura";
+import ConfirmarFactura from "../components/ConfirmarFactura";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -128,6 +131,13 @@ export default function TicketDetalle() {
     const pendiente = cotizaciones[0]?.estado === ESTADOS_COTIZACION.PENDIENTE ? cotizaciones[0] : null;
     // solo el cliente dueno decide; al personal el servidor le responde 403
     const puedeDecidir = pendiente && sesion.usuario.rol === ROLES.CLIENTE;
+
+    const { factura } = detalle;
+    const aprobada = cotizaciones.find((c) => c.estado === ESTADOS_COTIZACION.APROBADA);
+    // facturable solo le llega al taller; Recepcion lo ve pero no factura
+    const puedeFacturar =
+        detalle.facturable && aprobada && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
+    const mostrarFactura = Boolean(factura) || Boolean(detalle.facturable);
 
     // el aviso dice en que quedo el ticket, que es lo que le importa al cliente
     const decidir = (datos) =>
@@ -280,6 +290,27 @@ export default function TicketDetalle() {
                         </div>
                     )}
 
+                    {mostrarFactura && (
+                        <div className="tarjeta">
+                            <div className="detalle-titulo-fila">
+                                <h2>Factura</h2>
+                                {puedeFacturar && (
+                                    <button type="button" className="boton boton-chico" onClick={() => abrirEdicion("factura")}>
+                                        Generar factura
+                                    </button>
+                                )}
+                            </div>
+                            {factura ? (
+                                <Factura factura={factura} />
+                            ) : (
+                                <p className="detalle-vacio">
+                                    La cotización está aprobada y todavía no se emitió la factura.
+                                    {puedeFacturar && " Genérala cuando el trabajo esté listo para cobrar."}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     {puedeEditar && (
                         <div className="tarjeta no-imprimir">
                             <h2>Registrar novedad</h2>
@@ -378,11 +409,27 @@ export default function TicketDetalle() {
                 />
             )}
 
+            {puedeFacturar && editando === "factura" && (
+                <ConfirmarFactura
+                    cotizacion={aprobada}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onConfirmar={() =>
+                        ejecutar(
+                            () => generarFactura(token, ticket.id_ticket),
+                            "Factura generada. Ya se puede pasar el ticket a Resuelto."
+                        )
+                    }
+                />
+            )}
+
             {editando === "estado" && (
                 <CambioEstado
                     estadoActual={ticket.estado}
                     siguientes={detalle.estados_siguientes}
                     tieneDiagnostico={Boolean(diagnostico)}
+                    tieneFactura={Boolean(detalle.factura)}
                     guardando={guardando}
                     error={errorAccion}
                     onCerrar={() => setEditando(null)}

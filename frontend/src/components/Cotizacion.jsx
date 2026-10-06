@@ -1,7 +1,8 @@
 import { ESTADOS_COTIZACION } from "../constants/cotizaciones";
-import { formatearFechaHora, formatearMonto } from "../utils/formato";
+import { formatearFechaHora } from "../utils/formato";
 import Insignia from "./Insignia";
 import Totales from "./Totales";
+import TablaLineas from "./TablaLineas";
 import "./Cotizacion.css";
 
 // Una cotizacion guardada: sus lineas, los montos que calculo el servidor y,
@@ -19,28 +20,7 @@ export default function Cotizacion({ cotizacion }) {
                 </span>
             </div>
 
-            <div className="tabla-envoltorio">
-                <table className="cotizacion-tabla">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th className="cotizacion-cantidad">Cant.</th>
-                            <th className="cotizacion-monto">Precio unitario</th>
-                            <th className="cotizacion-monto">Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {cotizacion.lineas.map((linea) => (
-                            <tr key={linea.id_linea}>
-                                <td>{linea.descripcion}</td>
-                                <td className="cotizacion-cantidad">{linea.cantidad}</td>
-                                <td className="cotizacion-monto">{formatearMonto(linea.precio_unitario)}</td>
-                                <td className="cotizacion-monto">{formatearMonto(linea.importe)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <TablaLineas lineas={cotizacion.lineas} />
 
             <Totales montos={cotizacion} />
 
