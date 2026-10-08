@@ -190,6 +190,12 @@
 /* ---------- impresion: el contenido ocupa toda la hoja, sin menu ---------- */
 
 @media print {
+  /* sin esto el alto minimo de pantalla ocupa una hoja entera aunque su
+     contenido este oculto, y la cotizacion o factura salia en la pagina 2 */
+  .layout {
+    min-height: 0;
+  }
+
   .layout-topbar,
   .layout-fondo,
   .layout-lateral {
