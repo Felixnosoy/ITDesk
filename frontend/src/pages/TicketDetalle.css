@@ -212,3 +212,8 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* imprimir va pegado a la derecha, junto a la accion principal de la tarjeta */
+.detalle-imprimir {
+  margin-left: auto;
+}

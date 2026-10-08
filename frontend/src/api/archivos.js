@@ -1,6 +1,4 @@
-import { EVENTO_SESION_EXPIRADA } from "./client";
-
-const BASE_URL = import.meta.env.VITE_API_URL;
+import { BASE_URL, EVENTO_SESION_EXPIRADA } from "./client";
 
 // Descarga una imagen adjunta. Las urls de los adjuntos piden el token, asi
 // que un <img src> directo no sirve: se pide con fetch y se devuelve el

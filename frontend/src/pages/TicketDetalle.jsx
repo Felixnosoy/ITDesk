@@ -2,15 +2,31 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
+import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
+import { generarFactura, pagarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
-import { ESTADOS_TICKET } from "../constants/tickets";
-import { codigoTicket, formatearFecha, formatearFechaHora } from "../utils/formato";
+import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
+import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
+import {
+    codigoCotizacion,
+    codigoFactura,
+    codigoTicket,
+    formatearFecha,
+    formatearFechaHora,
+} from "../utils/formato";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import CambioEstado from "../components/CambioEstado";
 import FormularioSeguimiento from "../components/FormularioSeguimiento";
 import Adjuntos from "../components/Adjuntos";
+import EditorCotizacion from "../components/EditorCotizacion";
+import { SeccionCotizaciones } from "../components/Cotizacion";
+import DecisionCotizacion from "../components/DecisionCotizacion";
+import Factura from "../components/Factura";
+import ConfirmarFactura from "../components/ConfirmarFactura";
+import FormularioPago from "../components/FormularioPago";
+import DocumentoImprimible from "../components/DocumentoImprimible";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -41,6 +57,20 @@ export default function TicketDetalle() {
     const [editando, setEditando] = useState(null);
     const [guardando, setGuardando] = useState(false);
     const [errorAccion, setErrorAccion] = useState("");
+    // documento que se esta imprimiendo ("cotizacion"...): mientras dura, la
+    // pantalla queda en no-imprimir y en papel sale solo el documento
+    const [imprimiendo, setImprimiendo] = useState(null);
+
+    useEffect(() => {
+        if (!imprimiendo) return undefined;
+
+        // afterprint llega al cerrar el dialogo, se imprima o se cancele
+        const terminar = () => setImprimiendo(null);
+        window.addEventListener("afterprint", terminar);
+        window.print();
+
+        return () => window.removeEventListener("afterprint", terminar);
+    }, [imprimiendo]);
 
 
     useEffect(() => {
@@ -91,7 +121,7 @@ export default function TicketDetalle() {
     if (error) {
         return (
             <div className="pagina">
-                <Link to="/tickets" className="detalle-volver">← Volver a tickets</Link>
+                <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
                 <div className="aviso aviso-error" role="alert">
                     {error}
                 </div>
@@ -114,10 +144,38 @@ export default function TicketDetalle() {
     // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
     const puedeCambiarEstado =
         [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol) && detalle.estados_siguientes?.length > 0;
+    const cotizaciones = detalle.cotizaciones ?? [];
+    // cotizable ya dice si se puede cotizar ahora (hay diagnostico, no hay
+    // otra vigente, no esta resuelto); el rol es porque Recepcion no cotiza
+    const puedeCotizar = detalle.cotizable && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
+    // el cliente solo ve la tarjeta cuando ya tiene algo que mirar
+    const mostrarCotizacion = cotizaciones.length > 0 || (esTaller && Boolean(diagnostico));
+    const pendiente = cotizaciones[0]?.estado === ESTADOS_COTIZACION.PENDIENTE ? cotizaciones[0] : null;
+    // solo el cliente dueno decide; al personal el servidor le responde 403
+    const puedeDecidir = pendiente && sesion.usuario.rol === ROLES.CLIENTE;
+
+    const { factura } = detalle;
+    const aprobada = cotizaciones.find((c) => c.estado === ESTADOS_COTIZACION.APROBADA);
+    // facturable solo le llega al taller; Recepcion lo ve pero no factura
+    const puedeFacturar =
+        detalle.facturable && aprobada && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol);
+    const mostrarFactura = Boolean(factura) || Boolean(detalle.facturable);
+    // solo el cliente dueno paga; al personal el servidor le responde 403
+    const puedePagar = factura?.estado === ESTADOS_FACTURA.PENDIENTE && sesion.usuario.rol === ROLES.CLIENTE;
+
+    // el aviso dice en que quedo el ticket, que es lo que le importa al cliente
+    const decidir = (datos) =>
+        ejecutar(async () => {
+            await decidirCotizacion(token, ticket.id_ticket, pendiente.id_cotizacion, datos);
+        }, datos.estado === ESTADOS_COTIZACION.APROBADA
+            ? `Aprobaste la cotización. Tu ticket pasó a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_REPARACION]}".`
+            : `Rechazaste la cotización. Tu ticket volvió a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_DIAGNOSTICO]}" y el técnico puede prepararte otra.`);
+
+    const cotizacionActual = cotizaciones[0];
 
     return (
-        <div className="pagina detalle-pagina">
-            <Link to="/tickets" className="detalle-volver">← Volver a tickets</Link>
+        <div className={`pagina detalle-pagina${imprimiendo ? " no-imprimir" : ""}`}>
+            <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
 
             <div className="pagina-cabecera detalle-cabecera">
                 <span className="detalle-codigo">{codigoTicket(ticket.id_ticket)}</span>
@@ -197,8 +255,120 @@ export default function TicketDetalle() {
                         )}
                     </div>
 
-                    {puedeEditar && (
+                    {mostrarCotizacion && (
                         <div className="tarjeta">
+                            <div className="detalle-titulo-fila">
+                                <h2>Cotización</h2>
+                                {cotizacionActual && editando !== "cotizacion" && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario detalle-imprimir"
+                                        onClick={() => setImprimiendo("cotizacion")}
+                                    >
+                                        Imprimir
+                                    </button>
+                                )}
+                                {puedeCotizar && editando !== "cotizacion" && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario"
+                                        onClick={() => abrirEdicion("cotizacion")}
+                                    >
+                                        {cotizaciones.length > 0 ? "Nueva cotización" : "Crear cotización"}
+                                    </button>
+                                )}
+                            </div>
+                            {editando === "cotizacion" ? (
+                                <EditorCotizacion
+                                    guardando={guardando}
+                                    error={errorAccion}
+                                    onCancelar={() => setEditando(null)}
+                                    onGuardar={(valores) =>
+                                        ejecutar(
+                                            () => crearCotizacion(token, ticket.id_ticket, valores),
+                                            "Cotización enviada. El ticket queda esperando la aprobación del cliente."
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <SeccionCotizaciones
+                                    cotizaciones={cotizaciones}
+                                    vacio="Todavía no hay cotización para este ticket."
+                                    acciones={
+                                        puedeDecidir ? (
+                                            <div className="cotizacion-acciones no-imprimir">
+                                                <p>¿Autorizas la reparación por este monto?</p>
+                                                <button
+                                                    type="button"
+                                                    className="boton boton-secundario"
+                                                    onClick={() => abrirEdicion(ESTADOS_COTIZACION.RECHAZADA)}
+                                                >
+                                                    Rechazar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="boton"
+                                                    onClick={() => abrirEdicion(ESTADOS_COTIZACION.APROBADA)}
+                                                >
+                                                    Aprobar
+                                                </button>
+                                            </div>
+                                        ) : pendiente && esTaller ? (
+                                            <p className="cotizacion-espera">
+                                                Esperando la decisión del cliente. El ticket se mueve solo cuando
+                                                apruebe o rechace.
+                                            </p>
+                                        ) : null
+                                    }
+                                />
+                            )}
+                        </div>
+                    )}
+
+                    {mostrarFactura && (
+                        <div className="tarjeta">
+                            <div className="detalle-titulo-fila">
+                                <h2>Factura</h2>
+                                {factura && (
+                                    <button
+                                        type="button"
+                                        className="boton boton-chico boton-secundario detalle-imprimir"
+                                        onClick={() => setImprimiendo("factura")}
+                                    >
+                                        Imprimir
+                                    </button>
+                                )}
+                                {puedeFacturar && (
+                                    <button type="button" className="boton boton-chico" onClick={() => abrirEdicion("factura")}>
+                                        Generar factura
+                                    </button>
+                                )}
+                            </div>
+                            {factura ? (
+                                <Factura
+                                    factura={factura}
+                                    pie={
+                                        puedePagar && (
+                                            <div className="factura-pie no-imprimir">
+                                                <p>Esta factura está pendiente de pago.</p>
+                                                <button type="button" className="boton" onClick={() => abrirEdicion("pago")}>
+                                                    Pagar en línea
+                                                </button>
+                                            </div>
+                                        )
+                                    }
+                                />
+                            ) : (
+                                <p className="detalle-vacio">
+                                    La cotización está aprobada y todavía no se emitió la factura.
+                                    {puedeFacturar && " Genérala cuando el trabajo esté listo para cobrar."}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {puedeEditar && (
+                        <div className="tarjeta no-imprimir">
                             <h2>Registrar novedad</h2>
                             <FormularioSeguimiento
                                 guardando={guardando}
@@ -284,11 +454,50 @@ export default function TicketDetalle() {
                 </aside>
             </div>
 
+            {puedeDecidir && [ESTADOS_COTIZACION.APROBADA, ESTADOS_COTIZACION.RECHAZADA].includes(editando) && (
+                <DecisionCotizacion
+                    cotizacion={pendiente}
+                    decision={editando}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onConfirmar={decidir}
+                />
+            )}
+
+            {puedeFacturar && editando === "factura" && (
+                <ConfirmarFactura
+                    cotizacion={aprobada}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onConfirmar={() =>
+                        ejecutar(
+                            () => generarFactura(token, ticket.id_ticket),
+                            "Factura generada. Ya se puede pasar el ticket a Resuelto."
+                        )
+                    }
+                />
+            )}
+
+            {puedePagar && editando === "pago" && (
+                <FormularioPago
+                    factura={factura}
+                    guardando={guardando}
+                    error={errorAccion}
+                    onCerrar={() => setEditando(null)}
+                    onPagar={(datos) =>
+                        ejecutar(() => pagarFactura(token, ticket.id_ticket, datos), "Pago recibido. Tu factura quedó pagada.")
+                    }
+                />
+            )}
+
             {editando === "estado" && (
                 <CambioEstado
                     estadoActual={ticket.estado}
                     siguientes={detalle.estados_siguientes}
                     tieneDiagnostico={Boolean(diagnostico)}
+                    tieneFactura={Boolean(detalle.factura)}
                     guardando={guardando}
                     error={errorAccion}
                     onCerrar={() => setEditando(null)}
@@ -296,6 +505,58 @@ export default function TicketDetalle() {
                         ejecutar(() => cambiarEstado(token, ticket.id_ticket, datos), "Estado actualizado.")
                     }
                 />
+            )}
+
+            {imprimiendo === "cotizacion" && cotizacionActual && (
+                <DocumentoImprimible
+                    titulo="Cotización"
+                    numero={codigoCotizacion(cotizacionActual.id_cotizacion)}
+                    fecha={cotizacionActual.fecha_creacion}
+                    ticket={ticket}
+                    estado={<Insignia tipo="cotizacion" valor={cotizacionActual.estado} />}
+                    documento={cotizacionActual}
+                >
+                    {cotizacionActual.observaciones && (
+                        <p className="documento-nota">
+                            <strong>Observaciones:</strong> {cotizacionActual.observaciones}
+                        </p>
+                    )}
+                    {cotizacionActual.motivo_rechazo && (
+                        <p className="documento-nota">
+                            <strong>Motivo del rechazo:</strong> {cotizacionActual.motivo_rechazo}
+                        </p>
+                    )}
+                    <footer className="documento-pie">
+                        <p>Montos en pesos dominicanos (RD$). El total incluye ITBIS del 18%.</p>
+                        <p>Preparada por {cotizacionActual.creada_por}.</p>
+                    </footer>
+                </DocumentoImprimible>
+            )}
+
+            {imprimiendo === "factura" && factura && (
+                <DocumentoImprimible
+                    titulo="Factura"
+                    numero={codigoFactura(factura.id_factura)}
+                    fecha={factura.fecha_emision}
+                    ticket={ticket}
+                    estado={<Insignia tipo="factura" valor={factura.estado} />}
+                    documento={factura}
+                >
+                    {factura.estado === ESTADOS_FACTURA.PAGADA ? (
+                        <p className="documento-nota">
+                            <strong>Pagada</strong> el {formatearFechaHora(factura.fecha_pago)} con la tarjeta terminada
+                            en {factura.tarjeta_ultimos4}. Referencia del pago: {factura.referencia_pago}.
+                        </p>
+                    ) : (
+                        <p className="documento-nota">
+                            <strong>Pendiente de pago.</strong>
+                        </p>
+                    )}
+                    <footer className="documento-pie">
+                        <p>Montos en pesos dominicanos (RD$). El total incluye ITBIS del 18%.</p>
+                        <p>Emitida por {factura.emitida_por}.</p>
+                    </footer>
+                </DocumentoImprimible>
             )}
         </div>
     );

@@ -6,6 +6,7 @@ import {
     ETIQUETA_PRIORIDAD,
     ETIQUETA_CATEGORIA,
 } from "../constants/tickets";
+import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
 import "./Insignia.css";
 
 // Cada tipo asocia su valor con un tono de color. Los tonos se definen una
@@ -29,6 +30,21 @@ const TIPOS = {
             [PRIORIDADES.BAJA]: "gris",
             [PRIORIDADES.MEDIA]: "ambar",
             [PRIORIDADES.ALTA]: "rojo",
+        },
+    },
+    cotizacion: {
+        etiquetas: {},
+        tonos: {
+            [ESTADOS_COTIZACION.PENDIENTE]: "ambar",
+            [ESTADOS_COTIZACION.APROBADA]: "verde",
+            [ESTADOS_COTIZACION.RECHAZADA]: "rojo",
+        },
+    },
+    factura: {
+        etiquetas: { [ESTADOS_FACTURA.PENDIENTE]: "Pendiente de pago" },
+        tonos: {
+            [ESTADOS_FACTURA.PENDIENTE]: "ambar",
+            [ESTADOS_FACTURA.PAGADA]: "verde",
         },
     },
     categoria: {

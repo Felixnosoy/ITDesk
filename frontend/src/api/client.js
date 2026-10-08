@@ -1,4 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_URL;
+// Se fija al hacer el build (Vite reemplaza import.meta.env): en desarrollo
+// sale de .env y en produccion de la variable configurada en el hosting.
+// Sin la barra final, porque todas las rutas empiezan con "/".
+export const BASE_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
 
 // Evento que se dispara cuando el servidor rechaza el token de una sesion
 // activa (vencido o invalido): AuthContext lo escucha y cierra la sesion.

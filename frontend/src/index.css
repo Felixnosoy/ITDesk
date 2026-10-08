@@ -174,3 +174,49 @@ textarea:focus-visible {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ---------- impresion ----------
+   Al imprimir solo interesa el contenido: se ocultan el menu, los botones de
+   accion, los formularios y los modales. Los encabezados de tabla y las
+   miniaturas tambien son <button>, por eso se oculta .boton y no todo button. */
+
+.solo-imprimir {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 15mm;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .boton,
+  form,
+  .modal-fondo,
+  .visor-fondo,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .solo-imprimir {
+    display: block;
+  }
+
+  .pagina {
+    max-width: none;
+  }
+
+  /* sin sombras ni fondos de color, que gastan tinta y no se ven en blanco y negro */
+  .tarjeta {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .aviso {
+    display: none;
+  }
+}

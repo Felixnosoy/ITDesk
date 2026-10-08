@@ -14,7 +14,16 @@ const motivoBloqueo = (estado, tieneDiagnostico) => {
 
 // Ventana para cambiar el estado del ticket. Solo ofrece los estados a los
 // que se puede pasar desde el actual (estados_siguientes del servidor).
-export default function CambioEstado({ estadoActual, siguientes, tieneDiagnostico, guardando, error, onGuardar, onCerrar }) {
+export default function CambioEstado({
+    estadoActual,
+    siguientes,
+    tieneDiagnostico,
+    tieneFactura,
+    guardando,
+    error,
+    onGuardar,
+    onCerrar,
+}) {
     const [estado, setEstado] = useState("");
     const [observaciones, setObservaciones] = useState("");
     const [sinCosto, setSinCosto] = useState(false);
@@ -23,7 +32,8 @@ export default function CambioEstado({ estadoActual, siguientes, tieneDiagnostic
 
     const enviar = (evento) => {
         evento.preventDefault();
-        onGuardar({ estado, observaciones, sin_costo: esResuelto ? sinCosto : undefined });
+        // con factura emitida la regla de cierre ya se cumple: no hay nada que declarar
+        onGuardar({ estado, observaciones, sin_costo: esResuelto && !tieneFactura ? sinCosto : undefined });
     };
 
     return (
@@ -63,7 +73,7 @@ export default function CambioEstado({ estadoActual, siguientes, tieneDiagnostic
                     })}
                 </fieldset>
 
-                {esResuelto && (
+                {esResuelto && !tieneFactura && (
                     <div className="estado-regla">
                         <p>
                             Para marcarlo como resuelto, el ticket necesita una cotización aprobada y facturada. Si el

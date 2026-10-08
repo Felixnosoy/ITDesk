@@ -6,7 +6,7 @@ export default function Paginacion({ pagina, totalPaginas, onCambiar }) {
     if (totalPaginas <= 1) return null;
 
     return (
-        <nav className="paginacion" aria-label="Paginación">
+        <nav className="paginacion no-imprimir" aria-label="Paginación">
             <button
                 type="button"
                 className="boton boton-chico boton-secundario"

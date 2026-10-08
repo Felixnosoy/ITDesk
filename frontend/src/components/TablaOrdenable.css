@@ -67,3 +67,14 @@
   text-align: center !important;
   color: var(--color-text-dim);
 }
+
+/* al imprimir la tabla no se puede ordenar: sin flechas y sin recorte horizontal */
+@media print {
+  .tabla-envoltorio {
+    overflow: visible;
+  }
+
+  .tabla-flecha {
+    display: none;
+  }
+}
