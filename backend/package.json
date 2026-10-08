@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:integracion": "jest --config jest.integracion.config.js"
+    "test:integracion": "jest --config jest.integracion.config.js",
+    "db:usuarios": "node scripts/usuarios-bd.js"
   },
   "keywords": [],
   "author": "",

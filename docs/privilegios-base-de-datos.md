@@ -43,6 +43,15 @@ Tiene `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `DROP`, `ALTER`, `INDEX`
 
 Sus credenciales no van en el servidor. Las usa una persona cuando hay que correr `schema.sql` o un `ALTER TABLE`.
 
+## Crear los usuarios
+
+1. En `backend/.env`, completa `DB_ROOT_USER`/`DB_ROOT_PASSWORD` (quien puede crear usuarios), `DB_APP_PASSWORD` y `DB_ADMIN_PASSWORD`, de 12 caracteres o más (ver `backend/.env.example`).
+2. Corre `schema.sql` en la base, porque el script revisa que existan las tablas.
+3. `npm run db:usuarios` en `backend/`. Se puede repetir: cada vez le quita todo a los dos usuarios y les vuelve a dar lo de la matriz. Para ver el SQL sin aplicarlo: `npm run db:usuarios -- --ver` (las claves salen ocultas).
+4. Para que el backend use el usuario restringido: `DB_USER=itdesk_app` y `DB_PASSWORD` con su clave. En producción el backend no arranca con `root`.
+
+Las pruebas de integración (`npm run test:integracion`) ya corren con un usuario restringido con esta misma matriz (`itdesk_app_prueba`), así que si al backend le falta un permiso, se nota ahí.
+
 ## Cuando cambia el backend
 
 Si una función nueva empieza a usar una operación que no está en la tabla, por ejemplo un `DELETE`, o si se agrega una tabla, hay que sumarla en `backend/scripts/privilegios.js` y volver a correr el script. El script se niega a correr si la base tiene una tabla que la matriz no menciona, para que no se olvide.
