@@ -15,9 +15,7 @@
 }
 
 .detalle-codigo {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-dim);
+  align-self: flex-start;
 }
 
 .detalle-insignias {

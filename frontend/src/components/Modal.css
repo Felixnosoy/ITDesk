@@ -15,42 +15,44 @@
   max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-2);
 }
 
 .modal-cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--espacio-4) var(--espacio-5);
+  border-bottom: 1px solid var(--borde);
 }
 
 .modal-cabecera h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--texto-lg);
+  font-weight: 700;
 }
 
 .modal-cerrar {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-sm);
   background: transparent;
-  color: var(--color-text-dim);
+  color: var(--texto-3);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
 }
 
 .modal-cerrar:hover {
-  background: var(--color-surface-2);
+  background: var(--superficie-3);
 }
 
 .modal-cuerpo {
-  padding: 20px;
+  padding: var(--espacio-5);
   overflow-y: auto;
 }
 
