@@ -55,7 +55,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(15, 20, 26, 0.85);
+  background: var(--velo-fuerte);
 }
 
 .visor {
@@ -71,13 +71,13 @@
   max-height: calc(100vh - 100px);
   margin: 0 auto;
   border-radius: 6px;
-  background: #fff;
+  background: var(--superficie);
 }
 
 .visor figcaption {
   margin-top: 10px;
   font-size: 13px;
-  color: #e6ebef;
+  color: var(--superficie-3);
 }
 
 .visor-cerrar {
@@ -88,8 +88,8 @@
   height: 40px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: var(--sobre-oscuro-suave);
+  color: var(--sobre-oscuro);
   font-size: 26px;
   line-height: 1;
   cursor: pointer;

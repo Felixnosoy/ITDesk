@@ -1,0 +1,169 @@
+/* Tokens de diseño de ITDesk (issue HU27.2). Todo color, tamaño, espacio,
+   radio y sombra de la aplicacion sale de aca; los componentes no escriben
+   valores sueltos.
+
+   Cada rol tiene su color principal y su acento (cliente indigo y coral,
+   tecnico petroleo y ambar, recepcion cobalto, administrador marino y
+   amarillo). El Layout pone data-rol en <html>, asi tambien lo heredan los
+   modales y documentos que se montan fuera del layout. Lo demas es igual
+   para todos: tipografia, neutros y colores de estado del ticket, para que
+   "En reparacion" se vea igual sin importar quien mira. */
+
+:root {
+  /* ---------- tipografia ---------- */
+  --fuente-titulo: "Archivo", "Hanken Grotesk", system-ui, sans-serif;
+  --fuente-titulo-ancho: 118%;
+  --fuente-texto: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fuente-codigo: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --texto-xs: 11px;
+  --texto-sm: 12px;
+  --texto-base: 14px;
+  --texto-md: 15px;
+  --texto-lg: 17px;
+  --texto-xl: 20px;
+  --texto-2xl: 26px;
+  --texto-3xl: 32px;
+
+  /* ---------- espacios, radios y sombras ---------- */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-5: 20px;
+  --espacio-6: 24px;
+  --espacio-7: 32px;
+  --espacio-8: 40px;
+
+  --radio-sm: 6px;
+  --radio: 10px;
+  --radio-lg: 14px;
+  --radio-pildora: 999px;
+
+  --sombra-1: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --sombra-2: 0 12px 32px -12px rgba(28, 25, 23, 0.28);
+  --velo: rgba(28, 25, 23, 0.5);
+  --velo-fuerte: rgba(15, 14, 13, 0.88);
+
+  /* ---------- neutros calidos ---------- */
+  --fondo: #f7f6f3;
+  --superficie: #ffffff;
+  --superficie-2: #fbfaf8;
+  --superficie-3: #efede8;
+  --borde: #e8e5df;
+  --borde-fuerte: #d6d3cd;
+  --texto: #1c1917;
+  --texto-2: #44403c;
+  --texto-3: #57534e;
+  --texto-4: #78716c;
+  --sobre-oscuro: #ffffff;
+  --sobre-oscuro-suave: rgba(255, 255, 255, 0.15);
+  --tinta-impresion: #000000;
+
+  /* ---------- semanticos ---------- */
+  --ok: #15803d;
+  --ok-suave: #f0fdf4;
+  --ok-borde: #bbf7d0;
+  --peligro: #b91c1c;
+  --peligro-suave: #fef2f2;
+  --peligro-borde: #fecaca;
+  --alerta: #b45309;
+  --alerta-texto: #92400e;
+  --alerta-suave: #fffbeb;
+  --alerta-borde: #fde68a;
+
+  /* ---------- estados del ticket: iguales para todos los roles ----------
+     -color es el punto o la franja; -texto y -suave forman la insignia,
+     con contraste de al menos 4.5:1 entre ellos. */
+  --estado-abierto: #78716c;
+  --estado-abierto-texto: #44403c;
+  --estado-abierto-suave: #f5f5f4;
+  --estado-diagnostico: #7c3aed;
+  --estado-diagnostico-texto: #6d28d9;
+  --estado-diagnostico-suave: #f5f3ff;
+  --estado-diagnostico-borde: #ddd6fe;
+  --estado-espera: #d97706;
+  --estado-espera-texto: #92400e;
+  --estado-espera-suave: #fffbeb;
+  --estado-reparacion: #2563eb;
+  --estado-reparacion-texto: #1d4ed8;
+  --estado-reparacion-suave: #eff6ff;
+  --estado-reparacion-borde: #bfdbfe;
+  --estado-resuelto: #16a34a;
+  --estado-resuelto-texto: #15803d;
+  --estado-resuelto-suave: #f0fdf4;
+  --estado-cerrado: #a8a29e;
+  --estado-cerrado-texto: #57534e;
+  --estado-cerrado-suave: #f5f5f4;
+
+  /* ---------- color del rol ----------
+     Sin sesion (inicio de sesion, pagina de no autorizado) se usa la tinta
+     neutra; cada rol lo reemplaza mas abajo. */
+  --rol-principal: #1c1917;
+  --rol-principal-hover: #292524;
+  --rol-sobre-principal: #ffffff;
+  --rol-suave: #f5f3ef;
+  --rol-logo-texto: #fdba74;
+  --rol-acento: #a8a29e;
+  --rol-aviso-fondo: #fbfaf8;
+  --rol-aviso-borde: #e8e5df;
+  --rol-aviso-texto: #44403c;
+  --rol-contador-fondo: #efede8;
+  --rol-contador-texto: #44403c;
+}
+
+[data-rol="Cliente"] {
+  --rol-principal: #3730a3;
+  --rol-principal-hover: #312e81;
+  --rol-suave: #ecebfb;
+  --rol-logo-texto: #fdba9f;
+  --rol-acento: #f26b4f;
+  --rol-aviso-fondo: #fff4f1;
+  --rol-aviso-borde: #f9c2b5;
+  --rol-aviso-texto: #b33a20;
+  --rol-contador-fondo: #fde1d9;
+  --rol-contador-texto: #9a3412;
+  --fondo: #f6f7fb;
+}
+
+[data-rol="Tecnico"] {
+  --rol-principal: #0f5e5a;
+  --rol-principal-hover: #0b4a47;
+  --rol-suave: #e7f2f0;
+  --rol-logo-texto: #fcd34d;
+  --rol-acento: #f59e0b;
+  --rol-aviso-fondo: #fffbeb;
+  --rol-aviso-borde: #fde68a;
+  --rol-aviso-texto: #92400e;
+  --rol-contador-fondo: #fef3c7;
+  --rol-contador-texto: #92400e;
+  --fondo: #f5f7f6;
+}
+
+[data-rol="Recepcionista"] {
+  --rol-principal: #1d4ed8;
+  --rol-principal-hover: #1e40af;
+  --rol-suave: #eff4ff;
+  --rol-logo-texto: #bfdbfe;
+  --rol-acento: #60a5fa;
+  --rol-aviso-fondo: #eff4ff;
+  --rol-aviso-borde: #bfdbfe;
+  --rol-aviso-texto: #1e40af;
+  --rol-contador-fondo: #dbeafe;
+  --rol-contador-texto: #1e40af;
+  --fondo: #f6f7f9;
+}
+
+[data-rol="Administrador"] {
+  --rol-principal: #1e3a6e;
+  --rol-principal-hover: #172e58;
+  --rol-suave: #eaf0f8;
+  --rol-logo-texto: #facc15;
+  --rol-acento: #facc15;
+  --rol-aviso-fondo: #fefce8;
+  --rol-aviso-borde: #fde047;
+  --rol-aviso-texto: #713f12;
+  --rol-contador-fondo: #fef08a;
+  --rol-contador-texto: #713f12;
+  --fondo: #f6f6f3;
+}

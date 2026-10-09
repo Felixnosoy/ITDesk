@@ -232,8 +232,8 @@
   margin: 16px 0 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #fbf0d9;
-  color: #5c3900;
+  background: var(--alerta-suave);
+  color: var(--alerta-texto);
   font-size: 14px;
 }
 

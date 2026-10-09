@@ -2,7 +2,7 @@
    (solo-imprimir), por eso los tamanos piensan en una hoja carta o A4. */
 
 .documento {
-  color: #000000;
+  color: var(--tinta-impresion);
   font-size: 13px;
 }
 
@@ -13,7 +13,7 @@
   gap: 24px;
   padding-bottom: 12px;
   margin-bottom: 16px;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid var(--tinta-impresion);
 }
 
 .documento-cabecera p {
@@ -61,14 +61,14 @@
 /* en papel la insignia es solo texto con borde: sin fondo de color */
 .documento .insignia {
   background: none;
-  color: #000000;
-  box-shadow: inset 0 0 0 1px #000000;
+  color: var(--tinta-impresion);
+  box-shadow: inset 0 0 0 1px var(--tinta-impresion);
 }
 
 .documento .cotizacion-tabla th {
   background: none;
-  color: #000000;
-  border-bottom: 1px solid #000000;
+  color: var(--tinta-impresion);
+  border-bottom: 1px solid var(--tinta-impresion);
 }
 
 .documento .cotizacion-totales {
@@ -76,7 +76,7 @@
 }
 
 .documento .cotizacion-totales dt {
-  color: #000000;
+  color: var(--tinta-impresion);
 }
 
 .documento-nota {
@@ -87,7 +87,7 @@
 .documento-pie {
   margin-top: 32px;
   padding-top: 8px;
-  border-top: 1px solid #000000;
+  border-top: 1px solid var(--tinta-impresion);
   font-size: 11px;
 }
 

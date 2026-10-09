@@ -1,19 +1,22 @@
 :root {
-  --color-bg: #f3f5f7;
-  --color-surface: #ffffff;
-  --color-surface-2: #eef2f5;
-  --color-border: #dbe1e6;
-  --color-text: #1c2733;
-  --color-text-dim: #5c6b78;
-  --color-accent: #0e7490;
-  --color-accent-soft: #dff0f3;
-  --color-accent-ink: #ffffff;
-  --color-danger: #b3261e;
-  --color-danger-soft: #fbe9e7;
-  --color-ok: #1b6e3c;
-  --color-ok-soft: #e4f4ea;
-  --radius: 10px;
-  --shadow: 0 1px 2px rgba(23, 33, 43, 0.06), 0 8px 24px -12px rgba(23, 33, 43, 0.16);
+  /* Nombres anteriores a los tokens de HU27.2, apuntando a los nuevos para
+     que toda pantalla tome la identidad de una vez. Los componentes nuevos
+     usan directamente los tokens de styles/tokens.css. */
+  --color-bg: var(--fondo);
+  --color-surface: var(--superficie);
+  --color-surface-2: var(--superficie-3);
+  --color-border: var(--borde);
+  --color-text: var(--texto);
+  --color-text-dim: var(--texto-3);
+  --color-accent: var(--rol-principal);
+  --color-accent-soft: var(--rol-suave);
+  --color-accent-ink: var(--rol-sobre-principal);
+  --color-danger: var(--peligro);
+  --color-danger-soft: var(--peligro-suave);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-suave);
+  --radius: var(--radio);
+  --shadow: var(--sombra-1);
 }
 
 * {
@@ -24,7 +27,25 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* titulos y cifras con la fuente ancha de la identidad */
+h1,
+h2,
+h3,
+.cifra {
+  font-family: var(--fuente-titulo);
+  font-stretch: var(--fuente-titulo-ancho);
+  letter-spacing: -0.01em;
+}
+
+/* codigos del sistema (TK-0004, FAC-0001) como etiquetas de inventario */
+code,
+.codigo {
+  font-family: var(--fuente-codigo);
 }
 
 button {
@@ -165,12 +186,13 @@ textarea:focus-visible {
   color: var(--color-ok);
 }
 
-/* insignia redondeada; los colores los pone cada pantalla o componente */
+/* insignia; los colores los pone cada pantalla o componente */
 .insignia {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 99px;
-  font-size: 12px;
+  padding: 1px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -190,8 +212,8 @@ textarea:focus-visible {
   }
 
   body {
-    background: #ffffff;
-    color: #000000;
+    background: var(--superficie);
+    color: var(--tinta-impresion);
   }
 
   .boton,

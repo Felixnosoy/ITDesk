@@ -24,7 +24,7 @@
 .seguimiento-tipo.activo {
   border-color: var(--color-accent);
   background: var(--color-accent-soft);
-  color: #0b5d73;
+  color: var(--rol-principal);
 }
 
 .seguimiento-imagenes {
@@ -58,7 +58,7 @@
   border: none;
   border-radius: 50%;
   background: var(--color-text);
-  color: #fff;
+  color: var(--rol-sobre-principal);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;

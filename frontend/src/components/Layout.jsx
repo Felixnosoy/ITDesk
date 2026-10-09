@@ -18,6 +18,15 @@ export default function Layout() {
     const { usuario } = sesion;
     const [menuAbierto, setMenuAbierto] = useState(false);
 
+    // el color de cada rol sale de data-rol (styles/tokens.css); va en <html>
+    // y no en el layout porque modales y documentos se montan fuera de el
+    useEffect(() => {
+        document.documentElement.dataset.rol = usuario.rol;
+        return () => {
+            delete document.documentElement.dataset.rol;
+        };
+    }, [usuario.rol]);
+
     useEffect(() => {
         if (!menuAbierto) return undefined;
 
