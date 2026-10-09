@@ -7,10 +7,12 @@
 
 /* ---------- panel de marca ---------- */
 
+/* logo y mensaje juntos, centrados en el alto del panel */
 .login-marca {
   display: flex;
   flex-direction: column;
-  gap: var(--espacio-8);
+  justify-content: center;
+  gap: var(--espacio-7);
   padding: var(--espacio-8) clamp(var(--espacio-6), 5vw, 64px);
   background: var(--marca-fondo);
   color: var(--marca-texto);
@@ -32,10 +34,6 @@
 
 .login-marca .logo-lema {
   color: var(--marca-texto-2);
-}
-
-.login-marca-mensaje {
-  margin-top: auto;
 }
 
 .login-marca-titular {
@@ -127,10 +125,6 @@
   .login-marca {
     gap: var(--espacio-4);
     padding: var(--espacio-6) var(--espacio-5);
-  }
-
-  .login-marca-mensaje {
-    margin-top: 0;
   }
 
   .login-marca-titular {
