@@ -31,8 +31,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* las letras bajan un poco a la izquierda para dejar libre el agujero */
-  padding: 8% 6% 0 0;
+  /* las letras bajan un poco a la izquierda para dejar libre el agujero
+     (en em: un padding en % se calcularia sobre el ancho del contenedor) */
+  padding: 0.3em 0.2em 0 0;
   box-sizing: border-box;
   border-radius: 28% 28% 28% 7%;
   background: var(--rol-principal);
