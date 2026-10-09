@@ -8,25 +8,33 @@
 .tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 .tabla th,
 .tabla td {
-  padding: 12px 20px;
+  padding: 11px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--borde);
   vertical-align: middle;
 }
 
 .tabla th {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-dim);
-  background: var(--color-surface-2);
+  color: var(--texto-4);
+  background: var(--superficie-2);
   white-space: nowrap;
+}
+
+.tabla tbody tr {
+  transition: background-color 0.12s;
+}
+
+.tabla tbody tr:hover {
+  background: var(--superficie-2);
 }
 
 .tabla tbody tr:last-child td {
@@ -50,7 +58,7 @@
 
 .tabla-orden:hover,
 .tabla-orden-activa {
-  color: var(--color-text);
+  color: var(--texto);
 }
 
 .tabla-flecha {
@@ -60,12 +68,12 @@
 
 .tabla-orden-activa .tabla-flecha {
   opacity: 1;
-  color: var(--color-accent);
+  color: var(--rol-principal);
 }
 
 .tabla-vacia {
   text-align: center !important;
-  color: var(--color-text-dim);
+  color: var(--texto-3);
 }
 
 /* al imprimir la tabla no se puede ordenar: sin flechas y sin recorte horizontal */

@@ -68,7 +68,7 @@ export default function Tickets() {
 
     const columnas = useMemo(
         () => [
-            { clave: "id_ticket", titulo: "Código", render: (t) => enlace(t, codigoTicket(t.id_ticket)) },
+            { clave: "id_ticket", titulo: "Código", render: (t) => enlace(t, <span className="etiqueta-codigo">{codigoTicket(t.id_ticket)}</span>) },
             { clave: "titulo", titulo: "Título", render: (t) => enlace(t, t.titulo) },
             ...(esCliente ? [] : [{ clave: "cliente", titulo: "Cliente" }]),
             { clave: "equipo", titulo: "Equipo", render: celdaEquipo, valorOrden: nombreEquipo },

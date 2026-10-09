@@ -178,7 +178,7 @@ export default function TicketDetalle() {
             <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
 
             <div className="pagina-cabecera detalle-cabecera">
-                <span className="detalle-codigo">{codigoTicket(ticket.id_ticket)}</span>
+                <span className="detalle-codigo etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
                 <h1>{ticket.titulo}</h1>
                 <div className="detalle-insignias">
                     <Insignia tipo="estado" valor={ticket.estado} />

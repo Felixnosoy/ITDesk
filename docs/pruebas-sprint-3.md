@@ -6,7 +6,7 @@ Resultado: **32 casos de aceptación aprobados** en navegador, **79 pruebas de i
 
 Historias HU14 a HU17 del Sprint 3: crear una cotización, aprobarla o rechazarla, generar la factura y pagarla en línea. Corresponden a las subtareas de pruebas HU14.6, HU15.5, HU16.5 y HU17.6.
 
-Las pruebas de HU18 (impresión), HU19 (despliegue) y HU26 (privilegios de la base de datos) se agregan a este documento cuando se hagan.
+Las pruebas de HU18 (impresión, subtarea HU18.4) se agregaron el 8 de octubre de 2026; están en su propia sección más abajo. Las de HU19 (despliegue) y HU26 (privilegios de la base de datos) se agregan cuando se hagan.
 
 ## Entorno
 
@@ -115,6 +115,24 @@ Para confirmar que las pruebas de clics simultáneos detectan el problema, se qu
 | Un segundo pago desde otra pestaña abierta se rechaza y el comprobante no cambia | Aprobado |
 | El técnico ve la factura Pagada sin botón de pago | Aprobado |
 
+### HU18 — Imprimir o descargar un documento
+
+Prueba de la subtarea HU18.4, hecha el 8 de octubre de 2026 en Chrome. Para cada caso se pulsa "Imprimir" en la tarjeta, se revisa el texto que sale en modo impresión y se guarda el PDF que genera el navegador (A4). Los PDF se revisaron también a ojo. Hubo 70 comprobaciones en 8 casos.
+
+| Caso | Resultado |
+| --- | --- |
+| El cliente imprime su cotización pendiente: datos del taller, número, cliente, ticket, equipo, estado, líneas y total | Aprobado |
+| Sale solo la cotización actual, no la rechazada del historial | Aprobado |
+| El cliente imprime su factura pagada con fecha de pago, últimos 4 dígitos y referencia | Aprobado |
+| La factura pendiente dice "Pendiente de pago" y no muestra datos de pago | Aprobado |
+| El técnico imprime la factura de un cliente | Aprobado |
+| El administrador imprime una cotización aprobada | Aprobado |
+| En papel no salen el menú, "Volver a tickets", los botones ni los formularios | Aprobado |
+| El PDF sale en una sola hoja, con el texto seleccionable | Aprobado tras corregir el defecto 1 |
+| Imprimir desde el celular (390 px) da el mismo documento | Aprobado |
+| Al cerrar la impresión la pantalla vuelve a la normalidad y el documento se desmonta | Aprobado |
+| El Ctrl+P normal del detalle imprime el detalle sin menú y sin el documento | Aprobado |
+
 ### Móvil (400 px)
 
 | Caso | Resultado |
@@ -127,4 +145,8 @@ En la consola del navegador solo aparecieron las respuestas de error que los cas
 
 ## Defectos encontrados
 
-Ninguno.
+En HU14 a HU17, ninguno.
+
+| # | Historia | Defecto | Corrección |
+| --- | --- | --- | --- |
+| 1 | HU18 | La cotización y la factura salían en la página 2 del PDF y la primera quedaba en blanco. El contenedor de la aplicación conservaba su alto mínimo de pantalla (`min-height: 100vh`) aunque su contenido estuviera oculto. | `.layout` pasa a `min-height: 0` al imprimir (`frontend/src/components/Layout.css`). Ahora el documento sale en una sola hoja. |

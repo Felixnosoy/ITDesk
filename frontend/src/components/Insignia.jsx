@@ -16,12 +16,12 @@ const TIPOS = {
     estado: {
         etiquetas: ETIQUETA_ESTADO,
         tonos: {
-            [ESTADOS_TICKET.ABIERTO]: "azul",
+            [ESTADOS_TICKET.ABIERTO]: "gris",
             [ESTADOS_TICKET.EN_DIAGNOSTICO]: "violeta",
             [ESTADOS_TICKET.ESPERANDO_APROBACION]: "ambar",
-            [ESTADOS_TICKET.EN_REPARACION]: "acento",
+            [ESTADOS_TICKET.EN_REPARACION]: "azul",
             [ESTADOS_TICKET.RESUELTO]: "verde",
-            [ESTADOS_TICKET.CERRADO]: "gris",
+            [ESTADOS_TICKET.CERRADO]: "apagado",
         },
     },
     prioridad: {
@@ -55,7 +55,7 @@ const TIPOS = {
         tonos: {
             [CATEGORIAS.HARDWARE]: "azul",
             [CATEGORIAS.SOFTWARE]: "violeta",
-            [CATEGORIAS.RED]: "acento",
+            [CATEGORIAS.RED]: "verde",
             [CATEGORIAS.OTRO]: "gris",
         },
     },

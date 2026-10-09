@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 const responder = require('./utils/respuesta');
+const { opcionesCors } = require('./config/entorno');
 
 const healthRoutes = require('./routes/health.routes')
 const usuarioRoutes = require('./routes/usuario.routes')
@@ -12,7 +13,10 @@ const archivoRoutes = require("./routes/archivo.routes");
 
 const app = express();
 
-app.use(cors());
+// sin la cabecera X-Powered-By: no hace falta anunciar que es Express
+app.disable("x-powered-by");
+
+app.use(cors(opcionesCors()));
 app.use(express.json());
 
 app.use("/api/health", healthRoutes);

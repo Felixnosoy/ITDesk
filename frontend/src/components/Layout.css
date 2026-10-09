@@ -12,22 +12,19 @@
   width: var(--lateral-ancho);
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  background: var(--superficie);
+  border-right: 1px solid var(--borde);
 }
 
 .layout-lateral-marca {
-  padding: 22px 22px 18px;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-accent);
+  padding: 20px 22px 18px;
 }
 
 .layout-nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 12px;
+  gap: 1px;
+  padding: 0 var(--espacio-3);
   flex: 1;
   overflow-y: auto;
 }
@@ -36,27 +33,28 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: var(--color-text-dim);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: var(--radio-sm);
+  color: var(--texto-2);
+  font-size: var(--texto-base);
+  font-weight: 500;
   text-decoration: none;
 }
 
 .layout-enlace:hover {
-  background: var(--color-surface-2);
-  color: var(--color-text);
+  background: var(--superficie-3);
+  color: var(--texto);
 }
 
 .layout-enlace.active {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  background: var(--rol-suave);
+  color: var(--rol-principal);
+  font-weight: 700;
 }
 
 .layout-usuario {
   padding: 14px 12px 16px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--borde);
 }
 
 .layout-usuario-datos {
@@ -74,9 +72,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
-  font-size: 13px;
+  background: var(--rol-suave);
+  color: var(--rol-principal);
+  font-size: var(--texto-sm);
   font-weight: 700;
 }
 
@@ -97,24 +95,29 @@
   color: var(--color-text-dim);
 }
 
-.layout-salir {
+.layout-accion {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-sm);
   background: transparent;
-  color: var(--color-text-dim);
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--texto-3);
+  font-size: var(--texto-base);
+  font-weight: 500;
   cursor: pointer;
 }
 
+.layout-accion:hover {
+  background: var(--superficie-3);
+  color: var(--texto);
+}
+
 .layout-salir:hover {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
+  background: var(--peligro-suave);
+  color: var(--peligro);
 }
 
 /* ---------- contenido ---------- */
@@ -155,12 +158,6 @@
     cursor: pointer;
   }
 
-  .layout-marca {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--color-accent);
-  }
-
   .layout-lateral {
     transform: translateX(-100%);
     visibility: hidden;
@@ -178,7 +175,7 @@
     position: fixed;
     inset: 0;
     z-index: 25;
-    background: rgba(23, 33, 43, 0.45);
+    background: var(--velo);
   }
 
   .layout-contenido {
@@ -190,6 +187,12 @@
 /* ---------- impresion: el contenido ocupa toda la hoja, sin menu ---------- */
 
 @media print {
+  /* sin esto el alto minimo de pantalla ocupa una hoja entera aunque su
+     contenido este oculto, y la cotizacion o factura salia en la pagina 2 */
+  .layout {
+    min-height: 0;
+  }
+
   .layout-topbar,
   .layout-fondo,
   .layout-lateral {

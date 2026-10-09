@@ -2,6 +2,7 @@ import { createPortal } from "react-dom";
 import { codigoTicket, formatearFecha, nombreEquipo } from "../utils/formato";
 import Totales from "./Totales";
 import TablaLineas from "./TablaLineas";
+import Logo from "./Logo";
 import "./Documento.css";
 
 // Hoja para entregar al cliente: datos del taller, cliente, equipo, lineas
@@ -13,10 +14,7 @@ export default function DocumentoImprimible({ titulo, numero, fecha, ticket, est
     return createPortal(
         <article className="documento solo-imprimir">
             <header className="documento-cabecera">
-                <div>
-                    <p className="documento-marca">ITDesk</p>
-                    <p className="documento-sub">Servicio técnico de equipos</p>
-                </div>
+                <Logo tamano="md" lema impresion />
                 <div className="documento-titulo">
                     <h1>{titulo}</h1>
                     {numero && <p>{numero}</p>}

@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { ETIQUETA_ROL } from "../constants/roles";
 import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
+import Logo from "./Logo";
+import { TEMAS, guardarTema } from "../utils/tema";
 import "./Layout.css";
 
 function iniciales(usuario) {
@@ -17,6 +19,23 @@ export default function Layout() {
     const { sesion, cerrarSesion } = useAuth();
     const { usuario } = sesion;
     const [menuAbierto, setMenuAbierto] = useState(false);
+    const [tema, setTema] = useState(() => document.documentElement.dataset.tema ?? TEMAS.CLARO);
+    const oscuro = tema === TEMAS.OSCURO;
+
+    const cambiarTema = () => {
+        const nuevo = oscuro ? TEMAS.CLARO : TEMAS.OSCURO;
+        guardarTema(nuevo);
+        setTema(nuevo);
+    };
+
+    // el color de cada rol sale de data-rol (styles/tokens.css); va en <html>
+    // y no en el layout porque modales y documentos se montan fuera de el
+    useEffect(() => {
+        document.documentElement.dataset.rol = usuario.rol;
+        return () => {
+            delete document.documentElement.dataset.rol;
+        };
+    }, [usuario.rol]);
 
     useEffect(() => {
         if (!menuAbierto) return undefined;
@@ -46,7 +65,7 @@ export default function Layout() {
                 >
                     <Icono nombre="menu" tamano={22} />
                 </button>
-                <span className="layout-marca">ITDesk</span>
+                <Logo />
             </header>
 
             {menuAbierto && (
@@ -61,7 +80,9 @@ export default function Layout() {
                 id="menu-lateral"
                 className={`layout-lateral${menuAbierto ? " abierto" : ""}`}
             >
-                <div className="layout-lateral-marca">ITDesk</div>
+                <div className="layout-lateral-marca">
+                    <Logo />
+                </div>
 
                 <nav className="layout-nav" aria-label="Navegación principal">
                     {opciones.map((opcion) => (
@@ -92,7 +113,16 @@ export default function Layout() {
                     </div>
                     <button
                         type="button"
-                        className="layout-salir"
+                        className="layout-accion"
+                        aria-pressed={oscuro}
+                        onClick={cambiarTema}
+                    >
+                        <Icono nombre={oscuro ? "sol" : "luna"} />
+                        <span>Modo oscuro</span>
+                    </button>
+                    <button
+                        type="button"
+                        className="layout-accion layout-salir"
                         onClick={cerrarSesion}
                     >
                         <Icono nombre="salir" />
