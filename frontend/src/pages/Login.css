@@ -18,16 +18,9 @@
   flex-direction: column;
 }
 
-.login-tarjeta h1 {
-  margin: 0 0 4px;
-  font-size: 24px;
-  color: var(--color-accent);
-}
-
-.login-subtitulo {
-  margin: 0 0 24px;
-  color: var(--color-text-dim);
-  font-size: 14px;
+.login-titulo {
+  margin: var(--espacio-6) 0 var(--espacio-5);
+  font-size: var(--texto-xl);
 }
 
 .login-tarjeta label {

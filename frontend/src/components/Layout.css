@@ -17,10 +17,7 @@
 }
 
 .layout-lateral-marca {
-  padding: 22px 22px 18px;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-accent);
+  padding: 20px 22px 18px;
 }
 
 .layout-nav {
@@ -153,12 +150,6 @@
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
-  }
-
-  .layout-marca {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--color-accent);
   }
 
   .layout-lateral {

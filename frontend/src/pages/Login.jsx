@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../api/auth";
+import Logo from "../components/Logo";
 import "./Login.css";
 
 export default function Login() {
@@ -32,8 +33,8 @@ export default function Login() {
     return (
         <div className="login-pantalla">
             <form className="login-tarjeta" onSubmit={manejarSubmit}>
-                <h1>ITDesk</h1>
-                <p className="login-subtitulo">Inicia sesión para continuar</p>
+                <Logo tamano="lg" lema />
+                <h1 className="login-titulo">Inicia sesión</h1>
 
                 <label htmlFor="correo">Correo</label>
                 <input

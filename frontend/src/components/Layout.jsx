@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { ETIQUETA_ROL } from "../constants/roles";
 import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
+import Logo from "./Logo";
 import "./Layout.css";
 
 function iniciales(usuario) {
@@ -55,7 +56,7 @@ export default function Layout() {
                 >
                     <Icono nombre="menu" tamano={22} />
                 </button>
-                <span className="layout-marca">ITDesk</span>
+                <Logo />
             </header>
 
             {menuAbierto && (
@@ -70,7 +71,9 @@ export default function Layout() {
                 id="menu-lateral"
                 className={`layout-lateral${menuAbierto ? " abierto" : ""}`}
             >
-                <div className="layout-lateral-marca">ITDesk</div>
+                <div className="layout-lateral-marca">
+                    <Logo />
+                </div>
 
                 <nav className="layout-nav" aria-label="Navegación principal">
                     {opciones.map((opcion) => (

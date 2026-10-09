@@ -1,0 +1,89 @@
+.logo {
+  --logo-lado: 28px;
+  --logo-letra: 10px;
+  --logo-nombre: var(--texto-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  color: var(--texto);
+}
+
+.logo-md {
+  --logo-lado: 36px;
+  --logo-letra: var(--texto-base);
+  --logo-nombre: var(--texto-xl);
+}
+
+.logo-lg {
+  --logo-lado: 52px;
+  --logo-letra: var(--texto-lg);
+  --logo-nombre: var(--texto-3xl);
+  gap: var(--espacio-3);
+}
+
+/* etiqueta de inventario: esquina inferior izquierda casi recta y el
+   agujero arriba a la derecha */
+.logo-etiqueta {
+  position: relative;
+  flex: none;
+  width: var(--logo-lado);
+  height: var(--logo-lado);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* las letras bajan un poco a la izquierda para dejar libre el agujero */
+  padding: 8% 6% 0 0;
+  box-sizing: border-box;
+  border-radius: 28% 28% 28% 7%;
+  background: var(--rol-principal);
+  color: var(--rol-logo-texto);
+  font-family: var(--fuente-codigo);
+  font-size: var(--logo-letra);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.logo-etiqueta::after {
+  content: "";
+  position: absolute;
+  top: 12%;
+  right: 12%;
+  width: 11%;
+  height: 11%;
+  border-radius: 50%;
+  background: var(--fondo);
+}
+
+.logo-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-nombre {
+  font-family: var(--fuente-titulo);
+  font-stretch: var(--fuente-titulo-ancho);
+  font-size: var(--logo-nombre);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.logo-lema {
+  margin-top: 2px;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--texto-3);
+}
+
+.logo-impresion .logo-etiqueta {
+  background: var(--tinta-impresion);
+  color: var(--superficie);
+}
+
+.logo-impresion .logo-etiqueta::after {
+  background: var(--superficie);
+}
+
+.logo-impresion .logo-lema {
+  color: var(--tinta-impresion);
+}
