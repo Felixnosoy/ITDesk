@@ -168,3 +168,122 @@
   --rol-contador-texto: #713f12;
   --fondo: #f6f6f3;
 }
+
+/* ---------- modo oscuro (issue HU27.5) ----------
+   Solo en pantalla: al imprimir siempre sale en claro. Los neutros son
+   calidos, como en claro. En oscuro el color del rol se aclara para leerse
+   sobre fondo oscuro, y el texto encima de ese color pasa a ser oscuro. */
+@media screen {
+  [data-tema="oscuro"] {
+    color-scheme: dark;
+
+    --fondo: #151413;
+    --superficie: #1e1c1a;
+    --superficie-2: #24221f;
+    --superficie-3: #2c2a27;
+    --borde: #353230;
+    --borde-fuerte: #4a4642;
+    --texto: #f2efea;
+    --texto-2: #d9d4cd;
+    --texto-3: #b3ada5;
+    --texto-4: #948e86;
+    --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sombra-2: 0 16px 40px -12px rgba(0, 0, 0, 0.7);
+    --velo: rgba(0, 0, 0, 0.6);
+
+    --ok: #4ade80;
+    --ok-suave: rgba(22, 163, 74, 0.14);
+    --ok-borde: rgba(74, 222, 128, 0.35);
+    --peligro: #f87171;
+    --peligro-hover: #b91c1c;
+    --peligro-suave: rgba(220, 38, 38, 0.14);
+    --peligro-borde: rgba(248, 113, 113, 0.35);
+    --alerta: #fbbf24;
+    --alerta-texto: #fcd34d;
+    --alerta-suave: rgba(217, 119, 6, 0.14);
+    --alerta-borde: rgba(251, 191, 36, 0.35);
+
+    --estado-abierto-texto: #d6d3d1;
+    --estado-abierto-suave: rgba(168, 162, 158, 0.14);
+    --estado-diagnostico: #a78bfa;
+    --estado-diagnostico-texto: #c4b5fd;
+    --estado-diagnostico-suave: rgba(124, 58, 237, 0.18);
+    --estado-diagnostico-borde: rgba(167, 139, 250, 0.4);
+    --estado-espera: #fbbf24;
+    --estado-espera-texto: #fcd34d;
+    --estado-espera-suave: rgba(217, 119, 6, 0.16);
+    --estado-reparacion: #60a5fa;
+    --estado-reparacion-texto: #93c5fd;
+    --estado-reparacion-suave: rgba(37, 99, 235, 0.18);
+    --estado-reparacion-borde: rgba(96, 165, 250, 0.4);
+    --estado-resuelto: #4ade80;
+    --estado-resuelto-texto: #86efac;
+    --estado-resuelto-suave: rgba(22, 163, 74, 0.16);
+    --estado-cerrado-texto: #b3ada5;
+    --estado-cerrado-suave: rgba(120, 113, 108, 0.16);
+
+    --rol-principal: #f2efea;
+    --rol-principal-hover: #ffffff;
+    --rol-sobre-principal: #1c1917;
+    /* la etiqueta del logo es clara en oscuro: sus letras van oscuras */
+    --rol-logo-texto: var(--rol-sobre-principal);
+    --rol-suave: rgba(242, 239, 234, 0.1);
+    --rol-aviso-fondo: rgba(242, 239, 234, 0.06);
+    --rol-aviso-borde: #4a4642;
+    --rol-aviso-texto: #d9d4cd;
+    --rol-contador-fondo: rgba(242, 239, 234, 0.12);
+    --rol-contador-texto: #f2efea;
+  }
+
+  [data-tema="oscuro"][data-rol="Cliente"] {
+    --rol-principal: #a5b4fc;
+    --rol-principal-hover: #c7d2fe;
+    --rol-sobre-principal: #1e1b4b;
+    --rol-suave: rgba(99, 102, 241, 0.18);
+    --rol-aviso-fondo: rgba(242, 107, 79, 0.12);
+    --rol-aviso-borde: rgba(249, 160, 140, 0.4);
+    --rol-aviso-texto: #fdba9f;
+    --rol-contador-fondo: rgba(242, 107, 79, 0.2);
+    --rol-contador-texto: #fdba9f;
+    --fondo: #14141a;
+  }
+
+  [data-tema="oscuro"][data-rol="Tecnico"] {
+    --rol-principal: #5eead4;
+    --rol-principal-hover: #99f6e4;
+    --rol-sobre-principal: #042f2e;
+    --rol-suave: rgba(20, 184, 166, 0.16);
+    --rol-aviso-fondo: rgba(245, 158, 11, 0.12);
+    --rol-aviso-borde: rgba(252, 211, 77, 0.4);
+    --rol-aviso-texto: #fcd34d;
+    --rol-contador-fondo: rgba(245, 158, 11, 0.2);
+    --rol-contador-texto: #fcd34d;
+    --fondo: #121615;
+  }
+
+  [data-tema="oscuro"][data-rol="Recepcionista"] {
+    --rol-principal: #93c5fd;
+    --rol-principal-hover: #bfdbfe;
+    --rol-sobre-principal: #172554;
+    --rol-suave: rgba(59, 130, 246, 0.18);
+    --rol-aviso-fondo: rgba(59, 130, 246, 0.12);
+    --rol-aviso-borde: rgba(147, 197, 253, 0.4);
+    --rol-aviso-texto: #bfdbfe;
+    --rol-contador-fondo: rgba(59, 130, 246, 0.22);
+    --rol-contador-texto: #bfdbfe;
+    --fondo: #131519;
+  }
+
+  [data-tema="oscuro"][data-rol="Administrador"] {
+    --rol-principal: #a9c1ea;
+    --rol-principal-hover: #c8d7f2;
+    --rol-sobre-principal: #0f1f3d;
+    --rol-suave: rgba(96, 135, 200, 0.18);
+    --rol-aviso-fondo: rgba(250, 204, 21, 0.1);
+    --rol-aviso-borde: rgba(253, 224, 71, 0.4);
+    --rol-aviso-texto: #fde047;
+    --rol-contador-fondo: rgba(250, 204, 21, 0.2);
+    --rol-contador-texto: #fde047;
+    --fondo: #131416;
+  }
+}

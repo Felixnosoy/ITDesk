@@ -95,24 +95,29 @@
   color: var(--color-text-dim);
 }
 
-.layout-salir {
+.layout-accion {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radio-sm);
   background: transparent;
-  color: var(--color-text-dim);
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--texto-3);
+  font-size: var(--texto-base);
+  font-weight: 500;
   cursor: pointer;
 }
 
+.layout-accion:hover {
+  background: var(--superficie-3);
+  color: var(--texto);
+}
+
 .layout-salir:hover {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
+  background: var(--peligro-suave);
+  color: var(--peligro);
 }
 
 /* ---------- contenido ---------- */
