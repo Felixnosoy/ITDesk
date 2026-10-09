@@ -56,56 +56,6 @@
   line-height: 1.55;
 }
 
-.login-roles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--espacio-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.login-rol {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3);
-  border: 1px solid var(--marca-borde);
-  border-radius: var(--radio);
-}
-
-.login-rol-color {
-  flex: none;
-  width: 10px;
-  height: 10px;
-  margin-top: 4px;
-  border-radius: 3px;
-  background: var(--color-rol);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-rol) 35%, transparent);
-}
-
-.login-rol-cliente { --color-rol: var(--marca-rol-cliente); }
-.login-rol-tecnico { --color-rol: var(--marca-rol-tecnico); }
-.login-rol-recepcion { --color-rol: var(--marca-rol-recepcion); }
-.login-rol-administrador { --color-rol: var(--marca-rol-administrador); }
-
-.login-rol-cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.login-rol-nombre {
-  font-size: var(--texto-base);
-  font-weight: 700;
-}
-
-.login-rol-texto {
-  color: var(--marca-texto-2);
-  font-size: var(--texto-sm);
-  line-height: 1.4;
-}
-
 /* ---------- formulario ---------- */
 
 .login-lado-formulario {
@@ -187,7 +137,6 @@
     font-size: 26px;
   }
 
-  .login-roles,
   .login-marca-texto {
     display: none;
   }
