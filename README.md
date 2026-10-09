@@ -100,6 +100,26 @@ cd backend && npm run test:integracion
 
 Crean desde cero una base aparte, `itdesk_test`, con `schema.sql` y `datos-prueba.sql`. Para usar otro nombre se define `DB_NAME_TEST` en `backend/.env`. Ese nombre tiene que terminar en `_test`, así nunca tocan la base de trabajo. Las imágenes que suben van a una carpeta temporal.
 
+La API de las pruebas de integración se conecta con un usuario de MySQL restringido (ver la sección siguiente). Por eso el `DB_USER` de tu `.env` tiene que poder crear usuarios; con `root` en local alcanza.
+
+## Usuarios de la base de datos
+
+La aplicación no se conecta a MySQL con `root`. Hay dos usuarios, cada uno con lo mínimo que necesita y solo sobre la base de ITDesk:
+
+| Usuario | Quién lo usa | Qué puede hacer | Qué no puede hacer |
+| --- | --- | --- | --- |
+| `itdesk_app` | El backend (`DB_USER` en el servidor) | Leer, agregar y actualizar datos, tabla por tabla, solo lo que el backend usa | Borrar o cambiar tablas, borrar datos, editar el historial (auditoría, línea de tiempo, notas, adjuntos, líneas de cotizaciones y facturas), crear usuarios, ver otras bases |
+| `itdesk_admin` | Una persona del equipo, a mano | Crear y cambiar tablas: correr `schema.sql`, `ALTER TABLE`, cargar datos | Crear usuarios, dar permisos, ver otras bases |
+
+Para crearlos o actualizarlos:
+
+1. En `backend/.env`, completa `DB_ROOT_USER` y `DB_ROOT_PASSWORD` (quien puede crear usuarios, solo en tu máquina), además de `DB_APP_PASSWORD` y `DB_ADMIN_PASSWORD`, de 12 caracteres o más.
+2. Corre `schema.sql` en la base.
+3. `cd backend && npm run db:usuarios`. Se puede repetir sin problema. Para ver el SQL sin aplicarlo: `npm run db:usuarios -- --ver` (las claves salen ocultas).
+4. Para que el backend use el usuario restringido, pon en su `.env` `DB_USER=itdesk_app` y su clave en `DB_PASSWORD`. En producción el backend no arranca con `root`.
+
+Qué puede hacer cada usuario sobre cada tabla está en `backend/scripts/privilegios.js`, explicado en [`docs/privilegios-base-de-datos.md`](docs/privilegios-base-de-datos.md). Si una función nueva empieza a usar una operación que no está ahí (por ejemplo un `DELETE`) o se agrega una tabla, hay que sumarla en ese archivo y volver a correr el script; si no, las pruebas de integración fallan.
+
 ## Cómo trabajamos en equipo
 
 Cada integrante tiene su propia rama y nadie hace commits en `main`. GitHub no lo permite: todo cambio entra por Pull Request con la aprobación del otro integrante.
