@@ -5,7 +5,27 @@ const ESTADOS_TICKET = require("../constants/estadosTicket");
 const PRIORIDADES_TICKET = require("../constants/prioridadesTicket");
 const CATEGORIAS_TICKET = require("../constants/categoriasTicket");
 const ESTADOS_USUARIO = require("../constants/estadosUsuario");
+const ESTADOS_COTIZACION = require("../constants/estadosCotizacion");
 const { validarId, validarTexto } = require("../validators/comun.validator");
+
+// Un ticket esta por facturar cuando el cliente aprobo una cotizacion que
+// todavia no tiene factura (issue HU30.1, vista "Para facturar"). Se calcula
+// en la consulta para no tener que pedir la cotizacion de cada ticket.
+// Solo constantes del sistema, sin datos del usuario.
+const POR_FACTURAR = `
+    (
+        t.estado <> '${ESTADOS_TICKET.CERRADO}'
+        AND EXISTS (
+            SELECT 1
+            FROM cotizacion co
+            LEFT JOIN factura f
+                ON f.id_cotizacion = co.id_cotizacion
+            WHERE co.id_ticket = t.id_ticket
+                AND co.estado = '${ESTADOS_COTIZACION.APROBADA}'
+                AND f.id_factura IS NULL
+        )
+    ) AS por_facturar
+`;
 
 const COLUMNAS_TICKET = `
     t.id_ticket,
@@ -26,7 +46,8 @@ const COLUMNAS_TICKET = `
     e.modelo AS equipo_modelo,
     e.numero_serie AS equipo_numero_serie,
     a.id_usuario AS id_tecnico,
-    CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico
+    CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico,
+    ${POR_FACTURAR}
 `;
 
 // LEFT JOIN con la asignacion activa: un ticket sin tecnico igual aparece

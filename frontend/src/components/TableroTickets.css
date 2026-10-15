@@ -1,0 +1,119 @@
+/* Las seis columnas no caben en pantallas medianas: el tablero se desplaza
+   de lado dentro de su caja y la pagina no. */
+.tablero {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(220px, 1fr));
+  gap: var(--espacio-3);
+  overflow-x: auto;
+  padding-bottom: var(--espacio-2);
+}
+
+.tablero-columna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  min-width: 0;
+  padding: var(--espacio-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--superficie-2);
+}
+
+.tablero-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-1);
+  font-family: var(--fuente-texto);
+  font-stretch: normal;
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-3);
+  white-space: nowrap;
+}
+
+.tablero-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tablero-punto-abierto { background: var(--estado-abierto); }
+.tablero-punto-diagnostico { background: var(--estado-diagnostico); }
+.tablero-punto-espera { background: var(--estado-espera); }
+.tablero-punto-reparacion { background: var(--estado-reparacion); }
+.tablero-punto-resuelto { background: var(--estado-resuelto); }
+.tablero-punto-cerrado { background: var(--estado-cerrado); }
+
+.tablero-cantidad {
+  margin-left: auto;
+  color: var(--texto-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.tablero-vacio {
+  margin: 0;
+  padding: var(--espacio-3) 0;
+  font-size: var(--texto-sm);
+  color: var(--texto-4);
+  text-align: center;
+}
+
+.tablero-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* la franja de prioridad va en el borde izquierdo, como en la tabla */
+.tablero-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--franja, var(--borde));
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.tablero-tarjeta:hover {
+  border-color: var(--borde-fuerte);
+  border-left-color: var(--franja, var(--borde-fuerte));
+}
+
+.tablero-tarjeta-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  margin-bottom: 4px;
+}
+
+.tablero-prioridad {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--texto-4);
+}
+
+.tablero-tarjeta-titulo {
+  font-size: var(--texto-base);
+  line-height: 1.3;
+}
+
+.tablero-tarjeta-dato {
+  overflow: hidden;
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

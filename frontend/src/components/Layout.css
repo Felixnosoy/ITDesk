@@ -20,6 +20,31 @@
   padding: 20px 22px 18px;
 }
 
+/* abre la busqueda global; parece un campo para que se entienda sin leer */
+.layout-buscar {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0 var(--espacio-3) var(--espacio-3);
+  padding: 7px 10px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  background: var(--superficie-2);
+  color: var(--texto-4);
+  font-size: var(--texto-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.layout-buscar:hover {
+  border-color: var(--borde-fuerte);
+  color: var(--texto-2);
+}
+
+.layout-buscar span {
+  flex: 1;
+}
+
 .layout-nav {
   display: flex;
   flex-direction: column;
@@ -156,6 +181,11 @@
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
+  }
+
+  /* la lupa queda a la derecha de la barra, el logo al centro-izquierda */
+  .layout-buscar-icono {
+    margin-left: auto;
   }
 
   .layout-lateral {

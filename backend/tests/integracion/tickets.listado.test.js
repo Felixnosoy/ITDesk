@@ -72,6 +72,22 @@ describe("alcance del listado segun el rol", () => {
 
         expect(fechas).toEqual([...fechas].sort((a, b) => b - a));
     });
+
+    // HU30.1: la vista "Para facturar" depende de este campo
+    test("por_facturar marca los tickets con cotizacion aprobada y sin factura", async () => {
+        const { body } = await api.pedir("GET", "/tickets", api.tokens.recepcionista);
+        const marcados = ids(body.data.filter((t) => t.por_facturar));
+
+        expect(marcados).toEqual(await esperados(`
+            t.estado <> 'Cerrado'
+            AND t.id_ticket IN (
+                SELECT co.id_ticket
+                FROM cotizacion co
+                LEFT JOIN factura f ON f.id_cotizacion = co.id_cotizacion
+                WHERE co.estado = 'Aprobada' AND f.id_factura IS NULL
+            )
+        `));
+    });
 });
 
 describe("filtros del listado", () => {

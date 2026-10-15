@@ -23,7 +23,7 @@ describe("ticket.service.obtenerTickets (alcance segun el rol)", () => {
             await ticketService.obtenerTickets({ id_usuario: 3, rol });
 
             const [sql, parametros] = pool.query.mock.calls[0];
-            expect(sql).not.toContain("WHERE");
+            expect(sql).not.toContain("t.id_usuario = ?");
             expect(parametros).toEqual([]);
         }
     );
@@ -35,6 +35,17 @@ describe("ticket.service.obtenerTickets (alcance segun el rol)", () => {
 
         const [sql] = pool.query.mock.calls[0];
         expect(sql).toMatch(/LEFT JOIN asignacion a\s+ON a.id_ticket = t.id_ticket\s+AND a.activa = 1/);
+    });
+
+    test("marca por_facturar con una cotizacion aprobada sin factura", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 3, rol: "Recepcionista" });
+
+        const [sql] = pool.query.mock.calls[0];
+        expect(sql).toContain("co.estado = 'Aprobada'");
+        expect(sql).toContain("f.id_factura IS NULL");
+        expect(sql).toContain("AS por_facturar");
     });
 });
 
@@ -70,7 +81,8 @@ describe("ticket.service.obtenerTickets (filtros)", () => {
         await ticketService.obtenerTickets({ id_usuario: 3, rol: "Administrador" }, { estado: "", prioridad: undefined });
 
         const [sql, parametros] = pool.query.mock.calls[0];
-        expect(sql).not.toContain("WHERE");
+        expect(sql).not.toContain("t.estado = ?");
+        expect(sql).not.toContain("t.prioridad = ?");
         expect(parametros).toEqual([]);
     });
 

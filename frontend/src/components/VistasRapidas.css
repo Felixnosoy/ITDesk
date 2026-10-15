@@ -1,0 +1,48 @@
+.vistas-rapidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.vista-rapida {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 6px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pildora);
+  background: var(--superficie);
+  color: var(--texto-2);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.vista-rapida:hover {
+  border-color: var(--borde-fuerte);
+  color: var(--texto);
+}
+
+.vista-rapida[aria-pressed="true"] {
+  border-color: var(--rol-principal);
+  background: var(--rol-principal);
+  color: var(--rol-sobre-principal);
+}
+
+.vista-rapida-cantidad {
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.vista-rapida[aria-pressed="true"] .vista-rapida-cantidad {
+  /* sale del color del texto, asi se ve bien en claro y en oscuro */
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  color: inherit;
+}

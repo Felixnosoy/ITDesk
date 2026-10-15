@@ -61,6 +61,20 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* texto que solo leen los lectores de pantalla, por ejemplo la prioridad
+   que en pantalla se muestra solo como color */
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- componentes base (issue HU27.4) ----------
    Botones, campos, tarjetas, avisos e insignias que comparten todas las
    pantallas. Solo usan tokens: el color principal es el del rol. */
@@ -253,6 +267,21 @@ textarea:focus-visible {
   font-size: var(--texto-sm);
   font-weight: 600;
   white-space: nowrap;
+}
+
+/* color de la franja de prioridad de un ticket (issue HU30.2). Solo define
+   --franja: cada pantalla decide donde dibujarla. La baja casi no se nota a
+   proposito, para que la alta resalte. */
+.prioridad-alta {
+  --franja: var(--peligro);
+}
+
+.prioridad-media {
+  --franja: var(--estado-espera);
+}
+
+.prioridad-baja {
+  --franja: var(--borde-fuerte);
 }
 
 /* codigo de un ticket o documento como etiqueta (TK-0004) */

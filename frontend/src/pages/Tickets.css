@@ -42,19 +42,84 @@
   text-decoration: underline;
 }
 
+/* filas compactas (issue HU30.2): cada celda en una sola linea */
 .tickets-tarjeta .tabla th,
 .tickets-tarjeta .tabla td {
-  padding: 12px 14px;
+  padding: 9px 12px;
+  white-space: nowrap;
 }
 
 .tickets-tarjeta .tabla th:first-child,
 .tickets-tarjeta .tabla td:first-child {
   padding-left: 20px;
-  white-space: nowrap;
 }
 
-.tickets-secundario {
+/* la franja de prioridad es el borde izquierdo de la fila; se dibuja con
+   sombra interna para no mover el contenido */
+.tickets-tarjeta .tabla tbody td:first-child {
+  box-shadow: inset 4px 0 0 var(--franja, transparent);
+}
+
+.tickets-recorte {
   display: block;
-  font-size: 12px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tickets-recorte-titulo {
+  max-width: 260px;
+}
+
+.tickets-prioridad {
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+}
+
+/* ---------- vistas rapidas y modo lista o tablero ---------- */
+
+.tickets-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--espacio-4);
+}
+
+.tickets-modo {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+
+.tickets-modo-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--texto-3);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tickets-modo-boton:hover {
+  color: var(--texto);
+}
+
+.tickets-modo-boton[aria-pressed="true"] {
+  background: var(--rol-suave);
+  color: var(--rol-principal);
+}
+
+.tickets-contador-suelto {
+  margin: 0 0 var(--espacio-3);
+  font-size: 13px;
   color: var(--color-text-dim);
 }

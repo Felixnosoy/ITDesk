@@ -5,6 +5,7 @@ import { ETIQUETA_ROL } from "../constants/roles";
 import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
 import Logo from "./Logo";
+import BusquedaGlobal from "./BusquedaGlobal";
 import { TEMAS, guardarTema } from "../utils/tema";
 import "./Layout.css";
 
@@ -19,6 +20,7 @@ export default function Layout() {
     const { sesion, cerrarSesion } = useAuth();
     const { usuario } = sesion;
     const [menuAbierto, setMenuAbierto] = useState(false);
+    const [buscando, setBuscando] = useState(false);
     const [tema, setTema] = useState(() => document.documentElement.dataset.tema ?? TEMAS.CLARO);
     const oscuro = tema === TEMAS.OSCURO;
 
@@ -47,6 +49,26 @@ export default function Layout() {
         return () => document.removeEventListener("keydown", alPresionar);
     }, [menuAbierto]);
 
+    // Ctrl+K (Cmd+K en Mac) abre la busqueda global desde cualquier
+    // pantalla (issue HU30.4); se escucha aqui porque el layout envuelve a
+    // todas. Con la busqueda abierta, el mismo atajo la cierra.
+    useEffect(() => {
+        const alPresionar = (evento) => {
+            if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === "k") {
+                evento.preventDefault();
+                setMenuAbierto(false);
+                setBuscando((abierta) => !abierta);
+            }
+        };
+        document.addEventListener("keydown", alPresionar);
+        return () => document.removeEventListener("keydown", alPresionar);
+    }, []);
+
+    const abrirBusqueda = () => {
+        setMenuAbierto(false);
+        setBuscando(true);
+    };
+
     const opciones = [
         { ruta: RUTA_INICIO[usuario.rol], etiqueta: "Inicio", icono: "inicio" },
         ...seccionesParaRol(usuario.rol),
@@ -66,6 +88,14 @@ export default function Layout() {
                     <Icono nombre="menu" tamano={22} />
                 </button>
                 <Logo />
+                <button
+                    type="button"
+                    className="layout-hamburguesa layout-buscar-icono"
+                    aria-label="Buscar"
+                    onClick={abrirBusqueda}
+                >
+                    <Icono nombre="buscar" tamano={22} />
+                </button>
             </header>
 
             {menuAbierto && (
@@ -83,6 +113,14 @@ export default function Layout() {
                 <div className="layout-lateral-marca">
                     <Logo />
                 </div>
+
+                <button type="button" className="layout-buscar" onClick={abrirBusqueda}>
+                    <Icono nombre="buscar" tamano={16} />
+                    <span>Buscar</span>
+                    <kbd className="busqueda-tecla" aria-label="atajo Control K">
+                        Ctrl K
+                    </kbd>
+                </button>
 
                 <nav className="layout-nav" aria-label="Navegación principal">
                     {opciones.map((opcion) => (
@@ -134,6 +172,8 @@ export default function Layout() {
             <main className="layout-contenido">
                 <Outlet />
             </main>
+
+            {buscando && <BusquedaGlobal onCerrar={() => setBuscando(false)} />}
         </div>
     );
 }

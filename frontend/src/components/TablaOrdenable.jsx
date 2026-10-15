@@ -7,10 +7,13 @@ const ARIA_SORT = { asc: "ascending", desc: "descending" };
 // tabla sirve si el orden lo resuelve el navegador o el backend.
 //
 // columnas: [{ clave, titulo, ordenable?, render?(fila), valorOrden?(fila) }]
+// claseFila es opcional: permite marcar una fila entera (por ejemplo, la
+// franja de prioridad del listado de tickets).
 export default function TablaOrdenable({
     columnas,
     filas,
     claveFila,
+    claseFila,
     orden,
     onOrdenar,
     textoVacio = "No hay resultados.",
@@ -57,7 +60,7 @@ export default function TablaOrdenable({
                         </tr>
                     )}
                     {filas.map((fila) => (
-                        <tr key={claveFila(fila)}>
+                        <tr key={claveFila(fila)} className={claseFila?.(fila)}>
                             {columnas.map((columna) => (
                                 <td key={columna.clave}>
                                     {columna.render ? columna.render(fila) : fila[columna.clave]}

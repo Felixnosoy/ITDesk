@@ -41,6 +41,9 @@ const TRAZOS = {
         "M19.07 4.93l-1.41 1.41",
     ],
     luna: ["M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"],
+    buscar: ["M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z", "M21 21l-4.35-4.35"],
+    lista: ["M8 6h13", "M8 12h13", "M8 18h13", "M3 6h.01", "M3 12h.01", "M3 18h.01"],
+    tablero: ["M4 4h4v16H4z", "M10 4h4v10h-4z", "M16 4h4v13h-4z"],
 };
 
 export default function Icono({ nombre, tamano = 18 }) {
