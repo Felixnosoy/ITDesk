@@ -272,6 +272,12 @@
   margin-bottom: var(--espacio-1);
 }
 
+.panel-equipo-codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
 .panel-equipo-nombre {
   font-size: var(--texto-lg);
 }

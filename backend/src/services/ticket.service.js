@@ -49,9 +49,13 @@ const COLUMNAS_TICKET = `
     CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico,
     f.estado AS factura_estado,
     f.total AS factura_total,
-    cp.total AS cotizacion_pendiente_total
+    cp.total AS cotizacion_pendiente_total,
+    ua.fecha AS ultima_actualizacion
 `;
 
+// ultima_actualizacion (y ultima_nota para el personal, mas abajo) alimentan
+// el aviso de "novedades" del listado.
+//
 // LEFT JOIN con la asignacion activa: un ticket sin tecnico igual aparece
 // en el listado, con id_tecnico y tecnico en null. La factura (a lo sumo una
 // por ticket) y la cotizacion pendiente viajan en el listado para que los
@@ -72,7 +76,25 @@ const JOIN_TICKET = `
     LEFT JOIN cotizacion cp
         ON cp.id_ticket = t.id_ticket
         AND cp.estado = 'Pendiente'
+    LEFT JOIN (
+        SELECT id_ticket, MAX(fecha) AS fecha FROM actualizacion GROUP BY id_ticket
+    ) ua
+        ON ua.id_ticket = t.id_ticket
 `;
+
+// La ultima nota interna solo se consulta para el personal: para el Cliente
+// la consulta ni siquiera toca nota_privada (ver detalle.service.test.js)
+const NOTA_COLUMNA = `,
+    un.fecha AS ultima_nota`;
+const NOTA_JOIN = `
+    LEFT JOIN (
+        SELECT id_ticket, MAX(fecha) AS fecha FROM nota_privada GROUP BY id_ticket
+    ) un
+        ON un.id_ticket = t.id_ticket
+`;
+const esPersonal = (usuario) => usuario?.rol !== ROLES.CLIENTE;
+const columnasTicket = (usuario) => COLUMNAS_TICKET + (esPersonal(usuario) ? NOTA_COLUMNA : "");
+const joinTicket = (usuario) => JOIN_TICKET + (esPersonal(usuario) ? NOTA_JOIN : "");
 
 // filtros que acepta el listado: parametro de la URL -> columna y catalogo
 const FILTROS = {
@@ -138,8 +160,8 @@ const obtenerTickets = async (usuario, filtros = {}) => {
     const [tickets] = await pool.query(
         `
         SELECT
-            ${COLUMNAS_TICKET}
-        ${JOIN_TICKET}
+            ${columnasTicket(usuario)}
+        ${joinTicket(usuario)}
         ${where}
         ORDER BY t.fecha_apertura DESC, t.id_ticket DESC
         `,
@@ -158,8 +180,8 @@ const obtenerTicketPorId = async (idTicket, usuario) => {
     const [tickets] = await pool.query(
         `
         SELECT
-            ${COLUMNAS_TICKET}
-        ${JOIN_TICKET}
+            ${columnasTicket(usuario)}
+        ${joinTicket(usuario)}
         WHERE t.id_ticket = ?
         `,
         [id_ticket]

@@ -38,6 +38,26 @@ describe("ticket.service.obtenerTickets (alcance segun el rol)", () => {
     });
 });
 
+describe("ticket.service.obtenerTickets (novedades)", () => {
+    test("para el personal la consulta trae la fecha de la ultima nota interna", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 3, rol: "Tecnico" });
+
+        expect(pool.query.mock.calls[0][0]).toContain("AS ultima_nota");
+        expect(pool.query.mock.calls[0][0]).toContain("ultima_actualizacion");
+    });
+
+    test("para el Cliente la consulta ni siquiera toca nota_privada", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 7, rol: "Cliente" });
+
+        expect(pool.query.mock.calls[0][0]).not.toContain("nota_privada");
+        expect(pool.query.mock.calls[0][0]).toContain("ultima_actualizacion");
+    });
+});
+
 describe("ticket.service.obtenerTickets (filtros)", () => {
     test("cada filtro valido agrega su condicion y su valor como parametro", async () => {
         pool.query.mockResolvedValueOnce([[]]);

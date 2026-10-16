@@ -6,6 +6,7 @@ import { ESTADOS_TICKET, PRIORIDADES, FILTROS_VACIOS } from "../constants/ticket
 import { ESTADOS_FACTURA } from "../constants/cotizaciones";
 import { listarTickets } from "../api/tickets";
 import { proximoPaso, leToca } from "../utils/ciclo";
+import { leerVistos, tieneNovedades } from "../utils/novedades";
 import { siguienteOrden, ordenarFilas, totalPaginas, paginar } from "../utils/tabla";
 import { codigoTicket, formatearFecha, nombreEquipo, normalizar } from "../utils/formato";
 import FiltrosTickets from "../components/FiltrosTickets";
@@ -14,6 +15,7 @@ import Paginacion from "../components/Paginacion";
 import Insignia from "../components/Insignia";
 import { EsqueletoTabla } from "../components/Esqueleto";
 import EstadoVacio from "../components/EstadoVacio";
+import PildoraNuevo from "../components/PildoraNuevo";
 import "./Tickets.css";
 
 // orden por etapa del ciclo de vida y por gravedad, no alfabetico
@@ -73,6 +75,8 @@ export default function Tickets() {
     const navegar = useNavigate();
     const vistas = useMemo(() => vistasDelRol(usuario.rol, usuario.id_usuario), [usuario.rol, usuario.id_usuario]);
     const [vista, setVista] = useState("todos");
+    // se lee una vez al entrar: lo que se abra despues se marca alla
+    const [vistos] = useState(() => leerVistos(usuario.id_usuario));
     // en el celular los filtros quedan detras de un boton
     const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
 
@@ -128,6 +132,7 @@ export default function Tickets() {
                 render: (t) => (
                     <>
                         {enlace(t, t.titulo)}
+                        {tieneNovedades(t, vistos) && <PildoraNuevo />}
                         {!esCliente && <span className="tickets-secundario">{t.cliente}</span>}
                     </>
                 ),
@@ -166,7 +171,7 @@ export default function Tickets() {
                 valorOrden: (t) => new Date(t.fecha_apertura).getTime(),
             },
         ],
-        [esCliente]
+        [esCliente, vistos]
     );
 
     const visibles = useMemo(() => {

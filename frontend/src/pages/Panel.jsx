@@ -8,6 +8,8 @@ import { PANELES } from "../constants/navegacion";
 import { listarTickets } from "../api/tickets";
 import { codigoTicket, formatearMonto } from "../utils/formato";
 import { PASOS_CICLO, proximoPaso, leToca } from "../utils/ciclo";
+import { leerVistos, tieneNovedades } from "../utils/novedades";
+import PildoraNuevo from "../components/PildoraNuevo";
 import Insignia from "../components/Insignia";
 import ProgresoCiclo from "../components/ProgresoCiclo";
 import { EsqueletoTarjetas } from "../components/Esqueleto";
@@ -57,13 +59,16 @@ function indicadores(rol, tickets, idUsuario) {
 }
 
 // Una fila de la lista "Te toca": codigo, titulo, equipo y el paso pendiente
-function FilaTicket({ ticket, paso, esCliente }) {
+function FilaTicket({ ticket, paso, esCliente, nuevo }) {
     return (
         <li>
             <Link to={`/tickets/${ticket.id_ticket}`} className={`panel-fila panel-fila-${ticket.prioridad?.toLowerCase()}`}>
                 <span className="etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
                 <span className="panel-fila-texto">
-                    <strong>{ticket.titulo}</strong>
+                    <strong>
+                        {ticket.titulo}
+                        {nuevo && <PildoraNuevo />}
+                    </strong>
                     <span>
                         {ticket.equipo_marca} {ticket.equipo_modelo}
                         {!esCliente && ` · ${ticket.cliente}`}
@@ -77,11 +82,14 @@ function FilaTicket({ ticket, paso, esCliente }) {
 }
 
 // Tarjeta de un equipo del cliente con su avance en el ciclo
-function TarjetaEquipo({ ticket, paso, urgente }) {
+function TarjetaEquipo({ ticket, paso, urgente, nuevo }) {
     return (
         <Link to={`/tickets/${ticket.id_ticket}`} className={`tarjeta panel-equipo${urgente ? " panel-equipo-urgente" : ""}`}>
             <div className="panel-equipo-cabecera">
-                <span className="etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
+                <span className="panel-equipo-codigo">
+                    <span className="etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
+                    {nuevo && <PildoraNuevo />}
+                </span>
                 <Insignia tipo="estado" valor={ticket.estado} />
             </div>
             <strong className="panel-equipo-nombre">
@@ -136,6 +144,7 @@ export default function Panel() {
     const esCliente = rol === ROLES.CLIENTE;
 
     const [tickets, setTickets] = useState(null);
+    const [vistos] = useState(() => leerVistos(usuario.id_usuario));
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -220,7 +229,13 @@ export default function Panel() {
                                 .filter(({ ticket }) => activo(ticket))
                                 .sort((a, b) => leToca(b.paso, rol) - leToca(a.paso, rol))
                                 .map(({ ticket, paso }) => (
-                                    <TarjetaEquipo key={ticket.id_ticket} ticket={ticket} paso={paso} urgente={leToca(paso, rol)} />
+                                    <TarjetaEquipo
+                                        key={ticket.id_ticket}
+                                        ticket={ticket}
+                                        paso={paso}
+                                        urgente={leToca(paso, rol)}
+                                        nuevo={tieneNovedades(ticket, vistos)}
+                                    />
                                 ))}
                         </div>
                     )}
@@ -248,7 +263,13 @@ export default function Panel() {
                         ) : (
                             <ul className="panel-lista">
                                 {pendientes.slice(0, 8).map(({ ticket, paso }) => (
-                                    <FilaTicket key={ticket.id_ticket} ticket={ticket} paso={paso} esCliente={esCliente} />
+                                    <FilaTicket
+                                        key={ticket.id_ticket}
+                                        ticket={ticket}
+                                        paso={paso}
+                                        esCliente={esCliente}
+                                        nuevo={tieneNovedades(ticket, vistos)}
+                                    />
                                 ))}
                             </ul>
                         )}

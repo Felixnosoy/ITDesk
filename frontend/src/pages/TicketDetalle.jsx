@@ -16,6 +16,7 @@ import {
     formatearMonto,
 } from "../utils/formato";
 import { proximoPaso, leToca } from "../utils/ciclo";
+import { marcarVisto } from "../utils/novedades";
 import ProgresoCiclo from "../components/ProgresoCiclo";
 import Insignia from "../components/Insignia";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
@@ -83,6 +84,16 @@ export default function TicketDetalle() {
         if (!editando) return;
         document.getElementById(`seccion-${editando}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, [editando]);
+
+    // lo que se ve ahora deja de contar como novedad en el listado
+    useEffect(() => {
+        if (!detalle) return;
+        marcarVisto(sesion.usuario.id_usuario, detalle.ticket.id_ticket, [
+            detalle.ticket.fecha_apertura,
+            ...detalle.actualizaciones.map((a) => a.fecha),
+            ...(detalle.notas_privadas ?? []).map((n) => n.fecha),
+        ]);
+    }, [detalle, sesion.usuario.id_usuario]);
 
     useEffect(() => {
         let vigente = true;
