@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { ETIQUETA_ROL } from "../constants/roles";
 import { obtenerUsuario, actualizarPerfil } from "../api/usuarios";
+import AvisoFlotante from "../components/AvisoFlotante";
 import "./Perfil.css";
 
 function formatearFecha(fecha) {
@@ -140,11 +141,7 @@ export default function Perfil() {
                                 {error}
                             </div>
                         )}
-                        {aviso && (
-                            <div className="aviso aviso-ok" role="status">
-                                {aviso}
-                            </div>
-                        )}
+                        <AvisoFlotante mensaje={aviso} onCerrar={() => setAviso("")} />
 
                         <div className="campo">
                             <label htmlFor="telefono">Teléfono</label>

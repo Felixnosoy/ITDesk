@@ -11,6 +11,7 @@ import {
 import Modal from "../components/Modal";
 import MenuAcciones from "../components/MenuAcciones";
 import FormularioUsuario from "../components/FormularioUsuario";
+import AvisoFlotante from "../components/AvisoFlotante";
 import "./Usuarios.css";
 
 // mismo minimo que exige el backend (usuario.service.js)
@@ -165,11 +166,7 @@ export default function Usuarios() {
                 </button>
             </div>
 
-            {aviso && (
-                <div className="aviso aviso-ok" role="status">
-                    {aviso}
-                </div>
-            )}
+            <AvisoFlotante mensaje={aviso} onCerrar={() => setAviso("")} />
 
             <div className="usuarios-filtros">
                 <div className="campo">

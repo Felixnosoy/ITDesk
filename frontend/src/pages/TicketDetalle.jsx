@@ -30,6 +30,7 @@ import Factura from "../components/Factura";
 import ConfirmarFactura from "../components/ConfirmarFactura";
 import FormularioPago from "../components/FormularioPago";
 import DocumentoImprimible from "../components/DocumentoImprimible";
+import AvisoFlotante from "../components/AvisoFlotante";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -257,11 +258,7 @@ export default function TicketDetalle() {
                 </div>
             </div>
 
-            {aviso && (
-                <div className="aviso aviso-ok" role="status">
-                    {aviso}
-                </div>
-            )}
+            <AvisoFlotante mensaje={aviso} onCerrar={() => setAviso("")} />
 
             <div className="detalle-columnas">
                 <div className="detalle-principal">
