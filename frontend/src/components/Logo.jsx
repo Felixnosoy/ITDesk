@@ -1,8 +1,9 @@
 import "./Logo.css";
 
 // Marca de ITDesk (issue HU27.3): una etiqueta de inventario con su agujero
-// y las letras IT, mas el nombre. Toma el color del rol de la sesion; en
-// papel (impresion) va en tinta negra para que se lea en blanco y negro.
+// y las letras IT, mas el nombre. Es el mismo para todos los roles (el color
+// del rol va en el menu y los botones, no en la marca); en papel
+// (impresion) va en tinta negra para que se lea en blanco y negro.
 // tamano: "sm" para el menu, "md" para encabezados, "lg" para el inicio de
 // sesion. lema muestra la frase debajo del nombre.
 export default function Logo({ tamano = "sm", lema = false, impresion = false }) {

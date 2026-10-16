@@ -1,17 +1,4 @@
 .detalle-pagina {
-  max-width: 1100px;
-}
-
-.detalle-volver {
-  display: inline-block;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: var(--color-accent);
-  text-decoration: none;
-}
-
-.detalle-volver:hover {
-  text-decoration: underline;
 }
 
 .detalle-codigo {
@@ -20,15 +7,90 @@
 
 .detalle-insignias {
   display: flex;
-  gap: 8px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
-  margin-top: 10px;
+  margin-top: var(--espacio-3);
+}
+
+.detalle-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.detalle-cabecera-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* datos del caso en filas de dos o tres columnas, segun el ancho */
+.detalle-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--espacio-3) var(--espacio-5);
+  margin: var(--espacio-4) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--borde);
+}
+
+.detalle-subtitulo {
+  margin: var(--espacio-5) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--borde);
+  font-size: var(--texto-md);
+}
+
+.detalle-resumen-sin-linea {
+  margin-top: var(--espacio-3);
+  padding-top: 0;
+  border-top: none;
+}
+
+.detalle-dato-ancho {
+  grid-column: 1 / -1;
+}
+
+/* el equipo y el cliente llevan a su ficha con historial */
+.detalle-enlace {
+  color: var(--rol-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.detalle-enlace:hover {
+  text-decoration: underline;
+}
+
+.detalle-serie {
+  font-family: var(--fuente-codigo);
+}
+
+/* quien y cuando, bajo una cotizacion o una factura */
+.detalle-autor {
+  display: block;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
+  color: var(--texto-3);
+}
+
+/* el panel de actividad queda a la vista mientras se recorre la columna */
+.detalle-lateral {
+  position: sticky;
+  top: calc(var(--barra-alto) + var(--espacio-4));
+  height: calc(100vh - var(--barra-alto) - var(--espacio-7));
+}
+
+.detalle-lateral .actividad {
+  height: 100%;
 }
 
 .detalle-columnas {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+  gap: var(--espacio-5);
   align-items: start;
 }
 
@@ -36,19 +98,19 @@
 .detalle-lateral {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--espacio-5);
   min-width: 0;
 }
 
 .detalle-datos {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--espacio-3);
   margin: 0;
 }
 
 .detalle-dato dt {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -57,120 +119,86 @@
 
 .detalle-dato dd {
   margin: 2px 0 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   overflow-wrap: anywhere;
 }
 
 /* respeta los saltos de linea que escribio el tecnico o el cliente */
 .detalle-texto {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   line-height: 1.5;
   white-space: pre-line;
 }
 
 .detalle-vacio {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   color: var(--color-text-dim);
 }
 
 /* lo privado se distingue a simple vista de lo que ve el cliente */
-.detalle-privado {
-  border-left: 4px solid var(--alerta);
-  background: var(--alerta-suave);
-}
-
 .detalle-titulo-fila {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
 }
 
 .detalle-titulo-fila h2 {
   margin: 0;
 }
 
-.detalle-etiqueta-privada {
-  padding: 2px 10px;
-  border-radius: 99px;
-  background: var(--alerta-suave);
-  color: var(--alerta-texto);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+/* dos columnas solo si el contenido tiene lugar (depende del menu plegado o
+   no, por eso mira el ancho de la pagina y no el de la ventana) */
+.detalle-pagina {
+  container: detalle / inline-size;
 }
 
-.detalle-notas {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.detalle-notas li + li {
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
-}
-
-.detalle-autor {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--color-text-dim);
-}
-
-@media (max-width: 860px) {
+@container detalle (max-width: 980px) {
   .detalle-columnas {
     grid-template-columns: minmax(0, 1fr);
   }
-}
 
-/* ---------- cambio de estado ---------- */
-
-.detalle-acciones-estado {
-  margin-top: 16px;
-}
-
-.detalle-acciones-estado .boton {
-  width: 100%;
+  /* apilado, el panel va despues del caso con un alto fijo y su propio scroll */
+  .detalle-lateral {
+    position: static;
+    height: min(70vh, 640px);
+  }
 }
 
 .estado-actual {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  font-size: 14px;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
+  font-size: var(--texto-base);
 }
 
 .estado-opciones {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 0 0 16px;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
   padding: 0;
   border: none;
 }
 
 .estado-opciones legend {
-  margin-bottom: 8px;
-  font-size: 13px;
+  margin-bottom: var(--espacio-2);
+  font-size: var(--texto-sm);
   font-weight: 600;
 }
 
 .estado-opcion {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--texto-base);
   cursor: pointer;
 }
 
@@ -187,26 +215,26 @@
 
 .estado-opcion small {
   display: block;
-  font-size: 12px;
+  font-size: var(--texto-xs);
 }
 
 .estado-regla {
-  margin-bottom: 16px;
-  padding: 12px;
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-3);
   border-radius: 8px;
   background: var(--alerta-suave);
   color: var(--alerta-texto);
-  font-size: 13px;
+  font-size: var(--texto-sm);
 }
 
 .estado-regla p {
-  margin: 0 0 8px;
+  margin: 0 0 var(--espacio-2);
 }
 
 .estado-check {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--espacio-2);
   font-weight: 600;
   cursor: pointer;
 }
@@ -214,4 +242,74 @@
 /* imprimir va pegado a la derecha, junto a la accion principal de la tarjeta */
 .detalle-imprimir {
   margin-left: auto;
+}
+
+/* ---------- aviso del proximo paso con la barra del ciclo ---------- */
+
+.detalle-paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-bottom: var(--espacio-5);
+}
+
+.detalle-paso-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.detalle-paso-fila p {
+  margin: 2px 0 0;
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.detalle-paso-titulo {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-4);
+}
+
+.detalle-paso-urgente {
+  background: var(--rol-aviso-fondo);
+  border-color: var(--rol-aviso-borde);
+  border-left: 4px solid var(--rol-acento);
+}
+
+.detalle-paso-urgente .detalle-paso-titulo {
+  color: var(--rol-aviso-texto);
+}
+
+.detalle-paso-acciones {
+  display: flex;
+  gap: var(--espacio-2);
+  flex-wrap: wrap;
+}
+
+/* cotizacion plegada cuando ya hay factura */
+.detalle-plegable summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--rol-principal);
+}
+
+.detalle-plegable[open] summary {
+  margin-bottom: var(--espacio-4);
+}
+
+@media (max-width: 720px) {
+  .detalle-paso-acciones,
+  .detalle-paso-acciones .boton {
+    width: 100%;
+  }
+
+  .detalle-paso-acciones .boton {
+    flex: 1;
+  }
 }

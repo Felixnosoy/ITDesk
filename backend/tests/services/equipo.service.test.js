@@ -95,7 +95,96 @@ describe("equipo.service.crearEquipo", () => {
 
         const equipo = await equipoService.crearEquipo(datos);
 
-        expect(pool.query.mock.calls[2][1]).toEqual([5, "Laptop", "Dell", "Latitude", "SERIE-1", null]);
+        // sin ficha: especificaciones en null, sin garantia
+        expect(pool.query.mock.calls[2][1]).toEqual([
+            5, "Laptop", "Dell", "Latitude", "SERIE-1", null,
+            null, null, null, null, null, 0, null, null
+        ]);
         expect(equipo).toEqual({ id_equipo: 9 });
+    });
+
+    test("guarda especificaciones, garantia y codigo de activo", async () => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_usuario: 5, estado: "Activo" }]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([{ insertId: 9 }])
+            .mockResolvedValueOnce([[{ id_equipo: 9 }]]);
+
+        await equipoService.crearEquipo({
+            ...datos,
+            sistema_operativo: " Windows 11 ",
+            procesador: "Intel i5",
+            memoria_ram: "16 GB",
+            almacenamiento: "512 GB SSD",
+            color: "Negro",
+            en_garantia: true,
+            garantia_vence: "2027-03-31",
+            codigo_activo: "ACT-0042"
+        });
+
+        expect(pool.query.mock.calls[2][1].slice(6)).toEqual([
+            "Windows 11", "Intel i5", "16 GB", "512 GB SSD", "Negro", 1, "2027-03-31", "ACT-0042"
+        ]);
+    });
+
+    test("sin garantia descarta la fecha de vencimiento", async () => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_usuario: 5, estado: "Activo" }]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([{ insertId: 9 }])
+            .mockResolvedValueOnce([[{ id_equipo: 9 }]]);
+
+        await equipoService.crearEquipo({ ...datos, en_garantia: false, garantia_vence: "2027-03-31" });
+
+        expect(pool.query.mock.calls[2][1].slice(11, 13)).toEqual([0, null]);
+    });
+
+    test.each([
+        ["garantia_vence", "31/03/2027"],
+        ["garantia_vence", "2027-02-30"],
+        ["en_garantia", "quizas"],
+        ["procesador", "x".repeat(81)]
+    ])("rechaza con 400 un %s invalido (%p) sin consultar la base", async (campo, valor) => {
+        await expect(equipoService.crearEquipo({ ...datos, en_garantia: true, [campo]: valor }))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining(campo) });
+
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+});
+
+describe("equipo.service.obtenerEquipoPorId", () => {
+    const tecnico = { id_usuario: 3, rol: "Tecnico" };
+
+    test("rechaza con 400 un id invalido sin consultar la base", async () => {
+        await expect(equipoService.obtenerEquipoPorId("x", tecnico)).rejects.toMatchObject({ status: 400 });
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    test("responde 404 si no existe", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+        await expect(equipoService.obtenerEquipoPorId("9", tecnico)).rejects.toMatchObject({ status: 404 });
+    });
+
+    test("el personal ve cualquier equipo, con el nombre del cliente", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 5, cliente: "Maria Gomez" }]]);
+
+        const equipo = await equipoService.obtenerEquipoPorId("9", tecnico);
+
+        expect(pool.query.mock.calls[0][1]).toEqual([9]);
+        expect(equipo.cliente).toBe("Maria Gomez");
+    });
+
+    test("al Cliente un equipo ajeno le responde 404, como si no existiera", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 5 }]]);
+
+        await expect(equipoService.obtenerEquipoPorId("9", { id_usuario: 7, rol: "Cliente" }))
+            .rejects.toMatchObject({ status: 404 });
+    });
+
+    test("el Cliente ve su propio equipo", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 7 }]]);
+
+        await expect(equipoService.obtenerEquipoPorId("9", { id_usuario: 7, rol: "Cliente" }))
+            .resolves.toMatchObject({ id_equipo: 9 });
     });
 });

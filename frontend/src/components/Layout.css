@@ -1,6 +1,12 @@
 .layout {
   --lateral-ancho: 248px;
+  --lateral-plegado: 68px;
+  --barra-alto: 56px;
   min-height: 100vh;
+}
+
+.layout-plegado {
+  --lateral-ancho: var(--lateral-plegado);
 }
 
 /* ---------- menu lateral ---------- */
@@ -8,37 +14,51 @@
 .layout-lateral {
   position: fixed;
   inset: 0 auto 0 0;
-  z-index: 30;
+  z-index: var(--capa-menu);
   width: var(--lateral-ancho);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--superficie);
   border-right: 1px solid var(--borde);
+  transition: width var(--duracion-media) var(--curva);
 }
 
 .layout-lateral-marca {
-  padding: 20px 22px 18px;
+  display: flex;
+  align-items: center;
+  height: var(--barra-alto);
+  padding: 0 var(--espacio-5);
+  flex: none;
 }
 
 .layout-nav {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 0 var(--espacio-3);
+  padding: var(--espacio-2) var(--espacio-3) 0;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .layout-enlace {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: var(--espacio-3);
+  min-height: 40px;
+  padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-sm);
   color: var(--texto-2);
   font-size: var(--texto-base);
   font-weight: 500;
+  white-space: nowrap;
   text-decoration: none;
+}
+
+.layout-enlace svg,
+.layout-accion svg {
+  flex: none;
 }
 
 .layout-enlace:hover {
@@ -53,15 +73,16 @@
 }
 
 .layout-usuario {
-  padding: 14px 12px 16px;
+  flex: none;
+  padding: var(--espacio-3);
   border-top: 1px solid var(--borde);
 }
 
 .layout-usuario-datos {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 12px 12px;
+  gap: var(--espacio-3);
+  padding: 0 var(--espacio-1) var(--espacio-3);
 }
 
 .layout-avatar {
@@ -82,7 +103,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--texto-sm);
+  line-height: var(--interlineado-titulo);
 }
 
 .layout-usuario-texto strong {
@@ -92,21 +114,23 @@
 }
 
 .layout-usuario-texto span {
-  color: var(--color-text-dim);
+  color: var(--texto-3);
 }
 
 .layout-accion {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: var(--espacio-3);
+  min-height: 40px;
+  padding: var(--espacio-2) var(--espacio-3);
   border: none;
   border-radius: var(--radio-sm);
   background: transparent;
   color: var(--texto-3);
   font-size: var(--texto-base);
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -120,49 +144,138 @@
   color: var(--peligro);
 }
 
-/* ---------- contenido ---------- */
+/* ---------- plegado: solo los iconos ---------- */
+
+/* el texto sigue en el DOM para el lector de pantalla */
+.layout-plegado .layout-texto,
+.layout-plegado .layout-lateral-marca .logo-texto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.layout-plegado .layout-lateral-marca {
+  justify-content: center;
+  padding: 0;
+}
+
+.layout-plegado .layout-nav {
+  padding-inline: var(--espacio-2);
+}
+
+.layout-plegado .layout-enlace,
+.layout-plegado .layout-accion {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.layout-plegado .layout-usuario {
+  padding-inline: var(--espacio-2);
+}
+
+.layout-plegado .layout-usuario-datos {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* ---------- barra superior y contenido ---------- */
+
+.layout-principal {
+  margin-left: var(--lateral-ancho);
+  min-width: 0;
+  transition: margin-left var(--duracion-media) var(--curva);
+}
+
+.layout-barra {
+  position: sticky;
+  top: 0;
+  z-index: var(--capa-encabezado);
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  height: var(--barra-alto);
+  padding: 0 var(--espacio-5);
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.layout-alternar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--texto-3);
+  cursor: pointer;
+}
+
+.layout-alternar:hover {
+  background: var(--superficie-3);
+  color: var(--texto);
+}
+
+.layout-alternar-angosto,
+.layout-barra-logo {
+  display: none;
+}
 
 .layout-contenido {
-  margin-left: var(--lateral-ancho);
-  padding: 32px;
+  padding: var(--espacio-pagina);
   min-width: 0;
 }
 
-.layout-topbar,
 .layout-fondo {
   display: none;
 }
 
-/* ---------- pantallas angostas: el menu se abre desde la barra superior ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .layout-lateral,
+  .layout-principal {
+    transition: none;
+  }
+}
 
-@media (max-width: 820px) {
-  .layout-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
+/* ---------- pantallas angostas: el menu se abre encima del contenido ---------- */
+
+@media (max-width: 960px) {
+  /* angosto el menu siempre se ve completo cuando se abre */
+  .layout,
+  .layout-plegado {
+    --lateral-ancho: 248px;
   }
 
-  .layout-hamburguesa {
-    display: flex;
-    padding: 6px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
+  .layout-plegado .layout-texto,
+  .layout-plegado .layout-lateral-marca .logo-texto {
+    position: static;
+    width: auto;
+    height: auto;
+    clip: auto;
+  }
+
+  .layout-plegado .layout-lateral-marca {
+    justify-content: flex-start;
+    padding: 0 var(--espacio-5);
+  }
+
+  .layout-plegado .layout-enlace,
+  .layout-plegado .layout-accion,
+  .layout-plegado .layout-usuario-datos {
+    justify-content: flex-start;
+    padding-inline: var(--espacio-3);
   }
 
   .layout-lateral {
     transform: translateX(-100%);
     visibility: hidden;
-    transition: transform 0.2s ease, visibility 0.2s;
-    box-shadow: var(--shadow);
+    transition: transform var(--duracion-media) var(--curva), visibility var(--duracion-media);
+    box-shadow: var(--sombra-2);
   }
 
   .layout-lateral.abierto {
@@ -174,13 +287,36 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 25;
+    z-index: var(--capa-velo);
     background: var(--velo);
   }
 
-  .layout-contenido {
+  .layout-principal {
     margin-left: 0;
-    padding: 20px 16px;
+  }
+
+  .layout-barra {
+    padding: 0 var(--espacio-4);
+  }
+
+  .layout-alternar-escritorio {
+    display: none;
+  }
+
+  .layout-alternar-angosto,
+  .layout-barra-logo {
+    display: flex;
+  }
+
+  .layout-contenido {
+    padding: var(--espacio-5) var(--espacio-4);
+  }
+}
+
+/* en el celular la barra deja solo la etiqueta del logo: el ancho es del buscador */
+@media (max-width: 520px) {
+  .layout-barra-logo .logo-texto {
+    display: none;
   }
 }
 
@@ -193,14 +329,17 @@
     min-height: 0;
   }
 
-  .layout-topbar,
+  .layout-barra,
   .layout-fondo,
   .layout-lateral {
     display: none !important;
   }
 
-  .layout-contenido {
+  .layout-principal {
     margin-left: 0;
+  }
+
+  .layout-contenido {
     padding: 0;
   }
 }

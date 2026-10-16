@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TODOS_LOS_ROLES, ETIQUETA_ROL } from "../constants/roles";
 import {
@@ -9,7 +10,11 @@ import {
     resetearContrasena,
 } from "../api/usuarios";
 import Modal from "../components/Modal";
+import MenuAcciones from "../components/MenuAcciones";
 import FormularioUsuario from "../components/FormularioUsuario";
+import AvisoFlotante from "../components/AvisoFlotante";
+import { EsqueletoTabla } from "../components/Esqueleto";
+import EstadoVacio from "../components/EstadoVacio";
 import "./Usuarios.css";
 
 // mismo minimo que exige el backend (usuario.service.js)
@@ -32,7 +37,16 @@ export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [errorCarga, setErrorCarga] = useState("");
-    const [busqueda, setBusqueda] = useState("");
+    // ?q= llega desde el buscador global (un correo del personal)
+    const [parametros] = useSearchParams();
+    const navegar = useNavigate();
+    const qInicial = parametros.get("q") ?? "";
+    const [busqueda, setBusqueda] = useState(qInicial);
+    const [qAplicada, setQAplicada] = useState(qInicial);
+    if (qInicial !== qAplicada) {
+        setQAplicada(qInicial);
+        setBusqueda(qInicial);
+    }
     const [filtroRol, setFiltroRol] = useState("");
     const [aviso, setAviso] = useState("");
 
@@ -164,11 +178,7 @@ export default function Usuarios() {
                 </button>
             </div>
 
-            {aviso && (
-                <div className="aviso aviso-ok" role="status">
-                    {aviso}
-                </div>
-            )}
+            <AvisoFlotante mensaje={aviso} onCerrar={() => setAviso("")} />
 
             <div className="usuarios-filtros">
                 <div className="campo">
@@ -194,7 +204,11 @@ export default function Usuarios() {
                 </div>
             </div>
 
-            {cargando && <p>Cargando usuarios...</p>}
+            {cargando && (
+                <div className="tarjeta usuarios-tarjeta">
+                    <EsqueletoTabla columnas={4} filas={5} etiqueta="Cargando los usuarios" />
+                </div>
+            )}
 
             {errorCarga && (
                 <div className="aviso aviso-error" role="alert">
@@ -212,34 +226,60 @@ export default function Usuarios() {
                         <table className="usuarios-tabla">
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
+                                    <th>Usuario</th>
                                     <th>Rol</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th>
+                                        <span className="sr-only">Acciones</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {visibles.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="usuarios-vacio">
-                                            No hay usuarios que coincidan con la búsqueda.
+                                        <td colSpan={4} className="usuarios-vacio">
+                                            <EstadoVacio
+                                                icono="buscar"
+                                                titulo="Ningún usuario coincide"
+                                                texto="Revisa el nombre o el correo, o mira todos los roles."
+                                                accion={{
+                                                    etiqueta: "Quitar la búsqueda",
+                                                    onClick: () => {
+                                                        setBusqueda("");
+                                                        setFiltroRol("");
+                                                    },
+                                                }}
+                                            />
                                         </td>
                                     </tr>
                                 )}
                                 {visibles.map((u) => (
                                     <tr key={u.id_usuario}>
-                                        <td>
-                                            {u.nombre} {u.apellido}
+                                        <td className="usuarios-persona">
+                                            <div className="usuarios-persona-fila">
+                                                <span className="usuarios-avatar" aria-hidden="true">
+                                                    {`${u.nombre?.[0] ?? ""}${u.apellido?.[0] ?? ""}`.toUpperCase()}
+                                                </span>
+                                                <span className="usuarios-persona-texto">
+                                                    <strong>
+                                                        {u.nombre} {u.apellido}
+                                                    </strong>
+                                                    <span>{u.correo}</span>
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td>{u.correo}</td>
-                                        <td>{ETIQUETA_ROL[u.rol] ?? u.rol}</td>
+                                        <td>
+                                            <span className={`usuarios-rol usuarios-rol-${u.rol.toLowerCase()}`}>
+                                                {ETIQUETA_ROL[u.rol] ?? u.rol}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`insignia insignia-${u.estado === "Activo" ? "activo" : "inactivo"}`}>
                                                 {u.estado}
                                             </span>
                                         </td>
                                         <td>
+                                            {/* editar es lo frecuente; lo demas va en el menu de la fila */}
                                             <div className="usuarios-acciones">
                                                 <button
                                                     type="button"
@@ -249,24 +289,25 @@ export default function Usuarios() {
                                                 >
                                                     Editar
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="boton boton-chico boton-secundario"
-                                                    aria-label={`${u.estado === "Activo" ? "Desactivar" : "Activar"} a ${u.nombre} ${u.apellido}`}
-                                                    disabled={esPropia(u)}
-                                                    title={esPropia(u) ? "No puedes desactivar tu propia cuenta" : undefined}
-                                                    onClick={() => abrir({ tipo: "estado", usuario: u })}
-                                                >
-                                                    {u.estado === "Activo" ? "Desactivar" : "Activar"}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="boton boton-chico boton-secundario"
-                                                    aria-label={`Restablecer la contraseña de ${u.nombre} ${u.apellido}`}
-                                                    onClick={() => abrir({ tipo: "clave", usuario: u })}
-                                                >
-                                                    Restablecer contraseña
-                                                </button>
+                                                <MenuAcciones
+                                                    etiqueta={`Más acciones para ${u.nombre} ${u.apellido}`}
+                                                    opciones={[
+                                                        ...(u.rol === "Cliente"
+                                                            ? [{ etiqueta: "Ver ficha del cliente", onClick: () => navegar(`/clientes/${u.id_usuario}`) }]
+                                                            : []),
+                                                        {
+                                                            etiqueta: "Restablecer contraseña",
+                                                            onClick: () => abrir({ tipo: "clave", usuario: u }),
+                                                        },
+                                                        {
+                                                            etiqueta: u.estado === "Activo" ? "Desactivar cuenta" : "Activar cuenta",
+                                                            peligro: u.estado === "Activo",
+                                                            deshabilitada: esPropia(u),
+                                                            motivo: "No puedes desactivar tu propia cuenta",
+                                                            onClick: () => abrir({ tipo: "estado", usuario: u }),
+                                                        },
+                                                    ]}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

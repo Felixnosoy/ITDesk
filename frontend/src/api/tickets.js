@@ -1,10 +1,11 @@
 import { apiFetch } from "./client";
 
-// filtros del servidor: estado, prioridad y categoria (vacios no se mandan)
+// filtros del servidor: estado, prioridad, categoria y, para las fichas,
+// id_cliente e id_equipo (vacios no se mandan)
 export async function listarTickets(token, filtros = {}) {
     const parametros = new URLSearchParams();
 
-    for (const campo of ["estado", "prioridad", "categoria"]) {
+    for (const campo of ["estado", "prioridad", "categoria", "id_cliente", "id_equipo"]) {
         if (filtros[campo]) parametros.set(campo, filtros[campo]);
     }
 
@@ -64,6 +65,13 @@ export async function buscarClientes(token, busqueda) {
 
 export async function listarEquipos(token, idCliente) {
     const respuesta = await apiFetch(`/equipos?id_cliente=${idCliente}`, { token });
+
+    return respuesta.data;
+}
+
+// un equipo con el nombre de su dueno (el cliente solo puede pedir los suyos)
+export async function obtenerEquipo(token, id) {
+    const respuesta = await apiFetch(`/equipos/${id}`, { token });
 
     return respuesta.data;
 }

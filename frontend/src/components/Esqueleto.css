@@ -1,0 +1,101 @@
+.esqueleto-linea {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radio-sm);
+  /* el borde fuerte, no la superficie: sobre la tarjeta blanca tiene que verse */
+  background: var(--borde-fuerte);
+  opacity: 0.7;
+  animation: esqueleto-pulso 1.4s var(--curva) infinite;
+}
+
+@keyframes esqueleto-pulso {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* sin animacion para quien pidio reducir movimiento: queda la silueta fija */
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto-linea {
+    animation: none;
+  }
+}
+
+.esqueleto-anuncio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.esqueleto-tabla {
+  display: flex;
+  flex-direction: column;
+}
+
+.esqueleto-fila {
+  display: grid;
+  gap: var(--espacio-4);
+  align-items: center;
+  padding: var(--espacio-4) var(--espacio-tarjeta);
+  border-bottom: 1px solid var(--borde);
+}
+
+.esqueleto-fila:last-child {
+  border-bottom: none;
+}
+
+.esqueleto-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--espacio-grupo);
+  margin-bottom: var(--espacio-seccion);
+}
+
+.esqueleto-tarjeta,
+.esqueleto-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.esqueleto-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.esqueleto-detalle > .tarjeta {
+  margin-top: var(--espacio-3);
+}
+
+.esqueleto-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--espacio-5);
+  align-items: start;
+}
+
+.esqueleto-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+@media (max-width: 860px) {
+  .esqueleto-columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .esqueleto-fila {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+
+  .esqueleto-fila > :nth-child(n + 3) {
+    display: none;
+  }
+}

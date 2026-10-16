@@ -1,18 +1,18 @@
 .seguimiento-tipos {
   display: flex;
-  gap: 8px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  margin-bottom: var(--espacio-4);
 }
 
 .seguimiento-tipo {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--color-border);
   border-radius: 99px;
-  font-size: 13px;
+  font-size: var(--texto-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -29,9 +29,9 @@
 
 .seguimiento-imagenes {
   display: flex;
-  gap: 10px;
+  gap: var(--espacio-3);
   flex-wrap: wrap;
-  margin: 0 0 14px;
+  margin: 0 0 var(--espacio-4);
   padding: 0;
   list-style: none;
 }
@@ -59,7 +59,7 @@
   border-radius: 50%;
   background: var(--color-text);
   color: var(--rol-sobre-principal);
-  font-size: 16px;
+  font-size: var(--texto-base);
   line-height: 1;
   cursor: pointer;
 }
@@ -67,14 +67,41 @@
 .seguimiento-acciones {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--espacio-3);
 }
 
 .seguimiento-contador {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   color: var(--color-text-dim);
 }
 
 .seguimiento-acciones .boton[type="submit"] {
   margin-left: auto;
+}
+
+/* respuestas rapidas del panel de actividad: una fila que se desliza */
+.seguimiento-rapidas {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-2);
+  padding-bottom: 2px;
+  overflow-x: auto;
+}
+
+.seguimiento-rapida {
+  flex: none;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pildora);
+  background: var(--superficie-2);
+  color: var(--texto-2);
+  font: inherit;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seguimiento-rapida:hover {
+  border-color: var(--rol-principal);
+  color: var(--rol-principal);
 }

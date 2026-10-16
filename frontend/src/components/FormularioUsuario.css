@@ -1,7 +1,7 @@
 .formulario-grilla {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 16px;
+  column-gap: var(--espacio-4);
 }
 
 .formulario-ancho {
@@ -12,7 +12,7 @@
   min-width: 0;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 520px) {
   .formulario-grilla {
     grid-template-columns: 1fr;
   }

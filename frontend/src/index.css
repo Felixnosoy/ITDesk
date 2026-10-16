@@ -29,6 +29,7 @@ body {
   color: var(--color-text);
   font-family: var(--fuente-texto);
   font-size: var(--texto-base);
+  line-height: var(--interlineado-cuerpo);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -40,6 +41,7 @@ h3,
   font-family: var(--fuente-titulo);
   font-stretch: var(--fuente-titulo-ancho);
   letter-spacing: -0.01em;
+  line-height: var(--interlineado-titulo);
 }
 
 /* codigos del sistema (TK-0004, FAC-0001) como etiquetas de inventario */
@@ -61,12 +63,22 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* texto solo para el lector de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ---------- componentes base (issue HU27.4) ----------
    Botones, campos, tarjetas, avisos e insignias que comparten todas las
    pantallas. Solo usan tokens: el color principal es el del rol. */
 
 .pagina {
-  max-width: 1040px;
+  max-width: var(--ancho-trabajo);
   margin: 0 auto;
 }
 
@@ -110,7 +122,7 @@ textarea:focus-visible {
 }
 
 .campo label {
-  margin-bottom: 6px;
+  margin-bottom: var(--espacio-2);
   font-size: var(--texto-sm);
   font-weight: 600;
   color: var(--texto-2);
@@ -120,14 +132,14 @@ textarea:focus-visible {
 .campo select,
 .campo textarea {
   min-height: 40px;
-  padding: 9px 12px;
+  padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--borde-fuerte);
   border-radius: var(--radio-sm);
   background: var(--superficie);
   color: var(--texto);
   font: inherit;
   font-size: var(--texto-base);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color var(--duracion-rapida), box-shadow var(--duracion-rapida);
 }
 
 .campo input::placeholder,
@@ -175,7 +187,7 @@ textarea:focus-visible {
   justify-content: center;
   gap: var(--espacio-2);
   min-height: 40px;
-  padding: 9px 16px;
+  padding: var(--espacio-2) var(--espacio-4);
   border: 1px solid transparent;
   border-radius: var(--radio-sm);
   background: var(--rol-principal);
@@ -184,7 +196,7 @@ textarea:focus-visible {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  transition: background-color var(--duracion-rapida), border-color var(--duracion-rapida), color var(--duracion-rapida);
 }
 
 .boton:hover:not(:disabled) {
@@ -218,14 +230,14 @@ textarea:focus-visible {
 
 .boton-chico {
   min-height: 32px;
-  padding: 5px 11px;
+  padding: var(--espacio-1) var(--espacio-3);
   font-size: var(--texto-sm);
 }
 
 /* ---------- avisos ---------- */
 
 .aviso {
-  padding: 10px 14px;
+  padding: var(--espacio-3) var(--espacio-4);
   margin-bottom: var(--espacio-4);
   border: 1px solid transparent;
   border-radius: var(--radio);
@@ -247,10 +259,11 @@ textarea:focus-visible {
 /* insignia; los tonos estan en components/Insignia.css */
 .insignia {
   display: inline-block;
-  padding: 1px 8px;
+  padding: 1px var(--espacio-2);
   border: 1px solid transparent;
   border-radius: var(--radio-sm);
-  font-size: var(--texto-sm);
+  /* etiqueta, no texto de lectura: el tamano minimo de la escala */
+  font-size: var(--texto-xs);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -258,7 +271,7 @@ textarea:focus-visible {
 /* codigo de un ticket o documento como etiqueta (TK-0004) */
 .etiqueta-codigo {
   display: inline-block;
-  padding: 1px 6px;
+  padding: 1px var(--espacio-2);
   border: 1px solid var(--borde-fuerte);
   border-radius: 4px;
   background: var(--superficie);

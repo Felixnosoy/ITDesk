@@ -1,0 +1,67 @@
+.progreso {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progreso-paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+.progreso-barra {
+  height: 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--superficie-3);
+}
+
+.progreso-hecho .progreso-barra {
+  background: var(--rol-principal);
+  opacity: 0.45;
+}
+
+.progreso-actual .progreso-barra {
+  background: var(--rol-principal);
+}
+
+.progreso-etiqueta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--texto-sm);
+  /* texto-4 no llega a 4.5:1 sobre el fondo del aviso del rol */
+  color: var(--texto-3);
+}
+
+.progreso-hecho .progreso-etiqueta {
+  color: var(--texto-3);
+}
+
+.progreso-actual .progreso-etiqueta {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.progreso-compacta {
+  gap: 3px;
+}
+
+.progreso-compacta .progreso-barra {
+  height: 4px;
+}
+
+@media (max-width: 520px) {
+  /* en el celular solo se nombra la etapa actual */
+  .progreso-paso:not(.progreso-actual) .progreso-etiqueta {
+    visibility: hidden;
+  }
+
+  .progreso-actual .progreso-etiqueta {
+    overflow: visible;
+  }
+}

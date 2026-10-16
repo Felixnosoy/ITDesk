@@ -11,7 +11,7 @@ export default function TablaLineas({ lineas }) {
                     <tr>
                         <th>Descripción</th>
                         <th className="cotizacion-cantidad">Cant.</th>
-                        <th className="cotizacion-monto">Precio unitario</th>
+                        <th className="cotizacion-monto cotizacion-unitario">Precio unitario</th>
                         <th className="cotizacion-monto">Importe</th>
                     </tr>
                 </thead>
@@ -20,7 +20,7 @@ export default function TablaLineas({ lineas }) {
                         <tr key={linea.id_linea}>
                             <td>{linea.descripcion}</td>
                             <td className="cotizacion-cantidad">{linea.cantidad}</td>
-                            <td className="cotizacion-monto">{formatearMonto(linea.precio_unitario)}</td>
+                            <td className="cotizacion-monto cotizacion-unitario">{formatearMonto(linea.precio_unitario)}</td>
                             <td className="cotizacion-monto">{formatearMonto(linea.importe)}</td>
                         </tr>
                     ))}

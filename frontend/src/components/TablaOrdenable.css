@@ -8,12 +8,13 @@
 .tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--texto-base);
+  /* las tablas son densas: van en el tamano de apoyo */
+  font-size: var(--texto-sm);
 }
 
 .tabla th,
 .tabla td {
-  padding: 11px 16px;
+  padding: var(--espacio-3) var(--espacio-4);
   text-align: left;
   border-bottom: 1px solid var(--borde);
   vertical-align: middle;
@@ -30,7 +31,7 @@
 }
 
 .tabla tbody tr {
-  transition: background-color 0.12s;
+  transition: background-color var(--duracion-rapida);
 }
 
 .tabla tbody tr:hover {
@@ -45,7 +46,7 @@
 .tabla-orden {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--espacio-2);
   padding: 0;
   border: none;
   background: none;
@@ -62,7 +63,7 @@
 }
 
 .tabla-flecha {
-  font-size: 10px;
+  font-size: var(--texto-xs);
   opacity: 0.5;
 }
 
@@ -71,9 +72,79 @@
   color: var(--rol-principal);
 }
 
+.tabla-fila-abrible {
+  cursor: pointer;
+}
+
+.tabla tbody tr:has(.tabla-vacia):hover {
+  background: none;
+}
+
 .tabla-vacia {
   text-align: center !important;
   color: var(--texto-3);
+}
+
+/* ---------- filas como tarjetas en pantallas angostas ---------- */
+
+@media screen and (max-width: 720px) {
+  .tabla-tarjetas thead {
+    display: none;
+  }
+
+  .tabla-tarjetas,
+  .tabla-tarjetas tbody,
+  .tabla-tarjetas tr,
+  .tabla-tarjetas td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla-tarjetas tr {
+    padding: var(--espacio-3) var(--espacio-4);
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .tabla-tarjetas tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-tarjetas td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--espacio-3);
+    padding: 3px 0 !important;
+    border: none;
+    text-align: right;
+  }
+
+  .tabla-tarjetas td::before {
+    content: attr(data-titulo);
+    flex: none;
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--texto-4);
+  }
+
+  .tabla-tarjetas td.tabla-vacia::before,
+  .tabla-tarjetas td.celda-principal::before {
+    content: none;
+  }
+
+  /* la celda principal va arriba y sin titulo, como encabezado de la tarjeta */
+  .tabla-tarjetas td.celda-principal {
+    display: block;
+    text-align: left;
+    font-size: var(--texto-md);
+  }
+
+  /* lo secundario se lee en el detalle */
+  .tabla-tarjetas td.solo-escritorio {
+    display: none;
+  }
 }
 
 /* al imprimir la tabla no se puede ordenar: sin flechas y sin recorte horizontal */

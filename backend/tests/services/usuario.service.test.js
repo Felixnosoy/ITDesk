@@ -54,6 +54,49 @@ describe("usuario.service.crearUsuario", () => {
         expect(argsInsert).toContain("hash-de-la-clave");
         expect(argsInsert).not.toContain("clave12345");
     });
+    const insertCon = async (extra) => {
+        pool.query
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([{ insertId: 42 }])
+            .mockResolvedValueOnce([[{ id_usuario: 42 }]]);
+        bcrypt.hash.mockResolvedValueOnce("hash");
+
+        await usuarioService.crearUsuario({ ...datos, ...extra });
+
+        // tipo_cliente, empresa, rnc, contacto alterno: posiciones 10 a 14 del INSERT
+        return pool.query.mock.calls[2][1].slice(10, 15);
+    };
+
+    test("un cliente sin datos extra queda como Persona", async () => {
+        expect(await insertCon({})).toEqual(["Persona", null, null, null, null]);
+    });
+
+    test("un cliente empresa guarda empresa, RNC y contacto alterno", async () => {
+        expect(await insertCon({
+            tipo_cliente: "Empresa",
+            empresa: " Distribuidora Caribe ",
+            rnc: "1-01-12345-6",
+            contacto_alterno_nombre: "Rosa Diaz",
+            contacto_alterno_telefono: "809-555-1234"
+        })).toEqual(["Empresa", "Distribuidora Caribe", "1-01-12345-6", "Rosa Diaz", "809-555-1234"]);
+    });
+
+    test("una persona no guarda empresa ni RNC aunque lleguen", async () => {
+        expect(await insertCon({ empresa: "X", rnc: "1" })).toEqual(["Persona", null, null, null, null]);
+    });
+
+    test("el personal no guarda datos de cliente", async () => {
+        expect(await insertCon({ rol: "Tecnico", tipo_cliente: "Empresa", empresa: "X" }))
+            .toEqual([null, null, null, null, null]);
+    });
+
+    test("rechaza con 400 un tipo de cliente fuera del catalogo sin consultar la base", async () => {
+        await expect(usuarioService.crearUsuario({ ...datos, tipo_cliente: "Gobierno" }))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("tipo_cliente") });
+
+        expect(pool.query).not.toHaveBeenCalled();
+    });
 });
 
 describe("usuario.service.cambiarContrasena (self-service)", () => {
@@ -182,5 +225,56 @@ describe("usuario.service.actualizarPerfilPropio", () => {
         await usuarioService.actualizarPerfilPropio(5, { telefono: "", direccion: "" });
 
         expect(pool.query.mock.calls[1][1]).toEqual([null, null, 5]);
+    });
+});
+
+describe("usuario.service.actualizarUsuario (datos de cliente)", () => {
+    const datos = {
+        nombre: "Maria",
+        apellido: "Gomez",
+        correo: "maria@correo.test",
+        rol: "Cliente",
+        tipo_documento: "Cedula",
+        num_documento: "000-0000005-5",
+        telefono: null,
+        direccion: null,
+        especialidad: null
+    };
+
+    // existe, correo libre, documento libre, UPDATE, SELECT final
+    const actualizarCon = async (extra) => {
+        pool.query
+            .mockResolvedValueOnce([[{ id_usuario: 5 }]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([{ affectedRows: 1 }])
+            .mockResolvedValueOnce([[{ id_usuario: 5 }]]);
+
+        await usuarioService.actualizarUsuario(5, { ...datos, ...extra });
+
+        const update = pool.query.mock.calls.find(([sql]) => sql.includes("UPDATE usuario"));
+        // tipo_cliente, empresa, rnc y contacto alterno van antes del id
+        return update[1].slice(9, 14);
+    };
+
+    test("un cliente pasa a empresa con su RNC y contacto alterno", async () => {
+        expect(await actualizarCon({
+            tipo_cliente: "Empresa",
+            empresa: "Distribuidora Caribe",
+            rnc: "1-01-12345-6",
+            contacto_alterno_nombre: "Rosa Diaz",
+            contacto_alterno_telefono: "809-555-1234"
+        })).toEqual(["Empresa", "Distribuidora Caribe", "1-01-12345-6", "Rosa Diaz", "809-555-1234"]);
+    });
+
+    test("si deja de ser cliente, sus datos de cliente quedan vacios", async () => {
+        expect(await actualizarCon({ rol: "Tecnico", empresa: "X" })).toEqual([null, null, null, null, null]);
+    });
+
+    test("rechaza con 400 un tipo de cliente invalido sin consultar la base", async () => {
+        await expect(usuarioService.actualizarUsuario(5, { ...datos, tipo_cliente: "Gobierno" }))
+            .rejects.toMatchObject({ status: 400 });
+
+        expect(pool.query).not.toHaveBeenCalled();
     });
 });

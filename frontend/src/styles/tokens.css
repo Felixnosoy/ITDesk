@@ -16,16 +16,24 @@
   --fuente-texto: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
   --fuente-codigo: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
-  --texto-xs: 11px;
-  --texto-sm: 12px;
-  --texto-base: 14px;
-  --texto-md: 15px;
-  --texto-lg: 17px;
-  --texto-xl: 20px;
-  --texto-2xl: 26px;
-  --texto-3xl: 32px;
+  /* Escala tipografica: 16px es el cuerpo (parrafos, campos, botones);
+     14px el texto de apoyo y las tablas, que son densas; 12px es el minimo
+     y solo para etiquetas en mayusculas y metadatos. */
+  --texto-xs: 12px;
+  --texto-sm: 14px;
+  --texto-base: 16px;
+  --texto-md: 17px;
+  --texto-lg: 19px;
+  --texto-xl: 22px;
+  --texto-2xl: 28px;
+  --texto-3xl: 34px;
 
-  /* ---------- espacios, radios y sombras ---------- */
+  --interlineado-cuerpo: 1.5;
+  --interlineado-titulo: 1.2;
+
+  /* ---------- espacios ----------
+     Escala de 4px. La proximidad dice que va junto: dentro de un grupo se
+     usa menos espacio que entre grupos, y entre secciones mas todavia. */
   --espacio-1: 4px;
   --espacio-2: 8px;
   --espacio-3: 12px;
@@ -34,7 +42,46 @@
   --espacio-6: 24px;
   --espacio-7: 32px;
   --espacio-8: 40px;
+  --espacio-9: 48px;
+  --espacio-10: 64px;
 
+  /* nombres por funcion: si cambia el ritmo de la interfaz, cambia aca */
+  --espacio-interno: var(--espacio-3);   /* dentro de un control o fila */
+  --espacio-grupo: var(--espacio-4);     /* entre campos y elementos de un grupo */
+  --espacio-tarjeta: var(--espacio-5);   /* relleno de una tarjeta */
+  --espacio-seccion: var(--espacio-6);   /* entre tarjetas y secciones */
+  --espacio-pagina: var(--espacio-7);    /* margen del contenido */
+
+  /* ---------- anchos maximos del contenido ----------
+     trabajo: listados, detalle e inicio, que aprovechan la pantalla cuando
+     el menu esta plegado; formulario: un registro paso a paso; lectura:
+     formularios cortos y texto, donde una linea larga cansa. */
+  --ancho-trabajo: 1440px;
+  --ancho-formulario: 820px;
+  --ancho-lectura: 640px;
+
+  /* ---------- capas (z-index) ---------- */
+  --capa-encabezado: 20;
+  --capa-velo: 25;
+  --capa-menu: 30;
+  --capa-desplegable: 40;
+  --capa-modal: 50;
+  --capa-visor: 55;
+  --capa-aviso: 60;
+
+  /* ---------- movimiento ---------- */
+  --duracion-rapida: 0.15s;
+  --duracion-media: 0.2s;
+  --curva: ease;
+
+  /* Breakpoints (las media queries no aceptan variables, por eso van como
+     referencia y se repiten literales en los componentes):
+     520px celular chico, 720px celular (tablas como tarjetas), 860px
+     tablet (el detalle pasa a una columna), 960px escritorio angosto (el
+     menu lateral se oculta), 1100px y 1440px columnas opcionales de las
+     tablas. */
+
+  /* ---------- radios y sombras ---------- */
   --radio-sm: 6px;
   --radio: 10px;
   --radio-lg: 14px;
@@ -97,10 +144,25 @@
   --estado-cerrado-texto: #57534e;
   --estado-cerrado-suave: #f5f5f4;
 
+  /* insignia de cada rol (lista de usuarios): fija, no depende de quien mira */
+  --insignia-cliente-fondo: #ecebfb;
+  --insignia-cliente-texto: #3730a3;
+  --insignia-tecnico-fondo: #e7f2f0;
+  --insignia-tecnico-texto: #0f5e5a;
+  --insignia-recepcionista-fondo: #eff4ff;
+  --insignia-recepcionista-texto: #1d4ed8;
+  --insignia-administrador-fondo: #eaf0f8;
+  --insignia-administrador-texto: #1e3a6e;
+
   /* panel de marca del inicio de sesion: oscuro en los dos temas */
   --marca-fondo: #1c1917;
   --marca-texto: #f2efea;
   --marca-texto-2: #b3ada5;
+
+  /* el logo es el mismo en toda la aplicacion, sin importar el rol: la
+     etiqueta en el marron del inicio de sesion con las letras claras */
+  --logo-fondo: var(--marca-fondo);
+  --logo-letras: var(--marca-texto);
 
   /* ---------- color del rol ----------
      Sin sesion (inicio de sesion, pagina de no autorizado) se usa la tinta
@@ -109,7 +171,6 @@
   --rol-principal-hover: #292524;
   --rol-sobre-principal: #ffffff;
   --rol-suave: #f5f3ef;
-  --rol-logo-texto: #fdba74;
   --rol-acento: #a8a29e;
   --rol-aviso-fondo: #fbfaf8;
   --rol-aviso-borde: #e8e5df;
@@ -122,7 +183,6 @@
   --rol-principal: #3730a3;
   --rol-principal-hover: #312e81;
   --rol-suave: #ecebfb;
-  --rol-logo-texto: #fdba9f;
   --rol-acento: #f26b4f;
   --rol-aviso-fondo: #fff4f1;
   --rol-aviso-borde: #f9c2b5;
@@ -136,7 +196,6 @@
   --rol-principal: #0f5e5a;
   --rol-principal-hover: #0b4a47;
   --rol-suave: #e7f2f0;
-  --rol-logo-texto: #fcd34d;
   --rol-acento: #f59e0b;
   --rol-aviso-fondo: #fffbeb;
   --rol-aviso-borde: #fde68a;
@@ -150,7 +209,6 @@
   --rol-principal: #1d4ed8;
   --rol-principal-hover: #1e40af;
   --rol-suave: #eff4ff;
-  --rol-logo-texto: #bfdbfe;
   --rol-acento: #60a5fa;
   --rol-aviso-fondo: #eff4ff;
   --rol-aviso-borde: #bfdbfe;
@@ -164,7 +222,6 @@
   --rol-principal: #1e3a6e;
   --rol-principal-hover: #172e58;
   --rol-suave: #eaf0f8;
-  --rol-logo-texto: #facc15;
   --rol-acento: #facc15;
   --rol-aviso-fondo: #fefce8;
   --rol-aviso-borde: #fde047;
@@ -227,11 +284,22 @@
     --estado-cerrado-texto: #b3ada5;
     --estado-cerrado-suave: rgba(120, 113, 108, 0.16);
 
+    --insignia-cliente-fondo: rgba(99, 102, 241, 0.18);
+    --insignia-cliente-texto: #a5b4fc;
+    --insignia-tecnico-fondo: rgba(20, 184, 166, 0.16);
+    --insignia-tecnico-texto: #5eead4;
+    --insignia-recepcionista-fondo: rgba(59, 130, 246, 0.18);
+    --insignia-recepcionista-texto: #93c5fd;
+    --insignia-administrador-fondo: rgba(96, 135, 200, 0.18);
+    --insignia-administrador-texto: #a9c1ea;
+
     --rol-principal: #f2efea;
     --rol-principal-hover: #ffffff;
     --rol-sobre-principal: #1c1917;
-    /* la etiqueta del logo es clara en oscuro: sus letras van oscuras */
-    --rol-logo-texto: var(--rol-sobre-principal);
+    /* en oscuro el marron se perderia contra el fondo: se invierte, igual
+       que en el panel del inicio de sesion */
+    --logo-fondo: var(--marca-texto);
+    --logo-letras: var(--marca-fondo);
     --rol-suave: rgba(242, 239, 234, 0.1);
     --rol-aviso-fondo: rgba(242, 239, 234, 0.06);
     --rol-aviso-borde: #4a4642;

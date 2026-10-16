@@ -1,0 +1,54 @@
+.menu-acciones {
+  position: relative;
+  display: inline-block;
+}
+
+.menu-acciones-boton {
+  min-width: 34px;
+  font-size: var(--texto-md);
+  line-height: 1;
+}
+
+.menu-acciones-lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: var(--capa-desplegable);
+  min-width: 210px;
+  margin: 0;
+  padding: var(--espacio-1);
+  list-style: none;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-2);
+}
+
+.menu-acciones-lista button {
+  width: 100%;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: none;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--texto);
+  font-size: var(--texto-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-acciones-lista button:hover:not(:disabled) {
+  background: var(--superficie-3);
+}
+
+.menu-acciones-lista button:disabled {
+  color: var(--texto-4);
+  cursor: default;
+}
+
+.menu-acciones-lista .menu-acciones-peligro {
+  color: var(--peligro);
+}
+
+.menu-acciones-lista .menu-acciones-peligro:hover:not(:disabled) {
+  background: var(--peligro-suave);
+}

@@ -1,18 +1,17 @@
 .usuarios-pagina {
-  max-width: 1100px;
 }
 
 .usuarios-cabecera {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--espacio-4);
   flex-wrap: wrap;
 }
 
 .usuarios-filtros {
   display: flex;
-  gap: 16px;
+  gap: var(--espacio-4);
   flex-wrap: wrap;
 }
 
@@ -27,32 +26,33 @@
 
 .usuarios-contador {
   margin: 0;
-  padding: 14px 20px;
-  font-size: 13px;
+  padding: var(--espacio-4) var(--espacio-5);
+  font-size: var(--texto-sm);
   color: var(--color-text-dim);
   border-bottom: 1px solid var(--color-border);
 }
 
+/* sin recorte: el menu de acciones de la ultima fila sale por debajo */
 .usuarios-tabla-envoltorio {
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .usuarios-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--texto-sm);
 }
 
 .usuarios-tabla th,
 .usuarios-tabla td {
-  padding: 12px 20px;
+  padding: var(--espacio-3) var(--espacio-5);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
 }
 
 .usuarios-tabla th {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -72,7 +72,7 @@
 
 .usuarios-acciones {
   display: flex;
-  gap: 6px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
 }
 
@@ -84,4 +84,115 @@
 .insignia-inactivo {
   background: var(--color-surface-2);
   color: var(--color-text-dim);
+}
+
+.usuarios-persona-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+.usuarios-avatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+}
+
+.usuarios-persona-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.usuarios-persona-texto span {
+  overflow-wrap: anywhere;
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+}
+
+/* el rol con el color de su identidad, sin importar quien mira */
+.usuarios-rol {
+  display: inline-block;
+  padding: 2px var(--espacio-2);
+  border-radius: var(--radio-pildora);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  background: var(--superficie-3);
+  color: var(--texto-2);
+}
+
+.usuarios-rol-cliente {
+  background: var(--insignia-cliente-fondo);
+  color: var(--insignia-cliente-texto);
+}
+
+.usuarios-rol-tecnico {
+  background: var(--insignia-tecnico-fondo);
+  color: var(--insignia-tecnico-texto);
+}
+
+.usuarios-rol-recepcionista {
+  background: var(--insignia-recepcionista-fondo);
+  color: var(--insignia-recepcionista-texto);
+}
+
+.usuarios-rol-administrador {
+  background: var(--insignia-administrador-fondo);
+  color: var(--insignia-administrador-texto);
+}
+
+.usuarios-acciones {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+/* ---------- celular: cada usuario es una tarjeta ---------- */
+
+@media screen and (max-width: 720px) {
+  .usuarios-filtros .campo {
+    max-width: none;
+  }
+
+  .usuarios-tabla thead {
+    display: none;
+  }
+
+  .usuarios-tabla,
+  .usuarios-tabla tbody,
+  .usuarios-tabla tr {
+    display: block;
+  }
+
+  .usuarios-tabla tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--espacio-2);
+    padding: var(--espacio-3) var(--espacio-4);
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .usuarios-tabla td {
+    padding: 0;
+    border: none;
+  }
+
+  .usuarios-tabla td.usuarios-persona {
+    grid-column: 1 / -1;
+  }
+
+  .usuarios-tabla td:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .usuarios-acciones {
+    justify-content: flex-start;
+  }
 }

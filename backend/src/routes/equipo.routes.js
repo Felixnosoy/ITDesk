@@ -19,6 +19,10 @@ router.get(
     equipoController.obtenerEquipos
 );
 
+// un equipo, para su ficha con historial. Todos los roles: el Cliente solo
+// ve los suyos (chequeo adentro del service)
+router.get("/:id", equipoController.obtenerEquipo);
+
 // registrar un equipo a nombre de un cliente (Recepcion, Admin de respaldo)
 router.post(
     "/",

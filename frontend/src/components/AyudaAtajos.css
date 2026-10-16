@@ -1,0 +1,81 @@
+.atajos-grupo + .atajos-grupo {
+  margin-top: var(--espacio-5);
+}
+
+.atajos-grupo h3 {
+  margin: 0 0 var(--espacio-2);
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+}
+
+.atajos-grupo dl {
+  margin: 0;
+}
+
+.atajos-fila {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  border-top: 1px solid var(--borde);
+}
+
+.atajos-fila dt {
+  white-space: nowrap;
+  color: var(--texto-3);
+}
+
+.atajos-fila dd {
+  margin: 0;
+}
+
+.atajos-fila kbd {
+  display: inline-block;
+  min-width: 26px;
+  padding: 1px var(--espacio-2);
+  border: 1px solid var(--borde-fuerte);
+  border-bottom-width: 2px;
+  border-radius: var(--radio-sm);
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  text-align: center;
+}
+
+.atajos-boton {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.atajos-boton:hover {
+  background: var(--superficie-3);
+}
+
+.atajos-boton kbd {
+  padding: 1px var(--espacio-2);
+  border: 1px solid var(--borde-fuerte);
+  border-bottom-width: 2px;
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--texto-3);
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+}
+
+/* en el celular no hay teclado fisico: el boton sobra */
+@media (max-width: 720px) {
+  .atajos-boton {
+    display: none;
+  }
+}

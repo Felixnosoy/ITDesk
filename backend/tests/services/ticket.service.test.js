@@ -38,6 +38,26 @@ describe("ticket.service.obtenerTickets (alcance segun el rol)", () => {
     });
 });
 
+describe("ticket.service.obtenerTickets (novedades)", () => {
+    test("para el personal la consulta trae la fecha de la ultima nota interna", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 3, rol: "Tecnico" });
+
+        expect(pool.query.mock.calls[0][0]).toContain("AS ultima_nota");
+        expect(pool.query.mock.calls[0][0]).toContain("ultima_actualizacion");
+    });
+
+    test("para el Cliente la consulta ni siquiera toca nota_privada", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 7, rol: "Cliente" });
+
+        expect(pool.query.mock.calls[0][0]).not.toContain("nota_privada");
+        expect(pool.query.mock.calls[0][0]).toContain("ultima_actualizacion");
+    });
+});
+
 describe("ticket.service.obtenerTickets (filtros)", () => {
     test("cada filtro valido agrega su condicion y su valor como parametro", async () => {
         pool.query.mockResolvedValueOnce([[]]);
@@ -62,6 +82,33 @@ describe("ticket.service.obtenerTickets (filtros)", () => {
         const [sql, parametros] = pool.query.mock.calls[0];
         expect(sql).toContain("t.id_usuario = ? AND t.prioridad = ?");
         expect(parametros).toEqual([7, "Alta"]);
+    });
+
+    test("filtra por cliente y por equipo para las fichas", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 3, rol: "Recepcionista" }, { id_cliente: "5", id_equipo: "9" });
+
+        const [sql, parametros] = pool.query.mock.calls[0];
+        expect(sql).toContain("t.id_usuario = ? AND t.id_equipo = ?");
+        expect(parametros).toEqual([5, 9]);
+    });
+
+    test("el Cliente que pide el equipo de otro sigue limitado a lo suyo", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+
+        await ticketService.obtenerTickets({ id_usuario: 7, rol: "Cliente" }, { id_equipo: "9" });
+
+        const [sql, parametros] = pool.query.mock.calls[0];
+        expect(sql).toContain("t.id_usuario = ? AND t.id_equipo = ?");
+        expect(parametros).toEqual([7, 9]);
+    });
+
+    test("rechaza con 400 un id de equipo invalido", async () => {
+        await expect(ticketService.obtenerTickets({ id_usuario: 3, rol: "Tecnico" }, { id_equipo: "abc" }))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("id_equipo") });
+
+        expect(pool.query).not.toHaveBeenCalled();
     });
 
     test("un filtro vacio o ausente no filtra", async () => {

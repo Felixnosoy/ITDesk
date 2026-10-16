@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { RESPUESTAS_RAPIDAS } from "../constants/respuestas";
 import "./FormularioSeguimiento.css";
 
 // mismos limites que el backend (archivo.service.js); revisarlos aqui
@@ -44,12 +45,28 @@ function VistaPrevia({ imagen, onQuitar }) {
 
 // Formulario para registrar un avance o una nota privada con imagenes. Las
 // imagenes se eligen con el boton o se pegan con Ctrl+V sobre el texto.
-export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
-    const [tipo, setTipo] = useState("actualizaciones");
+//
+// Con tipoFijo es la caja de mensaje del panel de actividad: la pestana del
+// panel ya dice si es para el cliente o interno, asi que no hay selector, y
+// Ctrl+Enter envia como en un chat.
+export default function FormularioSeguimiento({ guardando, error, onGuardar, tipoFijo }) {
+    const [tipoElegido, setTipo] = useState("actualizaciones");
+    const tipo = tipoFijo ?? tipoElegido;
     const [texto, setTexto] = useState("");
     const [imagenes, setImagenes] = useState([]);
     const [avisoImagen, setAvisoImagen] = useState("");
     const selector = useRef(null);
+    const caja = useRef(null);
+
+    // la respuesta rapida se suma a lo ya escrito y deja el cursor al final
+    const usarRespuesta = (frase) => {
+        const nuevo = texto.trim() ? `${texto.trimEnd()} ${frase}` : frase;
+        setTexto(nuevo);
+        requestAnimationFrame(() => {
+            caja.current?.focus();
+            caja.current?.setSelectionRange(nuevo.length, nuevo.length);
+        });
+    };
 
     const agregar = (archivos) => {
         const nuevas = [];
@@ -97,6 +114,7 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
 
     const enviar = async (evento) => {
         evento.preventDefault();
+        if (guardando || !texto.trim()) return;
         const guardado = await onGuardar(tipo, texto, imagenes);
 
         if (guardado) {
@@ -109,7 +127,8 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
     const actual = TIPOS[tipo];
 
     return (
-        <form onSubmit={enviar} className="seguimiento">
+        <form onSubmit={enviar} className={`seguimiento${tipoFijo ? " seguimiento-chat" : ""}`}>
+            {!tipoFijo && (
             <div className="seguimiento-tipos" role="radiogroup" aria-label="Tipo de registro">
                 {Object.entries(TIPOS).map(([clave, { etiqueta }]) => (
                     <label key={clave} className={`seguimiento-tipo${tipo === clave ? " activo" : ""}`}>
@@ -124,6 +143,7 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
                     </label>
                 ))}
             </div>
+            )}
 
             {error && (
                 <div className="aviso aviso-error" role="alert">
@@ -131,18 +151,40 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
                 </div>
             )}
 
+            {tipoFijo && (
+                <div className="seguimiento-rapidas" role="group" aria-label="Respuestas rápidas">
+                    {RESPUESTAS_RAPIDAS[tipo].map((respuesta) => (
+                        <button
+                            key={respuesta.etiqueta}
+                            type="button"
+                            className="seguimiento-rapida"
+                            title={respuesta.texto}
+                            onClick={() => usarRespuesta(respuesta.texto)}
+                        >
+                            {respuesta.etiqueta}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             <div className="campo">
-                <label htmlFor="seguimiento-texto">{actual.etiqueta}</label>
+                <label htmlFor={`seguimiento-texto-${tipo}`} className={tipoFijo ? "sr-only" : undefined}>
+                    {actual.etiqueta}
+                </label>
                 <textarea
-                    id="seguimiento-texto"
-                    rows={3}
+                    ref={caja}
+                    id={`seguimiento-texto-${tipo}`}
+                    rows={tipoFijo ? 2 : 3}
                     value={texto}
                     placeholder={actual.placeholder}
                     onChange={(e) => setTexto(e.target.value)}
                     onPaste={alPegar}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) enviar(e);
+                    }}
                 />
                 <span className="campo-ayuda">
-                    {actual.ayuda} Puedes pegar una captura con Ctrl+V.
+                    {actual.ayuda} {tipoFijo ? "Ctrl+Enter envía; " : "Puedes "}pegar una captura con Ctrl+V.
                 </span>
             </div>
 
@@ -182,13 +224,13 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar }) {
                     disabled={imagenes.length >= MAXIMO_IMAGENES}
                     onClick={() => selector.current.click()}
                 >
-                    Adjuntar imágenes
+                    {tipoFijo ? "Adjuntar" : "Adjuntar imágenes"}
                 </button>
                 <span className="seguimiento-contador">
                     {imagenes.length}/{MAXIMO_IMAGENES}
                 </span>
                 <button type="submit" className="boton" disabled={guardando || !texto.trim()}>
-                    {guardando ? "Guardando..." : "Registrar"}
+                    {guardando ? "Guardando..." : tipoFijo ? "Enviar" : "Registrar"}
                 </button>
             </div>
         </form>

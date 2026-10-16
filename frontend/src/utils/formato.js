@@ -41,3 +41,13 @@ export const normalizar = (texto) =>
 
 // el valor guardado no lleva tilde
 export const etiquetaDocumento = (tipo) => (tipo === "Cedula" ? "Cédula" : tipo);
+
+// iniciales de un nombre completo para los avatares: "Maria Gomez" -> "MG"
+export const iniciales = (nombre = "") =>
+    nombre
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((parte) => parte[0])
+        .join("")
+        .toUpperCase();

@@ -4,7 +4,31 @@ import { listarEquipos, crearEquipo } from "../api/tickets";
 // sugerencias para el tipo; se puede escribir cualquier otro
 const TIPOS_SUGERIDOS = ["Laptop", "Desktop", "Impresora", "Router", "Monitor", "Tablet", "Teléfono"];
 
-const EQUIPO_VACIO = { tipo: "", marca: "", modelo: "", numero_serie: "", observaciones: "" };
+const EQUIPO_VACIO = {
+    tipo: "",
+    marca: "",
+    modelo: "",
+    numero_serie: "",
+    observaciones: "",
+    sistema_operativo: "",
+    procesador: "",
+    memoria_ram: "",
+    almacenamiento: "",
+    color: "",
+    en_garantia: false,
+    garantia_vence: "",
+    codigo_activo: "",
+};
+
+// campos de la ficha tecnica, todos opcionales: [campo, etiqueta, largo, sugerencia]
+const FICHA = [
+    ["sistema_operativo", "Sistema operativo", 60, "Windows 11, macOS 14..."],
+    ["procesador", "Procesador", 80, "Intel Core i5-1135G7"],
+    ["memoria_ram", "Memoria RAM", 30, "16 GB"],
+    ["almacenamiento", "Almacenamiento", 60, "512 GB SSD"],
+    ["color", "Color", 30, "Negro"],
+    ["codigo_activo", "Código de activo del cliente", 50, "Solo empresas: ACT-0042"],
+];
 
 const descripcion = (equipo) => `${equipo.tipo} ${equipo.marca} ${equipo.modelo}`;
 
@@ -35,6 +59,7 @@ export default function SelectorEquipo({ token, cliente, equipo, onSeleccionar }
     }, [token, cliente.id_usuario]);
 
     const cambiar = (campo) => (evento) => setNuevo({ ...nuevo, [campo]: evento.target.value });
+    const marcar = (campo) => (evento) => setNuevo({ ...nuevo, [campo]: evento.target.checked });
 
     const registrar = async (evento) => {
         evento.preventDefault();
@@ -135,16 +160,47 @@ export default function SelectorEquipo({ token, cliente, equipo, onSeleccionar }
                             <input id="eq-serie" value={nuevo.numero_serie} onChange={cambiar("numero_serie")} maxLength={100} required />
                         </div>
                     </div>
-                    <div className="campo">
-                        <label htmlFor="eq-observaciones">Observaciones (opcional)</label>
-                        <textarea
-                            id="eq-observaciones"
-                            rows={2}
-                            value={nuevo.observaciones}
-                            onChange={cambiar("observaciones")}
-                            placeholder="Accesorios que deja, golpes visibles..."
-                        />
-                    </div>
+                    {/* lo que no cambia de una visita a otra; como llega hoy (accesorios,
+                        golpes) se anota en el ticket, en el paso 3 */}
+                    <details className="registro-mas">
+                        <summary>Especificaciones y garantía (opcional)</summary>
+                        <div className="registro-campos">
+                            {FICHA.map(([campo, etiqueta, largo, sugerencia]) => (
+                                <div className="campo" key={campo}>
+                                    <label htmlFor={`eq-${campo}`}>{etiqueta}</label>
+                                    <input
+                                        id={`eq-${campo}`}
+                                        value={nuevo[campo]}
+                                        onChange={cambiar(campo)}
+                                        maxLength={largo}
+                                        placeholder={sugerencia}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="registro-campos">
+                            <label className="registro-casilla">
+                                <input type="checkbox" checked={nuevo.en_garantia} onChange={marcar("en_garantia")} />
+                                Está en garantía
+                            </label>
+                            {nuevo.en_garantia && (
+                                <div className="campo">
+                                    <label htmlFor="eq-garantia">Garantía vence</label>
+                                    <input id="eq-garantia" type="date" value={nuevo.garantia_vence} onChange={cambiar("garantia_vence")} />
+                                </div>
+                            )}
+                        </div>
+                        <div className="campo">
+                            <label htmlFor="eq-observaciones">Observaciones del equipo</label>
+                            <textarea
+                                id="eq-observaciones"
+                                rows={2}
+                                value={nuevo.observaciones}
+                                onChange={cambiar("observaciones")}
+                                placeholder="Algo del equipo que el taller debe saber siempre."
+                            />
+                        </div>
+                    </details>
                     <div className="modal-acciones">
                         {equipos.length > 0 && (
                             <button type="button" className="boton boton-secundario" onClick={() => setAltaAbierta(false)}>

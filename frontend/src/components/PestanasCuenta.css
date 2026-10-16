@@ -1,0 +1,40 @@
+.cuenta-cabecera {
+  margin-bottom: var(--espacio-4);
+}
+
+.cuenta-pestanas {
+  display: flex;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-seccion);
+  border-bottom: 1px solid var(--borde);
+}
+
+/* las dos pantallas de la cuenta tienen el mismo ancho: al cambiar de
+   pestana nada se mueve */
+.cuenta-pagina {
+  max-width: var(--ancho-lectura);
+}
+
+.cuenta-ayuda {
+  margin: 0 0 var(--espacio-4);
+  color: var(--texto-3);
+}
+
+.cuenta-pestana {
+  /* la raya de la pestana activa tapa la linea de abajo de la barra */
+  margin-bottom: -1px;
+  padding: var(--espacio-2) var(--espacio-4);
+  border-bottom: 2px solid transparent;
+  color: var(--texto-3);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cuenta-pestana:hover {
+  color: var(--texto);
+}
+
+.cuenta-pestana.active {
+  border-bottom-color: var(--rol-principal);
+  color: var(--rol-principal);
+}
