@@ -347,3 +347,10 @@
 .comprobante dd {
   margin: 0;
 }
+
+/* en el celular el importe basta: el precio unitario sale de cantidad e importe */
+@media screen and (max-width: 520px) {
+  .cotizacion-unitario {
+    display: none;
+  }
+}

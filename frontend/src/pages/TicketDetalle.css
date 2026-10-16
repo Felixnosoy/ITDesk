@@ -215,3 +215,85 @@
 .detalle-imprimir {
   margin-left: auto;
 }
+
+/* ---------- aviso del proximo paso con la barra del ciclo ---------- */
+
+.detalle-paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-bottom: var(--espacio-5);
+}
+
+.detalle-paso-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.detalle-paso-fila p {
+  margin: 2px 0 0;
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.detalle-paso-titulo {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-4);
+}
+
+.detalle-paso-urgente {
+  background: var(--rol-aviso-fondo);
+  border-color: var(--rol-aviso-borde);
+  border-left: 4px solid var(--rol-acento);
+}
+
+.detalle-paso-urgente .detalle-paso-titulo {
+  color: var(--rol-aviso-texto);
+}
+
+.detalle-paso-acciones {
+  display: flex;
+  gap: var(--espacio-2);
+  flex-wrap: wrap;
+}
+
+/* cotizacion plegada cuando ya hay factura */
+.detalle-plegable summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--rol-principal);
+}
+
+.detalle-plegable[open] summary {
+  margin-bottom: var(--espacio-4);
+}
+
+/* formulario de novedades al pie de la linea de tiempo */
+.detalle-novedad {
+  margin-top: var(--espacio-5);
+  padding-top: var(--espacio-5);
+  border-top: 1px solid var(--borde);
+}
+
+.detalle-novedad h3 {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-md);
+}
+
+@media (max-width: 640px) {
+  .detalle-paso-acciones,
+  .detalle-paso-acciones .boton {
+    width: 100%;
+  }
+
+  .detalle-paso-acciones .boton {
+    flex: 1;
+  }
+}

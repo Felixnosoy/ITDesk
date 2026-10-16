@@ -13,7 +13,10 @@ import {
     codigoTicket,
     formatearFecha,
     formatearFechaHora,
+    formatearMonto,
 } from "../utils/formato";
+import { proximoPaso, leToca } from "../utils/ciclo";
+import ProgresoCiclo from "../components/ProgresoCiclo";
 import Insignia from "../components/Insignia";
 import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
@@ -72,6 +75,12 @@ export default function TicketDetalle() {
         return () => window.removeEventListener("afterprint", terminar);
     }, [imprimiendo]);
 
+    // los formularios que se abren desde el aviso del proximo paso viven en
+    // su tarjeta: se lleva la vista hasta ahi para que no queden fuera
+    useEffect(() => {
+        if (!editando) return;
+        document.getElementById(`seccion-${editando}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, [editando]);
 
     useEffect(() => {
         let vigente = true;
@@ -172,6 +181,42 @@ export default function TicketDetalle() {
             : `Rechazaste la cotización. Tu ticket volvió a "${ETIQUETA_ESTADO[ESTADOS_TICKET.EN_DIAGNOSTICO]}" y el técnico puede prepararte otra.`);
 
     const cotizacionActual = cotizaciones[0];
+    const esCliente = sesion.usuario.rol === ROLES.CLIENTE;
+
+    // Aviso del proximo paso: lo que hay que hacer ahora, con un solo boton
+    // principal. Las acciones son las mismas de cada tarjeta, solo que aca
+    // quedan arriba en vez de a mitad de la pagina.
+    const paso = proximoPaso(
+        {
+            ...ticket,
+            factura_estado: factura?.estado,
+            factura_total: factura?.total,
+            cotizacion_pendiente_total: pendiente?.total,
+        },
+        sesion.usuario.rol
+    );
+    let acciones = [];
+    if (puedeDecidir) {
+        acciones = [
+            { etiqueta: "Rechazar", secundaria: true, abrir: ESTADOS_COTIZACION.RECHAZADA },
+            { etiqueta: "Aprobar cotización", abrir: ESTADOS_COTIZACION.APROBADA },
+        ];
+    } else if (puedePagar) {
+        acciones = [{ etiqueta: "Pagar en línea", abrir: "pago" }];
+    } else if (puedeEditar && !diagnostico && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol)) {
+        paso.texto = "Registra el diagnóstico: sin él no se puede cotizar.";
+        acciones = [{ etiqueta: "Registrar diagnóstico", abrir: "diagnostico" }];
+    } else if (puedeCotizar) {
+        paso.texto = cotizaciones.length > 0
+            ? "El cliente rechazó la cotización anterior. Prepara una nueva."
+            : "El diagnóstico está listo. Prepara la cotización para el cliente.";
+        acciones = [{ etiqueta: "Crear cotización", abrir: "cotizacion" }];
+    } else if (puedeFacturar) {
+        acciones = [{ etiqueta: "Generar factura", abrir: "factura" }];
+    } else if (puedeCambiarEstado && leToca(paso, sesion.usuario.rol)) {
+        acciones = [{ etiqueta: "Cambiar estado", abrir: "estado" }];
+    }
+    const pasoUrgente = acciones.length > 0;
 
     return (
         <div className={`pagina detalle-pagina${imprimiendo ? " no-imprimir" : ""}`}>
@@ -182,8 +227,33 @@ export default function TicketDetalle() {
                 <h1>{ticket.titulo}</h1>
                 <div className="detalle-insignias">
                     <Insignia tipo="estado" valor={ticket.estado} />
-                    <Insignia tipo="prioridad" valor={ticket.prioridad} />
+                    {/* la prioridad es una decision interna del taller */}
+                    {!esCliente && <Insignia tipo="prioridad" valor={ticket.prioridad} />}
                     <Insignia tipo="categoria" valor={ticket.categoria} />
+                </div>
+            </div>
+
+            <div className={`tarjeta detalle-paso no-imprimir${pasoUrgente ? " detalle-paso-urgente" : ""}`}>
+                <ProgresoCiclo estado={ticket.estado} />
+                <div className="detalle-paso-fila" role={pasoUrgente ? "status" : undefined}>
+                    <div>
+                        <span className="detalle-paso-titulo">{pasoUrgente ? "Te toca" : "Próximo paso"}</span>
+                        <p>{paso.texto}</p>
+                    </div>
+                    {acciones.length > 0 && (
+                        <div className="detalle-paso-acciones">
+                            {acciones.map((accion) => (
+                                <button
+                                    key={accion.abrir}
+                                    type="button"
+                                    className={`boton${accion.secundaria ? " boton-secundario" : ""}`}
+                                    onClick={() => abrirEdicion(accion.abrir)}
+                                >
+                                    {accion.etiqueta}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -200,7 +270,7 @@ export default function TicketDetalle() {
                         <p className="detalle-texto">{ticket.descripcion}</p>
                     </div>
 
-                    <div className="tarjeta">
+                    <div className="tarjeta" id="seccion-diagnostico">
                         <div className="detalle-titulo-fila">
                             <h2>Diagnóstico</h2>
                             {puedeEditar && editando !== "diagnostico" && (
@@ -256,7 +326,7 @@ export default function TicketDetalle() {
                     </div>
 
                     {mostrarCotizacion && (
-                        <div className="tarjeta">
+                        <div className="tarjeta" id="seccion-cotizacion">
                             <div className="detalle-titulo-fila">
                                 <h2>Cotización</h2>
                                 {cotizacionActual && editando !== "cotizacion" && (
@@ -290,6 +360,15 @@ export default function TicketDetalle() {
                                         )
                                     }
                                 />
+                            ) : factura && aprobada ? (
+                                // con factura emitida la cotizacion repite las mismas lineas:
+                                // queda plegada para no duplicar la tabla
+                                <details className="detalle-plegable">
+                                    <summary>
+                                        Aprobada por {formatearMonto(aprobada.total)} · ver detalle
+                                    </summary>
+                                    <SeccionCotizaciones cotizaciones={cotizaciones} vacio="" />
+                                </details>
                             ) : (
                                 <SeccionCotizaciones
                                     cotizaciones={cotizaciones}
@@ -367,29 +446,28 @@ export default function TicketDetalle() {
                         </div>
                     )}
 
-                    {puedeEditar && (
-                        <div className="tarjeta no-imprimir">
-                            <h2>Registrar novedad</h2>
-                            <FormularioSeguimiento
-                                guardando={guardando}
-                                error={editando === "seguimiento" ? errorAccion : ""}
-                                onGuardar={(tipo, texto, imagenes) => {
-                                    setEditando("seguimiento");
-                                    return ejecutar(
-                                        () => registrarSeguimiento(token, ticket.id_ticket, tipo, texto, imagenes),
-                                        tipo === "notas" ? "Nota privada registrada." : "Avance registrado."
-                                    );
-                                }}
-                            />
-                        </div>
-                    )}
-
                     <div className="tarjeta">
                         <h2>Línea de tiempo</h2>
                         <LineaTiempo
                             actualizaciones={detalle.actualizaciones}
                             renderAdjuntos={(adjuntos) => <Adjuntos adjuntos={adjuntos} />}
                         />
+                        {puedeEditar && (
+                            <div className="detalle-novedad no-imprimir">
+                                <h3>Registrar novedad</h3>
+                                <FormularioSeguimiento
+                                    guardando={guardando}
+                                    error={editando === "seguimiento" ? errorAccion : ""}
+                                    onGuardar={(tipo, texto, imagenes) => {
+                                        setEditando("seguimiento");
+                                        return ejecutar(
+                                            () => registrarSeguimiento(token, ticket.id_ticket, tipo, texto, imagenes),
+                                            tipo === "notas" ? "Nota privada registrada." : "Avance registrado."
+                                        );
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {esTaller && (
