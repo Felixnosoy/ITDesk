@@ -262,6 +262,10 @@ const actualizarUsuario = async (id, nuevosDatos) => {
         especialidad
     } = nuevosDatos;
 
+    // datos de cliente (empresa, contacto alterno); si deja de ser cliente
+    // quedan en null. Se valida antes de tocar la base
+    const cliente = datosDeCliente(rol, nuevosDatos);
+
     //verificar que el usuario a actualizar exista
     await verificarUsuarioExiste(id, "usuario no encontrado");
 
@@ -297,7 +301,12 @@ const actualizarUsuario = async (id, nuevosDatos) => {
                 num_documento = ?,
                 telefono = ?,
                 direccion = ?,
-                especialidad = ?
+                especialidad = ?,
+                tipo_cliente = ?,
+                empresa = ?,
+                rnc = ?,
+                contacto_alterno_nombre = ?,
+                contacto_alterno_telefono = ?
             WHERE id_usuario = ?
         `,
         [
@@ -310,6 +319,11 @@ const actualizarUsuario = async (id, nuevosDatos) => {
             telefono,
             direccion,
             especialidad,
+            cliente.tipo_cliente,
+            cliente.empresa,
+            cliente.rnc,
+            cliente.contacto_alterno_nombre,
+            cliente.contacto_alterno_telefono,
             id
         ]
     );

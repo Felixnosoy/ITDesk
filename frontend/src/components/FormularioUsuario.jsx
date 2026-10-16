@@ -49,7 +49,8 @@ export default function FormularioUsuario({
 
     const cambiar = (campo) => (evento) =>
         setValores((previos) => ({ ...previos, [campo]: evento.target.value }));
-    const esAltaCliente = modo === "crear" && valores.rol === ROLES.CLIENTE;
+    // datos propios de un cliente: en el alta y al editarlo
+    const esCliente = valores.rol === ROLES.CLIENTE;
 
     const enviar = (evento) => {
         evento.preventDefault();
@@ -78,8 +79,7 @@ export default function FormularioUsuario({
             datos.estado = "Activo";
         }
 
-        // datos propios de un cliente (por ahora solo en el alta)
-        if (esAltaCliente) {
+        if (esCliente) {
             const esEmpresa = valores.tipo_cliente === "Empresa";
             Object.assign(datos, {
                 tipo_cliente: valores.tipo_cliente,
@@ -182,7 +182,7 @@ export default function FormularioUsuario({
                     <input id="uf-direccion" value={valores.direccion} onChange={cambiar("direccion")} maxLength={255} />
                 </div>
 
-                {esAltaCliente && (
+                {esCliente && (
                     <>
                         <div className="campo formulario-ancho">
                             <label htmlFor="uf-tipo-cliente">Tipo de cliente</label>
