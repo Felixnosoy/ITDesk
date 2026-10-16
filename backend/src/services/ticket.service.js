@@ -26,11 +26,16 @@ const COLUMNAS_TICKET = `
     e.modelo AS equipo_modelo,
     e.numero_serie AS equipo_numero_serie,
     a.id_usuario AS id_tecnico,
-    CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico
+    CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico,
+    f.estado AS factura_estado,
+    f.total AS factura_total,
+    cp.total AS cotizacion_pendiente_total
 `;
 
 // LEFT JOIN con la asignacion activa: un ticket sin tecnico igual aparece
-// en el listado, con id_tecnico y tecnico en null
+// en el listado, con id_tecnico y tecnico en null. La factura (a lo sumo una
+// por ticket) y la cotizacion pendiente viajan en el listado para que los
+// inicios por rol sepan que espera pago o aprobacion sin pedir cada detalle.
 const JOIN_TICKET = `
     FROM ticket t
     INNER JOIN usuario c
@@ -42,6 +47,11 @@ const JOIN_TICKET = `
         AND a.activa = 1
     LEFT JOIN usuario tec
         ON a.id_usuario = tec.id_usuario
+    LEFT JOIN factura f
+        ON f.id_ticket = t.id_ticket
+    LEFT JOIN cotizacion cp
+        ON cp.id_ticket = t.id_ticket
+        AND cp.estado = 'Pendiente'
 `;
 
 // filtros que acepta el listado: parametro de la URL -> columna y catalogo

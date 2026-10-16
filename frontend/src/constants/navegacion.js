@@ -52,27 +52,22 @@ export const SECCIONES = [
 export const seccionesParaRol = (rol) =>
     SECCIONES.filter((seccion) => seccion.roles.includes(rol));
 
-// Contenido del panel de inicio de cada rol. "proximamente" lista lo que el
-// rol va a tener a medida que avanzan los sprints (no son enlaces).
+// Frase bajo el saludo del inicio de cada rol.
 export const PANELES = {
     [ROLES.ADMINISTRADOR]: {
         titulo: "Panel de administración",
-        resumen: "Desde aquí se controla quién tiene acceso al sistema y con qué rol.",
-        proximamente: ["Reportes del taller", "Registro de auditoría"],
+        resumen: "Así va el taller hoy: lo que está pendiente y lo que falta por cobrar.",
     },
     [ROLES.TECNICO]: {
         titulo: "Panel del técnico",
-        resumen: "Tu espacio de trabajo dentro del taller.",
-        proximamente: ["Cotizaciones", "Facturación"],
+        resumen: "Tu cola de trabajo, empezando por lo que te toca.",
     },
     [ROLES.CLIENTE]: {
         titulo: "Panel del cliente",
-        resumen: "Aquí seguirás el estado de tus equipos en el taller.",
-        proximamente: ["Cotizaciones y facturas", "Pago en línea"],
+        resumen: "Así van tus equipos en el taller.",
     },
     [ROLES.RECEPCIONISTA]: {
         titulo: "Panel de recepción",
-        resumen: "Tu espacio para recibir clientes y registrar sus casos.",
-        proximamente: ["Agenda de visitas técnicas", "Cobro de facturas"],
+        resumen: "Recibe equipos, registra tickets y entrega los que están listos.",
     },
 };
