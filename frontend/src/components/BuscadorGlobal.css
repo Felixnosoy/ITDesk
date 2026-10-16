@@ -1,0 +1,165 @@
+.buscador {
+  position: relative;
+  flex: 1;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+}
+
+.buscador-icono {
+  position: absolute;
+  left: var(--espacio-3);
+  display: flex;
+  color: var(--texto-4);
+  pointer-events: none;
+}
+
+.buscador-campo {
+  width: 100%;
+  height: 38px;
+  padding: 0 72px 0 40px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie-2);
+  color: var(--texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  transition: border-color var(--duracion-rapida), box-shadow var(--duracion-rapida), background-color var(--duracion-rapida);
+}
+
+.buscador-campo::placeholder {
+  color: var(--texto-4);
+}
+
+.buscador-campo:focus {
+  outline: none;
+  border-color: var(--rol-principal);
+  background: var(--superficie);
+  box-shadow: 0 0 0 3px var(--rol-suave);
+}
+
+.buscador-atajo {
+  position: absolute;
+  right: var(--espacio-3);
+  padding: 1px var(--espacio-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 4px;
+  background: var(--superficie);
+  color: var(--texto-3);
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  pointer-events: none;
+}
+
+.buscador-campo:focus ~ .buscador-atajo {
+  display: none;
+}
+
+/* ---------- resultados ---------- */
+
+.buscador-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: var(--capa-desplegable);
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  padding: var(--espacio-2);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-2);
+}
+
+.buscador-estado {
+  margin: 0;
+  padding: var(--espacio-1) var(--espacio-2) var(--espacio-2);
+  font-size: var(--texto-xs);
+  color: var(--texto-3);
+}
+
+.buscador-estado:empty {
+  display: none;
+}
+
+.buscador-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.buscador-grupo {
+  display: block;
+  padding: var(--espacio-3) var(--espacio-2) var(--espacio-1);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--texto-4);
+}
+
+.buscador-opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+}
+
+.buscador-opcion[aria-selected="true"] {
+  background: var(--rol-suave);
+}
+
+.buscador-opcion-texto {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.buscador-opcion-texto strong,
+.buscador-opcion-texto span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buscador-opcion-texto strong {
+  font-size: var(--texto-sm);
+}
+
+.buscador-opcion-texto span {
+  font-size: var(--texto-xs);
+  color: var(--texto-3);
+}
+
+.buscador-opcion-pie {
+  margin-top: var(--espacio-2);
+  border-top: 1px solid var(--borde);
+  border-radius: 0 0 var(--radio-sm) var(--radio-sm);
+}
+
+.buscador-opcion-pie strong {
+  font-weight: 600;
+  color: var(--rol-principal);
+}
+
+@media (max-width: 720px) {
+  .buscador-atajo {
+    display: none;
+  }
+
+  .buscador-campo {
+    padding-right: var(--espacio-3);
+  }
+
+  /* en el celular la lista ocupa el ancho de la pantalla */
+  .buscador-panel {
+    position: fixed;
+    top: calc(var(--barra-alto) + 4px);
+    left: var(--espacio-3);
+    right: var(--espacio-3);
+  }
+}

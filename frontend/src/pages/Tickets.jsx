@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, PRIORIDADES, FILTROS_VACIOS } from "../constants/tickets";
@@ -79,7 +79,18 @@ export default function Tickets() {
     const [tickets, setTickets] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState("");
-    const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+    // ?q= llega desde el buscador global (un cliente, una serie): arranca
+    // la busqueda del listado con ese texto
+    const [parametros] = useSearchParams();
+    const qInicial = parametros.get("q") ?? "";
+    const [filtros, setFiltros] = useState(() => ({ ...FILTROS_VACIOS, busqueda: qInicial }));
+    const [qAplicada, setQAplicada] = useState(qInicial);
+    // si ya estaba en el listado y llega otra busqueda, se aplica la nueva
+    if (qInicial !== qAplicada) {
+        setQAplicada(qInicial);
+        setFiltros({ ...FILTROS_VACIOS, busqueda: qInicial });
+        setVista("todos");
+    }
     const [orden, setOrden] = useState({ columna: "fecha_apertura", direccion: "desc" });
     const [pagina, setPagina] = useState(1);
 

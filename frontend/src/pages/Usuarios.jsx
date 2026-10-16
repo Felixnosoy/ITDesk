@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TODOS_LOS_ROLES, ETIQUETA_ROL } from "../constants/roles";
 import {
@@ -36,7 +37,15 @@ export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [errorCarga, setErrorCarga] = useState("");
-    const [busqueda, setBusqueda] = useState("");
+    // ?q= llega desde el buscador global (un correo del personal)
+    const [parametros] = useSearchParams();
+    const qInicial = parametros.get("q") ?? "";
+    const [busqueda, setBusqueda] = useState(qInicial);
+    const [qAplicada, setQAplicada] = useState(qInicial);
+    if (qInicial !== qAplicada) {
+        setQAplicada(qInicial);
+        setBusqueda(qInicial);
+    }
     const [filtroRol, setFiltroRol] = useState("");
     const [aviso, setAviso] = useState("");
 

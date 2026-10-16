@@ -313,6 +313,13 @@
   }
 }
 
+/* en el celular la barra deja solo la etiqueta del logo: el ancho es del buscador */
+@media (max-width: 520px) {
+  .layout-barra-logo .logo-texto {
+    display: none;
+  }
+}
+
 /* ---------- impresion: el contenido ocupa toda la hoja, sin menu ---------- */
 
 @media print {

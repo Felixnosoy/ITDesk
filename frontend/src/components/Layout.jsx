@@ -5,6 +5,7 @@ import { ETIQUETA_ROL } from "../constants/roles";
 import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
 import Logo from "./Logo";
+import BuscadorGlobal from "./BuscadorGlobal";
 import { TEMAS, guardarTema } from "../utils/tema";
 import { leerMenuPlegado, guardarMenuPlegado } from "../utils/preferencias";
 import "./Layout.css";
@@ -23,7 +24,7 @@ const CONSULTA_ANGOSTA = "(max-width: 960px)";
 // En escritorio el menu se puede plegar a una franja de iconos para dejarle
 // la pantalla al trabajo; la eleccion se recuerda. En pantallas angostas el
 // menu no ocupa lugar: se abre encima del contenido desde el mismo boton.
-export default function Layout({ barra }) {
+export default function Layout() {
     const { sesion, cerrarSesion } = useAuth();
     const { usuario } = sesion;
     const { pathname } = useLocation();
@@ -170,7 +171,7 @@ export default function Layout({ barra }) {
                     <span className="layout-barra-logo">
                         <Logo />
                     </span>
-                    {barra}
+                    <BuscadorGlobal />
                 </header>
 
                 <main className="layout-contenido">
