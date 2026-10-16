@@ -6,13 +6,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--espacio-4);
   flex-wrap: wrap;
 }
 
 .usuarios-filtros {
   display: flex;
-  gap: 16px;
+  gap: var(--espacio-4);
   flex-wrap: wrap;
 }
 
@@ -27,8 +27,8 @@
 
 .usuarios-contador {
   margin: 0;
-  padding: 14px 20px;
-  font-size: 13px;
+  padding: var(--espacio-4) var(--espacio-5);
+  font-size: var(--texto-sm);
   color: var(--color-text-dim);
   border-bottom: 1px solid var(--color-border);
 }
@@ -41,19 +41,19 @@
 .usuarios-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--texto-sm);
 }
 
 .usuarios-tabla th,
 .usuarios-tabla td {
-  padding: 12px 20px;
+  padding: var(--espacio-3) var(--espacio-5);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
 }
 
 .usuarios-tabla th {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -73,7 +73,7 @@
 
 .usuarios-acciones {
   display: flex;
-  gap: 6px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
 }
 
@@ -122,7 +122,7 @@
 /* el rol con el color de su identidad, sin importar quien mira */
 .usuarios-rol {
   display: inline-block;
-  padding: 2px 9px;
+  padding: 2px var(--espacio-2);
   border-radius: var(--radio-pildora);
   font-size: var(--texto-sm);
   font-weight: 600;

@@ -8,12 +8,13 @@
 .tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--texto-base);
+  /* las tablas son densas: van en el tamano de apoyo */
+  font-size: var(--texto-sm);
 }
 
 .tabla th,
 .tabla td {
-  padding: 11px 16px;
+  padding: var(--espacio-3) var(--espacio-4);
   text-align: left;
   border-bottom: 1px solid var(--borde);
   vertical-align: middle;
@@ -30,7 +31,7 @@
 }
 
 .tabla tbody tr {
-  transition: background-color 0.12s;
+  transition: background-color var(--duracion-rapida);
 }
 
 .tabla tbody tr:hover {
@@ -45,7 +46,7 @@
 .tabla-orden {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--espacio-2);
   padding: 0;
   border: none;
   background: none;
@@ -62,7 +63,7 @@
 }
 
 .tabla-flecha {
-  font-size: 10px;
+  font-size: var(--texto-xs);
   opacity: 0.5;
 }
 

@@ -3,16 +3,16 @@
 
 .documento {
   color: var(--tinta-impresion);
-  font-size: 13px;
+  font-size: var(--texto-sm);
 }
 
 .documento-cabecera {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
-  padding-bottom: 12px;
-  margin-bottom: 16px;
+  gap: var(--espacio-6);
+  padding-bottom: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
   border-bottom: 2px solid var(--tinta-impresion);
 }
 
@@ -25,8 +25,8 @@
 }
 
 .documento-titulo h1 {
-  margin: 0 0 4px;
-  font-size: 20px;
+  margin: 0 0 var(--espacio-1);
+  font-size: var(--texto-xl);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -34,12 +34,12 @@
 .documento-datos {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 24px;
-  margin: 0 0 16px;
+  gap: var(--espacio-2) var(--espacio-6);
+  margin: 0 0 var(--espacio-4);
 }
 
 .documento-datos dt {
-  font-size: 11px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -71,17 +71,17 @@
 }
 
 .documento-nota {
-  margin: 16px 0 0;
+  margin: var(--espacio-4) 0 0;
   white-space: pre-line;
 }
 
 .documento-pie {
-  margin-top: 32px;
-  padding-top: 8px;
+  margin-top: var(--espacio-7);
+  padding-top: var(--espacio-2);
   border-top: 1px solid var(--tinta-impresion);
-  font-size: 11px;
+  font-size: var(--texto-xs);
 }
 
 .documento-pie p {
-  margin: 0 0 4px;
+  margin: 0 0 var(--espacio-1);
 }

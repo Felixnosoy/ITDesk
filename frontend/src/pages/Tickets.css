@@ -6,7 +6,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--espacio-4);
   flex-wrap: wrap;
 }
 
@@ -16,8 +16,8 @@
 }
 
 .tickets-filtros {
-  margin-bottom: 16px;
-  padding-bottom: 4px;
+  margin-bottom: var(--espacio-4);
+  padding-bottom: var(--espacio-1);
 }
 
 .tickets-tarjeta {
@@ -26,8 +26,8 @@
 
 .tickets-contador {
   margin: 0;
-  padding: 14px 20px;
-  font-size: 13px;
+  padding: var(--espacio-4) var(--espacio-5);
+  font-size: var(--texto-sm);
   color: var(--color-text-dim);
   border-bottom: 1px solid var(--color-border);
 }
@@ -44,23 +44,50 @@
 
 .tickets-tarjeta .tabla th,
 .tickets-tarjeta .tabla td {
-  padding: 12px 14px;
+  padding: var(--espacio-3);
 }
 
 .tickets-tarjeta .tabla th:first-child,
 .tickets-tarjeta .tabla td:first-child {
-  padding-left: 20px;
+  padding-left: var(--espacio-5);
   white-space: nowrap;
 }
 
 .tickets-secundario {
   display: block;
-  font-size: 12px;
+  font-size: var(--texto-xs);
   color: var(--color-text-dim);
 }
 
 .tickets-mostrar-filtros {
   display: none;
+}
+
+/* el titulo es lo que se lee: no se deja aplastar por las demas columnas */
+.tickets-tarjeta .tabla td.celda-principal {
+  min-width: 220px;
+}
+
+/* Columnas que se dejan para pantallas anchas: el dato sigue en el detalle
+   y en las vistas rapidas, y la tabla nunca necesita desplazarse de lado. */
+@media (max-width: 1440px) {
+  .tickets-tarjeta .columna-amplia {
+    display: none;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .tickets-tarjeta .columna-media {
+    display: none;
+  }
+
+  .tickets-tarjeta .tabla td:nth-child(3) {
+    white-space: normal;
+  }
+
+  .tickets-tarjeta .tabla td.celda-principal {
+    min-width: 140px;
+  }
 }
 
 /* en escritorio estos datos caben en una linea */
@@ -83,7 +110,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--espacio-2);
-  padding: 6px 12px;
+  padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--borde);
   border-radius: var(--radio-pildora);
   background: var(--superficie);
@@ -106,7 +133,7 @@
 
 .tickets-vista-cantidad {
   min-width: 20px;
-  padding: 0 6px;
+  padding: 0 var(--espacio-2);
   border-radius: var(--radio-pildora);
   background: var(--superficie-3);
   color: var(--texto-2);
@@ -191,6 +218,6 @@
 
   .tickets-tarjeta .tabla .tickets-secundario {
     display: inline;
-    margin-left: 4px;
+    margin-left: var(--espacio-1);
   }
 }

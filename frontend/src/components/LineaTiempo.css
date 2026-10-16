@@ -7,8 +7,8 @@
 .linea-item {
   position: relative;
   display: flex;
-  gap: 14px;
-  padding-bottom: 18px;
+  gap: var(--espacio-4);
+  padding-bottom: var(--espacio-5);
 }
 
 /* la raya vertical une cada punto con el siguiente */
@@ -26,7 +26,7 @@
   flex: none;
   width: 12px;
   height: 12px;
-  margin-top: 4px;
+  margin-top: var(--espacio-1);
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-surface);
@@ -45,28 +45,28 @@
 .linea-titulo {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
-  font-size: 14px;
+  font-size: var(--texto-base);
   font-weight: 600;
 }
 
 .linea-texto {
-  margin: 4px 0 0;
-  font-size: 14px;
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-base);
   line-height: 1.5;
   white-space: pre-line;
 }
 
 .linea-autor {
   display: block;
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
   color: var(--color-text-dim);
 }
 
 .linea-vacia {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   color: var(--color-text-dim);
 }

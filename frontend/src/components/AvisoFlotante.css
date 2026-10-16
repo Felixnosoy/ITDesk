@@ -2,7 +2,7 @@
   position: fixed;
   right: var(--espacio-6);
   bottom: var(--espacio-6);
-  z-index: 60;
+  z-index: var(--capa-aviso);
   display: flex;
   align-items: center;
   gap: var(--espacio-3);
@@ -14,7 +14,7 @@
   box-shadow: var(--sombra-2);
   color: var(--texto);
   font-weight: 600;
-  animation: aviso-entrar 0.2s ease-out;
+  animation: aviso-entrar var(--duracion-media) ease-out;
 }
 
 .aviso-flotante-icono {
@@ -32,7 +32,7 @@
 .aviso-flotante-cerrar {
   flex: none;
   margin-left: auto;
-  padding: 2px 8px;
+  padding: 2px var(--espacio-2);
   border: none;
   border-radius: var(--radio-sm);
   background: transparent;

@@ -120,7 +120,7 @@ export default function Tickets() {
                 ),
             },
             { clave: "equipo", titulo: "Equipo", render: celdaEquipo, valorOrden: nombreEquipo },
-            { clave: "tecnico", titulo: "Técnico", clase: "solo-escritorio", render: (t) => t.tecnico ?? "Sin asignar" },
+            { clave: "tecnico", titulo: "Técnico", clase: "solo-escritorio columna-amplia", render: (t) => t.tecnico ?? "Sin asignar" },
             {
                 clave: "estado",
                 titulo: "Estado",
@@ -134,7 +134,7 @@ export default function Tickets() {
                       {
                           clave: "prioridad",
                           titulo: "Prioridad",
-                          clase: "solo-escritorio",
+                          clase: "solo-escritorio columna-media",
                           render: (t) => <Insignia tipo="prioridad" valor={t.prioridad} />,
                           valorOrden: (t) => ORDEN_PRIORIDAD.indexOf(t.prioridad),
                       },
@@ -142,12 +142,13 @@ export default function Tickets() {
             {
                 clave: "categoria",
                 titulo: "Categoría",
-                clase: "solo-escritorio",
+                clase: "solo-escritorio columna-amplia",
                 render: (t) => <Insignia tipo="categoria" valor={t.categoria} />,
             },
             {
                 clave: "fecha_apertura",
                 titulo: "Apertura",
+                clase: "columna-media",
                 render: (t) => formatearFecha(t.fecha_apertura),
                 valorOrden: (t) => new Date(t.fecha_apertura).getTime(),
             },

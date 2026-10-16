@@ -3,19 +3,19 @@
 .cotizacion-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--texto-sm);
 }
 
 .cotizacion-tabla th,
 .cotizacion-tabla td {
-  padding: 8px 10px;
+  padding: var(--espacio-2) var(--espacio-3);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
   vertical-align: top;
 }
 
 .cotizacion-tabla th {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -41,18 +41,18 @@
 }
 
 .cotizacion-editor td:not(.cotizacion-numero) {
-  padding-top: 6px;
+  padding-top: var(--espacio-2);
 }
 
 .cotizacion-editor input {
   width: 100%;
-  padding: 8px 10px;
+  padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 .cotizacion-editor .cotizacion-cantidad input {
@@ -76,8 +76,8 @@
 
 .cotizacion-error-campo {
   display: block;
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
   color: var(--color-danger);
   text-align: left;
   white-space: normal;
@@ -90,7 +90,7 @@
   border-radius: 8px;
   background: transparent;
   color: var(--color-text-dim);
-  font-size: 20px;
+  font-size: var(--texto-xl);
   line-height: 1;
   cursor: pointer;
 }
@@ -111,17 +111,17 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin: 12px 0 16px;
+  gap: var(--espacio-4);
+  margin: var(--espacio-3) 0 var(--espacio-4);
 }
 
 .cotizacion-totales {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--espacio-1);
   min-width: 220px;
-  margin: 12px 0 0 auto;
-  font-size: 14px;
+  margin: var(--espacio-3) 0 0 auto;
+  font-size: var(--texto-base);
 }
 
 .cotizacion-pie .cotizacion-totales {
@@ -131,7 +131,7 @@
 .cotizacion-totales div {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
+  gap: var(--espacio-6);
 }
 
 .cotizacion-totales dt {
@@ -144,10 +144,10 @@
 }
 
 .cotizacion-total {
-  margin-top: 4px;
-  padding-top: 6px;
+  margin-top: var(--espacio-1);
+  padding-top: var(--espacio-2);
   border-top: 1px solid var(--color-border);
-  font-size: 16px;
+  font-size: var(--texto-base);
   font-weight: 700;
 }
 
@@ -160,8 +160,8 @@
 .cotizacion-cabecera {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-3);
 }
 
 .cotizacion-cabecera .detalle-autor {
@@ -170,35 +170,35 @@
 
 .cotizacion-nota,
 .cotizacion-decision {
-  margin: 12px 0 0;
-  font-size: 14px;
+  margin: var(--espacio-3) 0 0;
+  font-size: var(--texto-base);
 }
 
 .cotizacion-decision {
-  padding: 10px 12px;
+  padding: var(--espacio-3) var(--espacio-3);
   border-radius: 8px;
   background: var(--color-surface-2);
 }
 
 .cotizacion-historial {
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-3);
   border-top: 1px solid var(--color-border);
 }
 
 .cotizacion-historial summary {
-  font-size: 13px;
+  font-size: var(--texto-sm);
   font-weight: 600;
   color: var(--color-accent);
   cursor: pointer;
 }
 
 .cotizacion-historial .cotizacion {
-  margin-top: 16px;
+  margin-top: var(--espacio-4);
   opacity: 0.85;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   .cotizacion-pie {
     flex-direction: column;
     align-items: stretch;
@@ -215,57 +215,57 @@
 .cotizacion-acciones {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--espacio-3);
   flex-wrap: wrap;
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
   border-top: 1px solid var(--color-border);
 }
 
 .cotizacion-acciones p {
   flex: 1 1 220px;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 .cotizacion-espera {
-  margin: 16px 0 0;
-  padding: 10px 12px;
+  margin: var(--espacio-4) 0 0;
+  padding: var(--espacio-3) var(--espacio-3);
   border-radius: 8px;
   background: var(--alerta-suave);
   color: var(--alerta-texto);
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 .decision-total {
-  margin: 0 0 12px;
-  font-size: 15px;
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-base);
 }
 
 .decision-texto {
-  margin: 0 0 16px;
-  font-size: 14px;
+  margin: 0 0 var(--espacio-4);
+  font-size: var(--texto-base);
   line-height: 1.5;
 }
 
 /* ---------- pago y comprobante ---------- */
 
 .pago-prueba {
-  margin-bottom: 16px;
-  padding: 12px;
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-3);
   border-radius: 8px;
   background: var(--color-accent-soft);
-  font-size: 13px;
+  font-size: var(--texto-sm);
 }
 
 .pago-prueba p {
-  margin: 0 0 8px;
+  margin: 0 0 var(--espacio-2);
 }
 
 .pago-prueba ul {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--espacio-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -274,12 +274,12 @@
 .pago-prueba li {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--espacio-3);
   flex-wrap: wrap;
 }
 
 .pago-prueba code {
-  font-size: 13px;
+  font-size: var(--texto-sm);
 }
 
 .pago-prueba li span {
@@ -289,7 +289,7 @@
 .pago-fila {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--espacio-3);
 }
 
 .campo input[aria-invalid="true"] {
@@ -297,47 +297,47 @@
 }
 
 .pago-error {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
   color: var(--color-danger);
 }
 
 .factura-pie {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--espacio-3);
   flex-wrap: wrap;
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: var(--espacio-4);
+  padding-top: var(--espacio-4);
   border-top: 1px solid var(--color-border);
 }
 
 .factura-pie p {
   flex: 1 1 220px;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 /* el comprobante se imprime junto con el detalle, por eso no lleva no-imprimir */
 .comprobante {
-  margin-top: 16px;
-  padding: 12px 14px;
+  margin-top: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
   border-radius: 8px;
   background: var(--color-ok-soft);
 }
 
 .comprobante h3 {
-  margin: 0 0 8px;
-  font-size: 14px;
+  margin: 0 0 var(--espacio-2);
+  font-size: var(--texto-base);
   color: var(--color-ok);
 }
 
 .comprobante dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 4px 16px;
+  gap: var(--espacio-1) var(--espacio-4);
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
 }
 
 .comprobante dt {

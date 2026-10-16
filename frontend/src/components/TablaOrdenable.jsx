@@ -33,12 +33,13 @@ export default function TablaOrdenable({
                             const activa = orden?.columna === columna.clave;
 
                             if (!ordenable) {
-                                return <th key={columna.clave}>{columna.titulo}</th>;
+                                return <th key={columna.clave} className={columna.clase}>{columna.titulo}</th>;
                             }
 
                             return (
                                 <th
                                     key={columna.clave}
+                                    className={columna.clase}
                                     aria-sort={activa ? ARIA_SORT[orden.direccion] : "none"}
                                 >
                                     <button

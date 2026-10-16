@@ -4,8 +4,8 @@
 
 .detalle-volver {
   display: inline-block;
-  margin-bottom: 12px;
-  font-size: 14px;
+  margin-bottom: var(--espacio-3);
+  font-size: var(--texto-base);
   color: var(--color-accent);
   text-decoration: none;
 }
@@ -20,15 +20,15 @@
 
 .detalle-insignias {
   display: flex;
-  gap: 8px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
-  margin-top: 10px;
+  margin-top: var(--espacio-3);
 }
 
 .detalle-columnas {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 20px;
+  gap: var(--espacio-5);
   align-items: start;
 }
 
@@ -36,19 +36,19 @@
 .detalle-lateral {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--espacio-5);
   min-width: 0;
 }
 
 .detalle-datos {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--espacio-3);
   margin: 0;
 }
 
 .detalle-dato dt {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -57,21 +57,21 @@
 
 .detalle-dato dd {
   margin: 2px 0 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   overflow-wrap: anywhere;
 }
 
 /* respeta los saltos de linea que escribio el tecnico o el cliente */
 .detalle-texto {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   line-height: 1.5;
   white-space: pre-line;
 }
 
 .detalle-vacio {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--texto-base);
   color: var(--color-text-dim);
 }
 
@@ -85,8 +85,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
 }
 
 .detalle-titulo-fila h2 {
@@ -94,11 +94,11 @@
 }
 
 .detalle-etiqueta-privada {
-  padding: 2px 10px;
+  padding: 2px var(--espacio-3);
   border-radius: 99px;
   background: var(--alerta-suave);
   color: var(--alerta-texto);
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -106,21 +106,21 @@
 .detalle-notas {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--espacio-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .detalle-notas li + li {
-  padding-top: 12px;
+  padding-top: var(--espacio-3);
   border-top: 1px solid var(--color-border);
 }
 
 .detalle-autor {
   display: block;
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
   color: var(--color-text-dim);
 }
 
@@ -133,7 +133,7 @@
 /* ---------- cambio de estado ---------- */
 
 .detalle-acciones-estado {
-  margin-top: 16px;
+  margin-top: var(--espacio-4);
 }
 
 .detalle-acciones-estado .boton {
@@ -143,34 +143,34 @@
 .estado-actual {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  font-size: 14px;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
+  font-size: var(--texto-base);
 }
 
 .estado-opciones {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 0 0 16px;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
   padding: 0;
   border: none;
 }
 
 .estado-opciones legend {
-  margin-bottom: 8px;
-  font-size: 13px;
+  margin-bottom: var(--espacio-2);
+  font-size: var(--texto-sm);
   font-weight: 600;
 }
 
 .estado-opcion {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--texto-base);
   cursor: pointer;
 }
 
@@ -187,26 +187,26 @@
 
 .estado-opcion small {
   display: block;
-  font-size: 12px;
+  font-size: var(--texto-xs);
 }
 
 .estado-regla {
-  margin-bottom: 16px;
-  padding: 12px;
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-3);
   border-radius: 8px;
   background: var(--alerta-suave);
   color: var(--alerta-texto);
-  font-size: 13px;
+  font-size: var(--texto-sm);
 }
 
 .estado-regla p {
-  margin: 0 0 8px;
+  margin: 0 0 var(--espacio-2);
 }
 
 .estado-check {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--espacio-2);
   font-weight: 600;
   cursor: pointer;
 }
@@ -287,7 +287,7 @@
   font-size: var(--texto-md);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .detalle-paso-acciones,
   .detalle-paso-acciones .boton {
     width: 100%;

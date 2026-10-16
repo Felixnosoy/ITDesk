@@ -1,12 +1,12 @@
 .perfil-bloque {
-  margin-bottom: 20px;
+  margin-bottom: var(--espacio-5);
   max-width: 640px;
 }
 
 .perfil-datos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  gap: var(--espacio-4);
   margin: 0;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .perfil-datos dt {
-  font-size: 12px;
+  font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -24,6 +24,6 @@
 
 .perfil-datos dd {
   margin: 2px 0 0;
-  font-size: 15px;
+  font-size: var(--texto-base);
   overflow-wrap: anywhere;
 }

@@ -1,8 +1,8 @@
 .adjuntos {
   display: flex;
-  gap: 8px;
+  gap: var(--espacio-2);
   flex-wrap: wrap;
-  margin: 8px 0 0;
+  margin: var(--espacio-2) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -42,19 +42,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  font-size: 11px;
+  padding: var(--espacio-1);
+  font-size: var(--texto-xs);
   color: var(--color-text-dim);
 }
 
 .visor-fondo {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--capa-visor);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--espacio-6);
   background: var(--velo-fuerte);
 }
 
@@ -75,8 +75,8 @@
 }
 
 .visor figcaption {
-  margin-top: 10px;
-  font-size: 13px;
+  margin-top: var(--espacio-3);
+  font-size: var(--texto-sm);
   color: var(--superficie-3);
 }
 
@@ -90,7 +90,7 @@
   border-radius: 50%;
   background: var(--sobre-oscuro-suave);
   color: var(--sobre-oscuro);
-  font-size: 26px;
+  font-size: var(--texto-2xl);
   line-height: 1;
   cursor: pointer;
 }

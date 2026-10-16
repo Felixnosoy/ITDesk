@@ -10,11 +10,12 @@ import {
 import "./FiltrosTickets.css";
 
 // Cada selector sale del catalogo, asi el filtro solo puede mandar valores
-// que el backend reconoce.
+// que el backend reconoce. La opcion vacia es corta porque la etiqueta ya
+// dice que se filtra.
 const SELECTORES = [
-    { campo: "estado", titulo: "Estado", todos: "Todos los estados", valores: ESTADOS_TICKET, etiquetas: ETIQUETA_ESTADO },
-    { campo: "categoria", titulo: "Categoría", todos: "Todas las categorías", valores: CATEGORIAS, etiquetas: ETIQUETA_CATEGORIA },
-    { campo: "prioridad", titulo: "Prioridad", todos: "Todas las prioridades", valores: PRIORIDADES, etiquetas: ETIQUETA_PRIORIDAD },
+    { campo: "estado", titulo: "Estado", todos: "Todos", valores: ESTADOS_TICKET, etiquetas: ETIQUETA_ESTADO },
+    { campo: "categoria", titulo: "Categoría", todos: "Todas", valores: CATEGORIAS, etiquetas: ETIQUETA_CATEGORIA },
+    { campo: "prioridad", titulo: "Prioridad", todos: "Todas", valores: PRIORIDADES, etiquetas: ETIQUETA_PRIORIDAD },
 ];
 
 // Panel de busqueda y filtros del listado de tickets. Es controlado: la
