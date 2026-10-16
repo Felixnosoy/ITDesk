@@ -74,7 +74,6 @@ export default function Tickets() {
     const esCliente = usuario.rol === ROLES.CLIENTE;
     const navegar = useNavigate();
     const vistas = useMemo(() => vistasDelRol(usuario.rol, usuario.id_usuario), [usuario.rol, usuario.id_usuario]);
-    const [vista, setVista] = useState("todos");
     // se lee una vez al entrar: lo que se abra despues se marca alla
     const [vistos] = useState(() => leerVistos(usuario.id_usuario));
     // en el celular los filtros quedan detras de un boton
@@ -85,15 +84,29 @@ export default function Tickets() {
     const [error, setError] = useState("");
     // ?q= llega desde el buscador global (un cliente, una serie): arranca
     // la busqueda del listado con ese texto
-    const [parametros] = useSearchParams();
+    const [parametros, setParametros] = useSearchParams();
     const qInicial = parametros.get("q") ?? "";
+
+    // La vista rapida vive en la direccion (?vista=cobrar): al abrir un ticket
+    // y volver atras se sigue en la misma vista, y el enlace se puede pasar a
+    // otra persona. Idea tomada del PR #280. replace evita llenar el historial.
+    const vista = vistas.some((v) => v.id === parametros.get("vista")) ? parametros.get("vista") : "todos";
+    const setVista = (nueva) =>
+        setParametros(
+            (actuales) => {
+                const siguientes = new URLSearchParams(actuales);
+                if (nueva === "todos") siguientes.delete("vista");
+                else siguientes.set("vista", nueva);
+                return siguientes;
+            },
+            { replace: true }
+        );
     const [filtros, setFiltros] = useState(() => ({ ...FILTROS_VACIOS, busqueda: qInicial }));
     const [qAplicada, setQAplicada] = useState(qInicial);
     // si ya estaba en el listado y llega otra busqueda, se aplica la nueva
     if (qInicial !== qAplicada) {
         setQAplicada(qInicial);
         setFiltros({ ...FILTROS_VACIOS, busqueda: qInicial });
-        setVista("todos");
     }
     const [orden, setOrden] = useState({ columna: "fecha_apertura", direccion: "desc" });
     const [pagina, setPagina] = useState(1);

@@ -80,6 +80,16 @@ describe("busqueda.service.buscar", () => {
         }
     );
 
+    test("el ticket cuyo codigo se escribio va primero", async () => {
+        sinResultados();
+
+        await busquedaService.buscar("TK-0004", tecnico);
+
+        const { sql, parametros } = consultas()[0];
+        expect(sql).toContain("ORDER BY t.id_ticket = ? DESC");
+        expect(parametros[parametros.length - 1]).toBe(4);
+    });
+
     test("devuelve los resultados agrupados", async () => {
         pool.query
             .mockResolvedValueOnce([[{ id_ticket: 4 }]])
