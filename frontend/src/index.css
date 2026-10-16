@@ -63,6 +63,16 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* texto solo para el lector de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ---------- componentes base (issue HU27.4) ----------
    Botones, campos, tarjetas, avisos e insignias que comparten todas las
    pantallas. Solo usan tokens: el color principal es el del rol. */

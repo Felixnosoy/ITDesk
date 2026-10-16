@@ -12,9 +12,56 @@
   margin-top: var(--espacio-3);
 }
 
+.detalle-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.detalle-cabecera-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* datos del caso en filas de dos o tres columnas, segun el ancho */
+.detalle-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--espacio-3) var(--espacio-5);
+  margin: var(--espacio-4) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--borde);
+}
+
+.detalle-serie {
+  font-family: var(--fuente-codigo);
+}
+
+/* quien y cuando, bajo una cotizacion o una factura */
+.detalle-autor {
+  display: block;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
+  color: var(--texto-3);
+}
+
+/* el panel de actividad queda a la vista mientras se recorre la columna */
+.detalle-lateral {
+  position: sticky;
+  top: calc(var(--barra-alto) + var(--espacio-4));
+  height: calc(100vh - var(--barra-alto) - var(--espacio-7));
+}
+
+.detalle-lateral .actividad {
+  height: 100%;
+}
+
 .detalle-columnas {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
   gap: var(--espacio-5);
   align-items: start;
 }
@@ -63,11 +110,6 @@
 }
 
 /* lo privado se distingue a simple vista de lo que ve el cliente */
-.detalle-privado {
-  border-left: 4px solid var(--alerta);
-  background: var(--alerta-suave);
-}
-
 .detalle-titulo-fila {
   display: flex;
   align-items: center;
@@ -80,51 +122,22 @@
   margin: 0;
 }
 
-.detalle-etiqueta-privada {
-  padding: 2px var(--espacio-3);
-  border-radius: 99px;
-  background: var(--alerta-suave);
-  color: var(--alerta-texto);
-  font-size: var(--texto-xs);
-  font-weight: 600;
-  white-space: nowrap;
+/* dos columnas solo si el contenido tiene lugar (depende del menu plegado o
+   no, por eso mira el ancho de la pagina y no el de la ventana) */
+.detalle-pagina {
+  container: detalle / inline-size;
 }
 
-.detalle-notas {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.detalle-notas li + li {
-  padding-top: var(--espacio-3);
-  border-top: 1px solid var(--color-border);
-}
-
-.detalle-autor {
-  display: block;
-  margin-top: var(--espacio-1);
-  font-size: var(--texto-xs);
-  color: var(--color-text-dim);
-}
-
-@media (max-width: 860px) {
+@container detalle (max-width: 980px) {
   .detalle-columnas {
     grid-template-columns: minmax(0, 1fr);
   }
-}
 
-/* ---------- cambio de estado ---------- */
-
-.detalle-acciones-estado {
-  margin-top: var(--espacio-4);
-}
-
-.detalle-acciones-estado .boton {
-  width: 100%;
+  /* apilado, el panel va despues del caso con un alto fijo y su propio scroll */
+  .detalle-lateral {
+    position: static;
+    height: min(70vh, 640px);
+  }
 }
 
 .estado-actual {
@@ -260,18 +273,6 @@
 
 .detalle-plegable[open] summary {
   margin-bottom: var(--espacio-4);
-}
-
-/* formulario de novedades al pie de la linea de tiempo */
-.detalle-novedad {
-  margin-top: var(--espacio-5);
-  padding-top: var(--espacio-5);
-  border-top: 1px solid var(--borde);
-}
-
-.detalle-novedad h3 {
-  margin: 0 0 var(--espacio-3);
-  font-size: var(--texto-md);
 }
 
 @media (max-width: 720px) {

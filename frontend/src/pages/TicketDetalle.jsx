@@ -18,11 +18,9 @@ import {
 import { proximoPaso, leToca } from "../utils/ciclo";
 import ProgresoCiclo from "../components/ProgresoCiclo";
 import Insignia from "../components/Insignia";
-import LineaTiempo from "../components/LineaTiempo";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
 import CambioEstado from "../components/CambioEstado";
-import FormularioSeguimiento from "../components/FormularioSeguimiento";
-import Adjuntos from "../components/Adjuntos";
+import PanelActividad from "../components/PanelActividad";
 import EditorCotizacion from "../components/EditorCotizacion";
 import { SeccionCotizaciones } from "../components/Cotizacion";
 import DecisionCotizacion from "../components/DecisionCotizacion";
@@ -42,8 +40,9 @@ const Dato = ({ etiqueta, children }) => (
     </div>
 );
 
-// Detalle de un ticket en una sola pantalla: resumen, cliente, equipo,
-// tecnico, descripcion y diagnostico.
+// Detalle de un ticket en una sola pantalla. A la izquierda lo que se sabe
+// del caso (problema, equipo, diagnostico, cotizacion, factura); a la
+// derecha, fijo, el panel de actividad con el registro tipo chat.
 //
 // Vista del taller o del cliente: no se decide por el rol sino por lo que
 // manda el servidor. Al Cliente no le llegan notas_privadas, asi que la
@@ -231,14 +230,26 @@ export default function TicketDetalle() {
             />
 
             <div className="pagina-cabecera detalle-cabecera">
-                <span className="detalle-codigo etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
-                <h1>{ticket.titulo}</h1>
-                <div className="detalle-insignias">
-                    <Insignia tipo="estado" valor={ticket.estado} />
-                    {/* la prioridad es una decision interna del taller */}
-                    {!esCliente && <Insignia tipo="prioridad" valor={ticket.prioridad} />}
-                    <Insignia tipo="categoria" valor={ticket.categoria} />
+                <div className="detalle-cabecera-texto">
+                    <span className="detalle-codigo etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>
+                    <h1>{ticket.titulo}</h1>
+                    <div className="detalle-insignias">
+                        <Insignia tipo="estado" valor={ticket.estado} />
+                        {/* la prioridad es una decision interna del taller */}
+                        {!esCliente && <Insignia tipo="prioridad" valor={ticket.prioridad} />}
+                        <Insignia tipo="categoria" valor={ticket.categoria} />
+                    </div>
                 </div>
+                {/* si el aviso del proximo paso ya ofrece cambiar el estado, no se repite */}
+                {puedeCambiarEstado && !acciones.some((a) => a.abrir === "estado") && (
+                    <button
+                        type="button"
+                        className="boton boton-secundario no-imprimir"
+                        onClick={() => abrirEdicion("estado")}
+                    >
+                        Cambiar estado
+                    </button>
+                )}
             </div>
 
             <div className={`tarjeta detalle-paso no-imprimir${pasoUrgente ? " detalle-paso-urgente" : ""}`}>
@@ -270,8 +281,26 @@ export default function TicketDetalle() {
             <div className="detalle-columnas">
                 <div className="detalle-principal">
                     <div className="tarjeta">
-                        <h2>Descripción del problema</h2>
+                        <h2>Problema reportado</h2>
                         <p className="detalle-texto">{ticket.descripcion}</p>
+                        <dl className="detalle-resumen">
+                            <Dato etiqueta="Equipo">
+                                {ticket.equipo_tipo} {ticket.equipo_marca} {ticket.equipo_modelo}
+                            </Dato>
+                            <Dato etiqueta="Número de serie">
+                                <span className="detalle-serie">{ticket.equipo_numero_serie}</span>
+                            </Dato>
+                            {esTaller && <Dato etiqueta="Cliente">{ticket.cliente}</Dato>}
+                            <Dato etiqueta="Técnico asignado">{ticket.tecnico ?? "Sin asignar"}</Dato>
+                            <Dato etiqueta="Apertura">{formatearFechaHora(ticket.fecha_apertura)}</Dato>
+                            {ticket.fecha_resolucion && (
+                                <Dato etiqueta="Resolución">
+                                    {formatearFecha(ticket.fecha_resolucion)}
+                                    {ticket.resuelto_sin_costo === 1 && " · sin costo"}
+                                </Dato>
+                            )}
+                            {ticket.fecha_cierre && <Dato etiqueta="Cierre">{formatearFecha(ticket.fecha_cierre)}</Dato>}
+                        </dl>
                     </div>
 
                     <div className="tarjeta" id="seccion-diagnostico">
@@ -450,89 +479,24 @@ export default function TicketDetalle() {
                         </div>
                     )}
 
-                    <div className="tarjeta">
-                        <h2>Línea de tiempo</h2>
-                        <LineaTiempo
-                            actualizaciones={detalle.actualizaciones}
-                            renderAdjuntos={(adjuntos) => <Adjuntos adjuntos={adjuntos} />}
-                        />
-                        {puedeEditar && (
-                            <div className="detalle-novedad no-imprimir">
-                                <h3>Registrar novedad</h3>
-                                <FormularioSeguimiento
-                                    guardando={guardando}
-                                    error={editando === "seguimiento" ? errorAccion : ""}
-                                    onGuardar={(tipo, texto, imagenes) => {
-                                        setEditando("seguimiento");
-                                        return ejecutar(
-                                            () => registrarSeguimiento(token, ticket.id_ticket, tipo, texto, imagenes),
-                                            tipo === "notas" ? "Nota privada registrada." : "Avance registrado."
-                                        );
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {esTaller && (
-                        <div className="tarjeta detalle-privado">
-                            <div className="detalle-titulo-fila">
-                                <h2>Notas privadas</h2>
-                                <span className="detalle-etiqueta-privada">Solo el taller</span>
-                            </div>
-                            {detalle.notas_privadas.length === 0 ? (
-                                <p className="detalle-vacio">No hay notas privadas.</p>
-                            ) : (
-                                <ul className="detalle-notas">
-                                    {detalle.notas_privadas.map((nota) => (
-                                        <li key={nota.id_nota}>
-                                            <p className="detalle-texto">{nota.contenido}</p>
-                                            {nota.adjuntos.length > 0 && <Adjuntos adjuntos={nota.adjuntos} />}
-                                            <span className="detalle-autor">
-                                                {nota.usuario} · {formatearFechaHora(nota.fecha)}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    )}
                 </div>
 
-                <aside className="detalle-lateral" aria-label="Resumen y equipo">
-                    <div className="tarjeta">
-                        <h2>Resumen</h2>
-                        <dl className="detalle-datos">
-                            <Dato etiqueta="Apertura">{formatearFechaHora(ticket.fecha_apertura)}</Dato>
-                            {ticket.fecha_resolucion && (
-                                <Dato etiqueta="Resolución">
-                                    {formatearFecha(ticket.fecha_resolucion)}
-                                    {ticket.resuelto_sin_costo === 1 && " · sin costo"}
-                                </Dato>
-                            )}
-                            {ticket.fecha_cierre && <Dato etiqueta="Cierre">{formatearFecha(ticket.fecha_cierre)}</Dato>}
-                            <Dato etiqueta="Técnico asignado">{ticket.tecnico ?? "Sin asignar"}</Dato>
-                            {esTaller && <Dato etiqueta="Cliente">{ticket.cliente}</Dato>}
-                        </dl>
-                        {puedeCambiarEstado && (
-                            <div className="detalle-acciones-estado">
-                                <button type="button" className="boton" onClick={() => abrirEdicion("estado")}>
-                                    Cambiar estado
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="tarjeta">
-                        <h2>Equipo</h2>
-                        <dl className="detalle-datos">
-                            <Dato etiqueta="Tipo">{ticket.equipo_tipo}</Dato>
-                            <Dato etiqueta="Marca y modelo">
-                                {ticket.equipo_marca} {ticket.equipo_modelo}
-                            </Dato>
-                            <Dato etiqueta="Número de serie">{ticket.equipo_numero_serie}</Dato>
-                        </dl>
-                    </div>
+                <aside className="detalle-lateral" aria-label="Actividad del ticket">
+                    <PanelActividad
+                        actualizaciones={detalle.actualizaciones}
+                        notas={esTaller ? detalle.notas_privadas : null}
+                        idUsuario={sesion.usuario.id_usuario}
+                        puedeEscribir={puedeEditar}
+                        guardando={guardando && editando === "seguimiento"}
+                        error={editando === "seguimiento" ? errorAccion : ""}
+                        onEnviar={(tipo, texto, imagenes) => {
+                            setEditando("seguimiento");
+                            return ejecutar(
+                                () => registrarSeguimiento(token, ticket.id_ticket, tipo, texto, imagenes),
+                                tipo === "notas" ? "Nota interna registrada." : "Avance enviado al cliente."
+                            );
+                        }}
+                    />
                 </aside>
             </div>
 

@@ -1,0 +1,221 @@
+.actividad {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.actividad-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4) var(--espacio-tarjeta) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.actividad-cabecera h2 {
+  margin: 0;
+}
+
+/* sin pestanas (cliente) el titulo necesita su espacio abajo */
+.actividad-cabecera:not(:has(.actividad-canales)) {
+  padding-bottom: var(--espacio-4);
+}
+
+.actividad-canales {
+  display: flex;
+  gap: var(--espacio-1);
+}
+
+.actividad-canal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin-bottom: -1px;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--texto-3);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actividad-canal:hover {
+  color: var(--texto);
+}
+
+.actividad-canal[aria-selected="true"] {
+  border-bottom-color: var(--rol-principal);
+  color: var(--rol-principal);
+}
+
+/* el canal interno lleva el color de alerta, igual que antes las notas */
+.actividad-interno .actividad-canal[aria-selected="true"] {
+  border-bottom-color: var(--alerta);
+  color: var(--alerta-texto);
+}
+
+.actividad-cantidad {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: var(--texto-xs);
+  text-align: center;
+}
+
+.actividad-aviso-interno {
+  margin: 0;
+  padding: var(--espacio-2) var(--espacio-tarjeta);
+  background: var(--alerta-suave);
+  border-bottom: 1px solid var(--alerta-borde);
+  color: var(--alerta-texto);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+/* ---------- mensajes ---------- */
+
+.actividad-lista {
+  flex: 1;
+  min-height: 160px;
+  padding: var(--espacio-4) var(--espacio-tarjeta);
+  overflow-y: auto;
+  background: var(--superficie-2);
+}
+
+.actividad-mensajes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.actividad-lista:focus-visible {
+  outline: 2px solid var(--rol-principal);
+  outline-offset: -2px;
+}
+
+.actividad-vacia {
+  margin: auto;
+  color: var(--texto-3);
+  text-align: center;
+}
+
+.actividad-mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-2);
+  max-width: 92%;
+}
+
+.actividad-mensaje.propio {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+
+.actividad-avatar {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+}
+
+.actividad-mensaje.propio .actividad-avatar {
+  background: var(--rol-suave);
+  color: var(--rol-principal);
+}
+
+.actividad-globo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  min-width: 0;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio) var(--radio) var(--radio) 4px;
+  background: var(--superficie);
+}
+
+.actividad-mensaje.propio .actividad-globo {
+  border-color: var(--rol-aviso-borde);
+  border-radius: var(--radio) var(--radio) 4px var(--radio);
+  background: var(--rol-suave);
+}
+
+.actividad-interno .actividad-globo {
+  border-color: var(--alerta-borde);
+  background: var(--alerta-suave);
+}
+
+.actividad-autor {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espacio-2);
+  font-size: var(--texto-sm);
+}
+
+.actividad-autor span {
+  font-size: var(--texto-xs);
+  color: var(--texto-3);
+}
+
+.actividad-globo p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.actividad-globo time,
+.actividad-evento time {
+  font-size: var(--texto-xs);
+  /* texto-4 no llega a 4.5:1 sobre el fondo del panel */
+  color: var(--texto-3);
+}
+
+.actividad-evento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-1);
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+  text-align: center;
+}
+
+.actividad-evento p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* ---------- caja para escribir ---------- */
+
+.actividad-caja {
+  padding: var(--espacio-3) var(--espacio-tarjeta) var(--espacio-4);
+  border-top: 1px solid var(--borde);
+  background: var(--superficie);
+}
+
+.actividad-caja .campo {
+  margin-bottom: var(--espacio-2);
+}
+
+.actividad-caja textarea {
+  resize: vertical;
+  min-height: 64px;
+}

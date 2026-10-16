@@ -4,7 +4,7 @@ import "./AvisoFlotante.css";
 
 const DURACION_MS = 5000;
 
-// Confirmacion de que algo se guardo, flotando abajo a la derecha: se ve
+// Confirmacion de que algo se guardo, flotando abajo al centro: se ve
 // aunque la accion se haya hecho a mitad de la pagina, y se va sola. Va en
 // un portal para que ningun contenedor con overflow la recorte.
 export default function AvisoFlotante({ mensaje, onCerrar }) {

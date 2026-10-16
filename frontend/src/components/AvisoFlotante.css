@@ -1,7 +1,9 @@
 .aviso-flotante {
+  /* abajo al centro: a la derecha tapaba la caja del panel de actividad */
   position: fixed;
-  right: var(--espacio-6);
+  left: 50%;
   bottom: var(--espacio-6);
+  transform: translateX(-50%);
   z-index: var(--capa-aviso);
   display: flex;
   align-items: center;
@@ -48,7 +50,7 @@
 @keyframes aviso-entrar {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate(-50%, 8px);
   }
 }
 
@@ -64,5 +66,14 @@
     bottom: var(--espacio-4);
     left: var(--espacio-4);
     max-width: none;
+    transform: none;
+    animation-name: aviso-entrar-celular;
+  }
+
+  @keyframes aviso-entrar-celular {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
   }
 }

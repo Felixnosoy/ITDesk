@@ -13,11 +13,13 @@ const TIPOS_ACTUALIZACION = {
     ESTADO: "Estado"
 };
 
+// rol_usuario: el panel de actividad muestra quien escribio cada mensaje
 const COLUMNAS_ACTUALIZACION = `
     a.id_actualizacion,
     a.id_ticket,
     a.id_usuario,
     CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+    u.rol AS rol_usuario,
     a.tipo,
     a.estado,
     a.observaciones,
@@ -29,6 +31,7 @@ const COLUMNAS_NOTA = `
     n.id_ticket,
     n.id_usuario,
     CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+    u.rol AS rol_usuario,
     n.contenido,
     n.fecha
 `;

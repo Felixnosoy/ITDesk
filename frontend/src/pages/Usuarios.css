@@ -154,15 +154,6 @@
   flex-wrap: nowrap;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 /* ---------- celular: cada usuario es una tarjeta ---------- */
 
 @media screen and (max-width: 720px) {
