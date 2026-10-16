@@ -1,0 +1,309 @@
+/* Fichas de cliente y de equipo: cabecera con identidad, indicadores y dos
+   columnas (datos fijos a la izquierda, historial a la derecha). */
+
+.ficha {
+  container: ficha / inline-size;
+}
+
+.ficha-cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.ficha-cabecera .boton {
+  margin-left: auto;
+  text-decoration: none;
+}
+
+.ficha-cabecera-texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  min-width: 0;
+}
+
+.ficha-cabecera-texto p a {
+  color: var(--rol-principal);
+  font-weight: 600;
+}
+
+.ficha-avatar {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--rol-suave);
+  color: var(--rol-principal);
+  font-family: var(--fuente-titulo);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+}
+
+.ficha-serie {
+  align-self: flex-start;
+}
+
+.ficha-insignias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-1);
+}
+
+.ficha-en-taller {
+  text-decoration: none;
+}
+
+/* ---------- indicadores ---------- */
+
+.ficha-indicadores {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-grupo);
+  margin-bottom: var(--espacio-seccion);
+}
+
+.ficha-indicador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-4) var(--espacio-5);
+}
+
+.ficha-indicador span {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--texto-3);
+}
+
+.ficha-indicador strong {
+  font-size: var(--texto-2xl);
+  line-height: 1;
+}
+
+.ficha-indicador .ficha-cifra-monto {
+  font-size: var(--texto-lg);
+}
+
+.ficha-aviso {
+  background: var(--alerta-suave);
+  border-color: var(--alerta-borde);
+  color: var(--alerta-texto);
+  font-weight: 600;
+}
+
+/* ---------- columnas ---------- */
+
+.ficha-columnas {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: var(--espacio-5);
+  align-items: start;
+}
+
+.ficha-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+  min-width: 0;
+}
+
+.ficha-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+}
+
+.ficha-dato dt {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-3);
+}
+
+.ficha-dato dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.ficha-dato a {
+  color: var(--rol-principal);
+}
+
+.ficha-vacio {
+  margin: 0;
+  color: var(--texto-3);
+}
+
+.ficha-equipos {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-equipos li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) 0;
+  border-top: 1px solid var(--borde);
+}
+
+.ficha-equipos li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.ficha-equipos a {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ficha-equipos a strong {
+  color: var(--rol-principal);
+}
+
+.ficha-equipos a:hover strong {
+  text-decoration: underline;
+}
+
+.ficha-equipos a span,
+.ficha-visitas {
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+}
+
+.ficha-visitas {
+  flex: none;
+}
+
+.ficha-historial {
+  min-width: 0;
+}
+
+.ficha-historial .tabla a {
+  color: var(--rol-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---------- historial de visitas del equipo ---------- */
+
+.ficha-visitas-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-visita {
+  position: relative;
+  display: flex;
+  gap: var(--espacio-4);
+  padding-bottom: var(--espacio-5);
+}
+
+/* la linea que une una visita con la siguiente */
+.ficha-visita:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: 0;
+  left: 6px;
+  width: 2px;
+  background: var(--borde);
+}
+
+.ficha-visita-punto {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border: 2px solid var(--rol-principal);
+  border-radius: 50%;
+  background: var(--superficie);
+}
+
+.ficha-visita-abierta .ficha-visita-punto {
+  background: var(--rol-principal);
+}
+
+.ficha-visita-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.ficha-visita-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+}
+
+.ficha-visita-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.ficha-visita-titulo:hover strong {
+  color: var(--rol-principal);
+  text-decoration: underline;
+}
+
+.ficha-visita-meta,
+.ficha-visita-recepcion,
+.ficha-visita-monto {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--texto-3);
+}
+
+.ficha-visita-recepcion {
+  color: var(--texto-2);
+}
+
+.ficha-visita-monto {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  font-weight: 600;
+  color: var(--texto);
+}
+
+/* ---------- angosto ---------- */
+
+@container ficha (max-width: 860px) {
+  .ficha-columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container ficha (max-width: 620px) {
+  .ficha-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ficha-cabecera .boton {
+    width: 100%;
+    margin-left: 0;
+  }
+}

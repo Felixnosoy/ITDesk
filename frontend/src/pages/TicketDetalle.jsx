@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
@@ -301,12 +301,20 @@ export default function TicketDetalle() {
                         <p className="detalle-texto">{ticket.descripcion}</p>
                         <dl className="detalle-resumen">
                             <Dato etiqueta="Equipo">
-                                {ticket.equipo_tipo} {ticket.equipo_marca} {ticket.equipo_modelo}
+                                <Link to={`/equipos/${ticket.id_equipo}`} className="detalle-enlace">
+                                    {ticket.equipo_tipo} {ticket.equipo_marca} {ticket.equipo_modelo}
+                                </Link>
                             </Dato>
                             <Dato etiqueta="Número de serie">
                                 <span className="detalle-serie">{ticket.equipo_numero_serie}</span>
                             </Dato>
-                            {esTaller && <Dato etiqueta="Cliente">{ticket.cliente}</Dato>}
+                            {esTaller && (
+                                <Dato etiqueta="Cliente">
+                                    <Link to={`/clientes/${ticket.id_usuario}`} className="detalle-enlace">
+                                        {ticket.cliente}
+                                    </Link>
+                                </Dato>
+                            )}
                             <Dato etiqueta="Técnico asignado">{ticket.tecnico ?? "Sin asignar"}</Dato>
                             <Dato etiqueta="Apertura">{formatearFechaHora(ticket.fecha_apertura)}</Dato>
                             {ticket.fecha_resolucion && (

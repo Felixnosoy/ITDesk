@@ -123,6 +123,14 @@ const obtenerTickets = async (usuario, filtros = {}) => {
         parametros.push(valor);
     }
 
+    // historial de un cliente o de un equipo (las fichas). Para el Cliente se
+    // suman a su alcance: pedir el equipo de otro devuelve una lista vacia
+    for (const [campo, columna] of [["id_cliente", "t.id_usuario"], ["id_equipo", "t.id_equipo"]]) {
+        if (filtros[campo] === undefined || filtros[campo] === "") continue;
+        condiciones.push(`${columna} = ?`);
+        parametros.push(validarId(filtros[campo], campo));
+    }
+
     const where = condiciones.length > 0
         ? `WHERE ${condiciones.join(" AND ")}`
         : "";

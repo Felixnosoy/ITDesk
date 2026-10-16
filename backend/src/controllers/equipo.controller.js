@@ -17,6 +17,21 @@ const obtenerEquipos = async (req, res) => {
     }
 };
 
+const obtenerEquipo = async (req, res) => {
+    try {
+        const equipo = await equipoService.obtenerEquipoPorId(req.params.id, req.usuario);
+
+        responder(res, 200, {
+            data: equipo
+        });
+
+    } catch (error) {
+        responder(res, error.status || 500, {
+            message: error.message
+        });
+    }
+};
+
 const crearEquipo = async (req, res) => {
     try {
         const equipo = await equipoService.crearEquipo(req.body);
@@ -41,5 +56,6 @@ const crearEquipo = async (req, res) => {
 
 module.exports = {
     obtenerEquipos,
+    obtenerEquipo,
     crearEquipo
 };

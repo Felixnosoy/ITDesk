@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TODOS_LOS_ROLES, ETIQUETA_ROL } from "../constants/roles";
 import {
@@ -39,6 +39,7 @@ export default function Usuarios() {
     const [errorCarga, setErrorCarga] = useState("");
     // ?q= llega desde el buscador global (un correo del personal)
     const [parametros] = useSearchParams();
+    const navegar = useNavigate();
     const qInicial = parametros.get("q") ?? "";
     const [busqueda, setBusqueda] = useState(qInicial);
     const [qAplicada, setQAplicada] = useState(qInicial);
@@ -291,6 +292,9 @@ export default function Usuarios() {
                                                 <MenuAcciones
                                                     etiqueta={`Más acciones para ${u.nombre} ${u.apellido}`}
                                                     opciones={[
+                                                        ...(u.rol === "Cliente"
+                                                            ? [{ etiqueta: "Ver ficha del cliente", onClick: () => navegar(`/clientes/${u.id_usuario}`) }]
+                                                            : []),
                                                         {
                                                             etiqueta: "Restablecer contraseña",
                                                             onClick: () => abrir({ tipo: "clave", usuario: u }),

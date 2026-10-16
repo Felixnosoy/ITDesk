@@ -1,19 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ETIQUETA_ROL } from "../constants/roles";
-import { formatearFechaHora } from "../utils/formato";
+import { formatearFechaHora, iniciales } from "../utils/formato";
 import Insignia from "./Insignia";
 import Adjuntos from "./Adjuntos";
 import FormularioSeguimiento from "./FormularioSeguimiento";
 import "./PanelActividad.css";
-
-const iniciales = (nombre = "") =>
-    nombre
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((parte) => parte[0])
-        .join("")
-        .toUpperCase();
 
 // Un mensaje del registro: quien, con que rol y cuando, como en el chat de
 // un sistema de mesa de ayuda. Los cambios de estado no son mensajes de una

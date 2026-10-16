@@ -12,8 +12,8 @@ const MINIMO = 2;
 const ESPERA_MS = 250;
 
 // Convierte la respuesta del servidor en una lista plana de opciones, cada
-// una con su grupo y a donde lleva. Clientes y personal no tienen ficha
-// propia: llevan al listado ya filtrado por esa persona.
+// una con su grupo y a donde lleva: tickets, equipos y clientes a su pagina;
+// el personal no tiene ficha y lleva a Usuarios filtrado por su correo.
 function opcionesDe(resultados, texto) {
     if (!resultados) return [];
 
@@ -32,14 +32,14 @@ function opcionesDe(resultados, texto) {
             clave: `e${e.id_equipo}`,
             titulo: `${e.marca} ${e.modelo}`,
             detalle: `${e.tipo} · Serie ${e.numero_serie} · ${e.cliente}`,
-            ruta: e.ultimo_ticket ? `/tickets/${e.ultimo_ticket}` : `/tickets?q=${encodeURIComponent(e.numero_serie)}`,
+            ruta: `/equipos/${e.id_equipo}`,
         })),
         ...resultados.clientes.map((c) => ({
             grupo: "Clientes",
             clave: `c${c.id_usuario}`,
             titulo: `${c.nombre} ${c.apellido}`,
             detalle: [c.correo, c.telefono].filter(Boolean).join(" · "),
-            ruta: `/tickets?q=${encodeURIComponent(`${c.nombre} ${c.apellido}`)}`,
+            ruta: `/clientes/${c.id_usuario}`,
         })),
         ...resultados.personal.map((p) => ({
             grupo: "Personal",

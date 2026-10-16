@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import {
@@ -11,7 +11,7 @@ import {
     ETIQUETA_CANAL,
     ACCESORIOS_COMUNES,
 } from "../constants/tickets";
-import { listarUsuarios } from "../api/usuarios";
+import { listarUsuarios, obtenerUsuario } from "../api/usuarios";
 import { crearTicket } from "../api/tickets";
 import { codigoTicket } from "../utils/formato";
 import SelectorCliente from "../components/SelectorCliente";
@@ -37,6 +37,9 @@ export default function RegistrarTicket() {
     const navegar = useNavigate();
 
     const [cliente, setCliente] = useState(null);
+    // desde la ficha de un cliente se llega con ?cliente=id y el paso 1 hecho
+    const [parametros] = useSearchParams();
+    const idClienteInicial = parametros.get("cliente");
     const [equipo, setEquipo] = useState(null);
     const [datos, setDatos] = useState({
         titulo: "",
@@ -56,6 +59,22 @@ export default function RegistrarTicket() {
     const [errorTecnicos, setErrorTecnicos] = useState("");
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (!idClienteInicial) return undefined;
+        let vigente = true;
+
+        obtenerUsuario(token, idClienteInicial)
+            .then((encontrado) => {
+                if (vigente && encontrado.rol === ROLES.CLIENTE && encontrado.estado === "Activo") setCliente(encontrado);
+            })
+            // si no se encuentra, el paso 1 queda como siempre para buscarlo
+            .catch(() => {});
+
+        return () => {
+            vigente = false;
+        };
+    }, [token, idClienteInicial]);
 
     // tecnicos activos a los que se puede asignar el ticket
     useEffect(() => {

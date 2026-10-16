@@ -151,3 +151,40 @@ describe("equipo.service.crearEquipo", () => {
         expect(pool.query).not.toHaveBeenCalled();
     });
 });
+
+describe("equipo.service.obtenerEquipoPorId", () => {
+    const tecnico = { id_usuario: 3, rol: "Tecnico" };
+
+    test("rechaza con 400 un id invalido sin consultar la base", async () => {
+        await expect(equipoService.obtenerEquipoPorId("x", tecnico)).rejects.toMatchObject({ status: 400 });
+        expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    test("responde 404 si no existe", async () => {
+        pool.query.mockResolvedValueOnce([[]]);
+        await expect(equipoService.obtenerEquipoPorId("9", tecnico)).rejects.toMatchObject({ status: 404 });
+    });
+
+    test("el personal ve cualquier equipo, con el nombre del cliente", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 5, cliente: "Maria Gomez" }]]);
+
+        const equipo = await equipoService.obtenerEquipoPorId("9", tecnico);
+
+        expect(pool.query.mock.calls[0][1]).toEqual([9]);
+        expect(equipo.cliente).toBe("Maria Gomez");
+    });
+
+    test("al Cliente un equipo ajeno le responde 404, como si no existiera", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 5 }]]);
+
+        await expect(equipoService.obtenerEquipoPorId("9", { id_usuario: 7, rol: "Cliente" }))
+            .rejects.toMatchObject({ status: 404 });
+    });
+
+    test("el Cliente ve su propio equipo", async () => {
+        pool.query.mockResolvedValueOnce([[{ id_equipo: 9, id_usuario: 7 }]]);
+
+        await expect(equipoService.obtenerEquipoPorId("9", { id_usuario: 7, rol: "Cliente" }))
+            .resolves.toMatchObject({ id_equipo: 9 });
+    });
+});

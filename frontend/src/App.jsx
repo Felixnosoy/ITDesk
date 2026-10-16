@@ -15,6 +15,8 @@ import Usuarios from "./pages/Usuarios";
 import Tickets from "./pages/Tickets";
 import TicketDetalle from "./pages/TicketDetalle";
 import RegistrarTicket from "./pages/RegistrarTicket";
+import FichaCliente from "./pages/FichaCliente";
+import FichaEquipo from "./pages/FichaEquipo";
 
 export default function App() {
     const { sesion } = useAuth();
@@ -46,8 +48,14 @@ export default function App() {
                         <Route path="/tickets/nuevo" element={<RegistrarTicket />} />
                     </Route>
 
+                    {/* la ficha de un cliente es para el personal del taller */}
+                    <Route element={<RequireRole roles={[ROLES.TECNICO, ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR]} />}>
+                        <Route path="/clientes/:id" element={<FichaCliente />} />
+                    </Route>
+
                     <Route element={<RequireRole roles={TODOS_LOS_ROLES} />}>
                         <Route path="/tickets" element={<Tickets />} />
+                        <Route path="/equipos/:id" element={<FichaEquipo />} />
                         <Route path="/tickets/:id" element={<TicketDetalle />} />
                         <Route path="/perfil" element={<Perfil />} />
                         <Route path="/cambiar-contrasena" element={<CambiarContrasena />} />

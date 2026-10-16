@@ -53,6 +53,17 @@
   grid-column: 1 / -1;
 }
 
+/* el equipo y el cliente llevan a su ficha con historial */
+.detalle-enlace {
+  color: var(--rol-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.detalle-enlace:hover {
+  text-decoration: underline;
+}
+
 .detalle-serie {
   font-family: var(--fuente-codigo);
 }

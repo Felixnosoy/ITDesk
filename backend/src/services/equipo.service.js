@@ -144,7 +144,36 @@ const crearEquipo = async (datos = {}) => {
     return equipos[0];
 };
 
+// Un equipo con el nombre de su dueno, para su ficha. El Cliente solo ve los
+// suyos: uno ajeno responde 404 igual que si no existiera, para no revelar
+// que el id esta en uso.
+const obtenerEquipoPorId = async (idEquipo, usuario) => {
+    const id_equipo = validarId(idEquipo, "id_equipo");
+
+    const [equipos] = await pool.query(
+        `
+        SELECT
+            ${COLUMNAS_EQUIPO.replace(/(\w+)/g, "e.$1")},
+            CONCAT(c.nombre, ' ', c.apellido) AS cliente
+        FROM equipo e
+        INNER JOIN usuario c
+            ON e.id_usuario = c.id_usuario
+        WHERE e.id_equipo = ?
+        `,
+        [id_equipo]
+    );
+
+    const equipo = equipos[0];
+
+    if (!equipo || (usuario.rol === ROLES.CLIENTE && equipo.id_usuario !== usuario.id_usuario)) {
+        throw crearError("Equipo no encontrado.", 404);
+    }
+
+    return equipo;
+};
+
 module.exports = {
     obtenerEquiposDeCliente,
+    obtenerEquipoPorId,
     crearEquipo
 };

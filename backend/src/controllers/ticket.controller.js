@@ -29,12 +29,14 @@ const crearTicket = async (req, res) => {
 
 const obtenerTickets = async (req, res) => {
     try {
-        const { estado, prioridad, categoria } = req.query;
+        const { estado, prioridad, categoria, id_cliente, id_equipo } = req.query;
 
         const tickets = await ticketService.obtenerTickets(req.usuario, {
             estado,
             prioridad,
-            categoria
+            categoria,
+            id_cliente,
+            id_equipo
         });
 
         responder(res, 200, {
