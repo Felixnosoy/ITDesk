@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import { ESTADOS_TICKET, PRIORIDADES, FILTROS_VACIOS } from "../constants/tickets";
+import { ESTADOS_FACTURA } from "../constants/cotizaciones";
 import { listarTickets } from "../api/tickets";
+import { proximoPaso, leToca } from "../utils/ciclo";
 import { siguienteOrden, ordenarFilas, totalPaginas, paginar } from "../utils/tabla";
 import { codigoTicket, formatearFecha, nombreEquipo, normalizar } from "../utils/formato";
 import FiltrosTickets from "../components/FiltrosTickets";
@@ -20,12 +22,43 @@ const ROLES_QUE_REGISTRAN = [ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR];
 
 const enlace = (ticket, texto) => <Link to={`/tickets/${ticket.id_ticket}`}>{texto}</Link>;
 
+// Vistas rapidas sobre el listado: atajos a las preguntas de todos los dias
+// ("que me toca", "que falta cobrar") sin armar filtros a mano.
+function vistasDelRol(rol, idUsuario) {
+    const toca = (t) => leToca(proximoPaso(t, rol), rol);
+
+    if (rol === ROLES.CLIENTE) {
+        return [
+            { id: "todos", etiqueta: "Todos", filtro: () => true },
+            { id: "toca", etiqueta: "Esperan tu respuesta", filtro: toca },
+            { id: "taller", etiqueta: "En el taller", filtro: (t) => t.estado !== ESTADOS_TICKET.CERRADO },
+            { id: "entregados", etiqueta: "Entregados", filtro: (t) => t.estado === ESTADOS_TICKET.CERRADO },
+        ];
+    }
+
+    return [
+        { id: "todos", etiqueta: "Todos", filtro: () => true },
+        { id: "toca", etiqueta: "Te toca", filtro: toca },
+        ...(rol === ROLES.TECNICO
+            ? [{ id: "mios", etiqueta: "Asignados a mí", filtro: (t) => t.id_tecnico === idUsuario && t.estado !== ESTADOS_TICKET.CERRADO }]
+            : []),
+        { id: "cliente", etiqueta: "Esperan al cliente", filtro: (t) => t.estado === ESTADOS_TICKET.ESPERANDO_APROBACION },
+        {
+            id: "facturar",
+            etiqueta: "Para facturar",
+            filtro: (t) => t.estado === ESTADOS_TICKET.EN_REPARACION && !t.factura_estado,
+        },
+        { id: "cobrar", etiqueta: "Por cobrar", filtro: (t) => t.factura_estado === ESTADOS_FACTURA.PENDIENTE },
+    ];
+}
+
 // marca y modelo en una linea, el tipo debajo en gris
+// (en un solo span para que en la tarjeta del celular vaya junto)
 const celdaEquipo = (ticket) => (
-    <>
+    <span>
         {ticket.equipo_marca} {ticket.equipo_modelo}
         <span className="tickets-secundario">{ticket.equipo_tipo}</span>
-    </>
+    </span>
 );
 
 // Listado de tickets. El alcance lo decide el servidor (el cliente recibe
@@ -35,6 +68,11 @@ export default function Tickets() {
     const { sesion } = useAuth();
     const { token, usuario } = sesion;
     const esCliente = usuario.rol === ROLES.CLIENTE;
+    const navegar = useNavigate();
+    const vistas = useMemo(() => vistasDelRol(usuario.rol, usuario.id_usuario), [usuario.rol, usuario.id_usuario]);
+    const [vista, setVista] = useState("todos");
+    // en el celular los filtros quedan detras de un boton
+    const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
 
     const [tickets, setTickets] = useState([]);
     const [cargando, setCargando] = useState(true);
@@ -69,23 +107,44 @@ export default function Tickets() {
     const columnas = useMemo(
         () => [
             { clave: "id_ticket", titulo: "Código", render: (t) => enlace(t, <span className="etiqueta-codigo">{codigoTicket(t.id_ticket)}</span>) },
-            { clave: "titulo", titulo: "Título", render: (t) => enlace(t, t.titulo) },
-            ...(esCliente ? [] : [{ clave: "cliente", titulo: "Cliente" }]),
+            {
+                clave: "titulo",
+                titulo: "Ticket",
+                clase: "celda-principal",
+                // el cliente va debajo del titulo: una columna menos y filas mas bajas
+                render: (t) => (
+                    <>
+                        {enlace(t, t.titulo)}
+                        {!esCliente && <span className="tickets-secundario">{t.cliente}</span>}
+                    </>
+                ),
+            },
             { clave: "equipo", titulo: "Equipo", render: celdaEquipo, valorOrden: nombreEquipo },
-            { clave: "tecnico", titulo: "Técnico" },
+            { clave: "tecnico", titulo: "Técnico", clase: "solo-escritorio", render: (t) => t.tecnico ?? "Sin asignar" },
             {
                 clave: "estado",
                 titulo: "Estado",
                 render: (t) => <Insignia tipo="estado" valor={t.estado} />,
                 valorOrden: (t) => ORDEN_ESTADO.indexOf(t.estado),
             },
+            // la prioridad es interna del taller: el cliente no la ve
+            ...(esCliente
+                ? []
+                : [
+                      {
+                          clave: "prioridad",
+                          titulo: "Prioridad",
+                          clase: "solo-escritorio",
+                          render: (t) => <Insignia tipo="prioridad" valor={t.prioridad} />,
+                          valorOrden: (t) => ORDEN_PRIORIDAD.indexOf(t.prioridad),
+                      },
+                  ]),
             {
-                clave: "prioridad",
-                titulo: "Prioridad",
-                render: (t) => <Insignia tipo="prioridad" valor={t.prioridad} />,
-                valorOrden: (t) => ORDEN_PRIORIDAD.indexOf(t.prioridad),
+                clave: "categoria",
+                titulo: "Categoría",
+                clase: "solo-escritorio",
+                render: (t) => <Insignia tipo="categoria" valor={t.categoria} />,
             },
-            { clave: "categoria", titulo: "Categoría", render: (t) => <Insignia tipo="categoria" valor={t.categoria} /> },
             {
                 clave: "fecha_apertura",
                 titulo: "Apertura",
@@ -98,16 +157,17 @@ export default function Tickets() {
 
     const visibles = useMemo(() => {
         const texto = normalizar(busqueda.trim());
+        const deLaVista = tickets.filter(vistas.find((v) => v.id === vista)?.filtro ?? (() => true));
         const filtrados = texto
-            ? tickets.filter((t) =>
+            ? deLaVista.filter((t) =>
                   normalizar(
                       `${codigoTicket(t.id_ticket)} ${t.titulo} ${t.cliente} ${nombreEquipo(t)} ${t.equipo_numero_serie}`
                   ).includes(texto)
               )
-            : tickets;
+            : deLaVista;
 
         return ordenarFilas(filtrados, columnas, orden);
-    }, [tickets, busqueda, columnas, orden]);
+    }, [tickets, busqueda, columnas, orden, vistas, vista]);
 
     const paginas = totalPaginas(visibles.length);
     // si un filtro deja menos paginas, se vuelve a la ultima que existe
@@ -145,8 +205,34 @@ export default function Tickets() {
                 )}
             </div>
 
-            <div className="tarjeta tickets-filtros no-imprimir">
-                <FiltrosTickets valores={filtros} onCambiar={cambiarFiltros} />
+            <div className="tickets-vistas no-imprimir" role="group" aria-label="Vistas rápidas">
+                {vistas.map((v) => (
+                    <button
+                        key={v.id}
+                        type="button"
+                        className={`tickets-vista${vista === v.id ? " activa" : ""}`}
+                        aria-pressed={vista === v.id}
+                        onClick={() => {
+                            setVista(v.id);
+                            setPagina(1);
+                        }}
+                    >
+                        {v.etiqueta}
+                        {!cargando && <span className="tickets-vista-cantidad">{tickets.filter(v.filtro).length}</span>}
+                    </button>
+                ))}
+            </div>
+
+            <div className={`tarjeta tickets-filtros no-imprimir${filtrosAbiertos ? " abiertos" : ""}`}>
+                <button
+                    type="button"
+                    className="boton boton-secundario boton-chico tickets-mostrar-filtros"
+                    aria-expanded={filtrosAbiertos}
+                    onClick={() => setFiltrosAbiertos((abierto) => !abierto)}
+                >
+                    {filtrosAbiertos ? "Ocultar filtros" : "Más filtros"}
+                </button>
+                <FiltrosTickets valores={filtros} onCambiar={cambiarFiltros} esCliente={esCliente} />
             </div>
 
             {error && (
@@ -168,12 +254,17 @@ export default function Tickets() {
                                 columnas={columnas}
                                 filas={paginar(visibles, paginaActual)}
                                 claveFila={(t) => t.id_ticket}
+                                onFila={(t) => navegar(`/tickets/${t.id_ticket}`)}
+                                claseFila={esCliente ? undefined : (t) => `tickets-fila-${t.prioridad?.toLowerCase()}`}
+                                tarjetas
                                 orden={orden}
                                 onOrdenar={ordenarPor}
                                 textoVacio={
                                     tickets.length === 0 && !estado && !prioridad && !categoria
                                         ? "Todavía no hay tickets."
-                                        : "Ningún ticket coincide con los filtros."
+                                        : vista === "toca" && !busqueda
+                                          ? "Nada pendiente por ahora. Todo al día."
+                                          : "Ningún ticket coincide con los filtros."
                                 }
                             />
                             <Paginacion pagina={paginaActual} totalPaginas={paginas} onCambiar={setPagina} />

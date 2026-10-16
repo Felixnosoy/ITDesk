@@ -58,3 +58,139 @@
   font-size: 12px;
   color: var(--color-text-dim);
 }
+
+.tickets-mostrar-filtros {
+  display: none;
+}
+
+/* en escritorio estos datos caben en una linea */
+.tickets-tarjeta .tabla td:nth-child(n + 3) {
+  white-space: nowrap;
+}
+
+/* ---------- vistas rapidas ---------- */
+
+.tickets-vistas {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.tickets-vista {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 6px 12px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pildora);
+  background: var(--superficie);
+  color: var(--texto-2);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tickets-vista:hover {
+  border-color: var(--borde-fuerte);
+  color: var(--texto);
+}
+
+.tickets-vista.activa {
+  background: var(--rol-principal);
+  border-color: var(--rol-principal);
+  color: var(--rol-sobre-principal);
+}
+
+.tickets-vista-cantidad {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radio-pildora);
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: var(--texto-xs);
+  text-align: center;
+}
+
+.tickets-vista.activa .tickets-vista-cantidad {
+  background: var(--sobre-oscuro-suave);
+  color: inherit;
+}
+
+/* la prioridad tambien como franja a la izquierda de la fila */
+.tickets-tarjeta .tabla td:first-child {
+  border-left: 3px solid transparent;
+}
+
+.tickets-tarjeta .tickets-fila-alta td:first-child {
+  border-left-color: var(--peligro);
+}
+
+.tickets-tarjeta .tickets-fila-media td:first-child {
+  border-left-color: var(--estado-espera);
+}
+
+/* ---------- celular: filtros en dos columnas, filas como tarjetas ---------- */
+
+@media (max-width: 720px) {
+  .tickets-cabecera .boton {
+    width: 100%;
+  }
+
+  .tickets-filtros .filtros-tickets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--espacio-3);
+  }
+
+  .tickets-filtros .campo {
+    max-width: none;
+  }
+
+  .tickets-filtros .filtros-busqueda,
+  .tickets-filtros .filtros-limpiar {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .tickets-filtros {
+    position: relative;
+  }
+
+  .tickets-mostrar-filtros {
+    display: inline-flex;
+    position: absolute;
+    top: 6px;
+    right: var(--espacio-4);
+  }
+
+  /* cerrados solo queda la busqueda */
+  .tickets-filtros:not(.abiertos) .campo:not(.filtros-busqueda),
+  .tickets-filtros:not(.abiertos) .filtros-limpiar {
+    display: none;
+  }
+
+  .tickets-tarjeta .tabla td:nth-child(n + 3) {
+    white-space: normal;
+  }
+
+  .tickets-tarjeta .tabla td:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .tickets-tarjeta .tickets-fila-alta {
+    box-shadow: inset 3px 0 0 var(--peligro);
+  }
+
+  .tickets-tarjeta .tickets-fila-media {
+    box-shadow: inset 3px 0 0 var(--estado-espera);
+  }
+
+  .tickets-tarjeta .tabla .tickets-secundario {
+    display: inline;
+    margin-left: 4px;
+  }
+}
