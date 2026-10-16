@@ -29,7 +29,12 @@ describe("ticket.service.crearTicket (validaciones)", () => {
         ["titulo", "x".repeat(151)],
         ["descripcion", undefined],
         ["prioridad", "Urgente"],
-        ["categoria", "hardware"]
+        ["categoria", "hardware"],
+        ["canal_entrada", "Fax"],
+        ["accesorios", ["x".repeat(41)]],
+        ["condicion_fisica", "x".repeat(501)],
+        ["enciende_al_recibir", "talvez"],
+        ["dejo_contrasena", "si"]
     ])("rechaza con 400 un %s invalido (%p) sin consultar la base", async (campo, valor) => {
         await expect(ticketService.crearTicket({ ...datos, [campo]: valor }, 9))
             .rejects.toMatchObject({ status: 400, message: expect.stringContaining(campo) });
@@ -86,13 +91,35 @@ describe("ticket.service.crearTicket (transaccion)", () => {
         const ticket = await ticketService.crearTicket(datos, 9);
 
         const insertTicket = pool.query.mock.calls[3][1];
-        expect(insertTicket).toEqual([5, 2, "No enciende", "No da imagen.", "Alta", "Hardware", "Abierto"]);
+        // sin datos de recepcion: presencial, sin accesorios ni contrasena
+        expect(insertTicket).toEqual([
+            5, 2, "No enciende", "No da imagen.", "Alta", "Hardware", "Abierto",
+            "Presencial", null, null, null, 0
+        ]);
         expect(pool.query.mock.calls[4][1]).toEqual([40, 3, 9]); // ticket, tecnico, asignado por
         expect(pool.conexion.beginTransaction).toHaveBeenCalled();
         expect(pool.conexion.commit).toHaveBeenCalled();
         expect(pool.conexion.rollback).not.toHaveBeenCalled();
         expect(pool.conexion.release).toHaveBeenCalled();
         expect(ticket).toEqual({ id_ticket: 40 });
+    });
+
+    test("guarda como se recibio el equipo", async () => {
+        referenciasValidas()
+            .mockResolvedValueOnce([{ insertId: 40 }])
+            .mockResolvedValueOnce([{ insertId: 1 }])
+            .mockResolvedValueOnce([[{ id_ticket: 40 }]]);
+
+        await ticketService.crearTicket({
+            ...datos,
+            canal_entrada: "WhatsApp",
+            accesorios: [" Cargador ", "Bolso", ""],
+            condicion_fisica: "Rayon en la tapa",
+            enciende_al_recibir: false,
+            dejo_contrasena: true
+        }, 9);
+
+        expect(pool.query.mock.calls[3][1].slice(7)).toEqual(["WhatsApp", "Cargador, Bolso", "Rayon en la tapa", 0, 1]);
     });
 
     test("si falla la asignacion deshace el ticket y libera la conexion", async () => {

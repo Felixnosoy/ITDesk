@@ -4,8 +4,15 @@ const ROLES = require("../constants/roles");
 const ESTADOS_TICKET = require("../constants/estadosTicket");
 const PRIORIDADES_TICKET = require("../constants/prioridadesTicket");
 const CATEGORIAS_TICKET = require("../constants/categoriasTicket");
+const CANALES_ENTRADA = require("../constants/canalesEntrada");
 const ESTADOS_USUARIO = require("../constants/estadosUsuario");
-const { validarId, validarTexto } = require("../validators/comun.validator");
+const {
+    validarId,
+    validarTexto,
+    validarTextoOpcional,
+    validarBooleanoOpcional,
+    validarCatalogoOpcional
+} = require("../validators/comun.validator");
 
 const COLUMNAS_TICKET = `
     t.id_ticket,
@@ -14,6 +21,11 @@ const COLUMNAS_TICKET = `
     t.estado,
     t.prioridad,
     t.categoria,
+    t.canal_entrada,
+    t.accesorios,
+    t.condicion_fisica,
+    t.enciende_al_recibir,
+    t.dejo_contrasena,
     t.fecha_apertura,
     t.fecha_resolucion,
     t.fecha_cierre,
@@ -25,6 +37,14 @@ const COLUMNAS_TICKET = `
     e.marca AS equipo_marca,
     e.modelo AS equipo_modelo,
     e.numero_serie AS equipo_numero_serie,
+    e.sistema_operativo AS equipo_sistema_operativo,
+    e.procesador AS equipo_procesador,
+    e.memoria_ram AS equipo_memoria_ram,
+    e.almacenamiento AS equipo_almacenamiento,
+    e.color AS equipo_color,
+    e.en_garantia AS equipo_en_garantia,
+    e.garantia_vence AS equipo_garantia_vence,
+    e.codigo_activo AS equipo_codigo_activo,
     a.id_usuario AS id_tecnico,
     CONCAT(tec.nombre, ' ', tec.apellido) AS tecnico,
     f.estado AS factura_estado,
@@ -155,9 +175,34 @@ const validarCatalogo = (valor, campo, catalogo) => {
     return valor.trim();
 };
 
+const MAXIMO_ACCESORIOS = 12;
+
+// Lo que el cliente entrego junto con el equipo: llega como lista (las
+// casillas del formulario) y se guarda como texto "Cargador, Bolso".
+const validarAccesorios = (valor) => {
+    if (valor === undefined || valor === null || valor === "") return null;
+
+    const lista = Array.isArray(valor) ? valor : [valor];
+
+    if (lista.length > MAXIMO_ACCESORIOS || lista.some((a) => typeof a !== "string" || a.trim().length > 40)) {
+        throw crearError(`El campo accesorios admite hasta ${MAXIMO_ACCESORIOS} elementos de 40 caracteres.`, 400);
+    }
+
+    const limpios = lista.map((a) => a.trim()).filter(Boolean);
+    return limpios.length > 0 ? validarTexto(limpios.join(", "), "accesorios", 255) : null;
+};
+
 // Valida todo lo que llega en el body antes de tocar la base, asi un error
 // de formato nunca deja nada a medias.
 const validarDatosTicket = (datos = {}) => ({
+    // recepcion del equipo: como llego el caso y en que estado se recibio
+    canal_entrada:
+        validarCatalogoOpcional(datos.canal_entrada, "canal_entrada", Object.values(CANALES_ENTRADA)) ??
+        CANALES_ENTRADA.PRESENCIAL,
+    accesorios: validarAccesorios(datos.accesorios),
+    condicion_fisica: validarTextoOpcional(datos.condicion_fisica, "condicion_fisica", 500),
+    enciende_al_recibir: validarBooleanoOpcional(datos.enciende_al_recibir, "enciende_al_recibir"),
+    dejo_contrasena: validarBooleanoOpcional(datos.dejo_contrasena, "dejo_contrasena") ?? 0,
     id_cliente: validarId(datos.id_cliente, "id_cliente"),
     id_equipo: validarId(datos.id_equipo, "id_equipo"),
     id_tecnico: validarId(datos.id_tecnico, "id_tecnico"),
@@ -219,8 +264,11 @@ const crearTicket = async (datos, id_asignado_por) => {
 
         const [resultado] = await conexion.query(
             `
-            INSERT INTO ticket (id_usuario, id_equipo, titulo, descripcion, prioridad, categoria, estado)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO ticket (
+                id_usuario, id_equipo, titulo, descripcion, prioridad, categoria, estado,
+                canal_entrada, accesorios, condicion_fisica, enciende_al_recibir, dejo_contrasena
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 ticket.id_cliente,
@@ -229,7 +277,12 @@ const crearTicket = async (datos, id_asignado_por) => {
                 ticket.descripcion,
                 ticket.prioridad,
                 ticket.categoria,
-                ESTADOS_TICKET.ABIERTO
+                ESTADOS_TICKET.ABIERTO,
+                ticket.canal_entrada,
+                ticket.accesorios,
+                ticket.condicion_fisica,
+                ticket.enciende_al_recibir,
+                ticket.dejo_contrasena
             ]
         );
 

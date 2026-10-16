@@ -2,7 +2,7 @@ const pool = require("../config/database");
 const crearError = require("../utils/crearError");
 const ROLES = require("../constants/roles");
 const ESTADOS_USUARIO = require("../constants/estadosUsuario");
-const { validarId, validarTexto, validarTextoOpcional } = require("../validators/comun.validator");
+const { validarId, validarTexto, validarTextoOpcional, validarBooleanoOpcional, validarFechaOpcional } = require("../validators/comun.validator");
 
 const COLUMNAS_EQUIPO = `
     id_equipo,
@@ -11,6 +11,14 @@ const COLUMNAS_EQUIPO = `
     marca,
     modelo,
     numero_serie,
+    sistema_operativo,
+    procesador,
+    memoria_ram,
+    almacenamiento,
+    color,
+    en_garantia,
+    garantia_vence,
+    codigo_activo,
     estado,
     observaciones,
     fecha_registro
@@ -66,6 +74,20 @@ const crearEquipo = async (datos = {}) => {
     const modelo = validarTexto(datos.modelo, "modelo", 50);
     const numero_serie = validarTexto(datos.numero_serie, "numero_serie", 100);
     const observaciones = validarTextoOpcional(datos.observaciones, "observaciones");
+    // especificaciones y garantia: opcionales, con el largo de su columna
+    const ficha = {
+        sistema_operativo: validarTextoOpcional(datos.sistema_operativo, "sistema_operativo", 60),
+        procesador: validarTextoOpcional(datos.procesador, "procesador", 80),
+        memoria_ram: validarTextoOpcional(datos.memoria_ram, "memoria_ram", 30),
+        almacenamiento: validarTextoOpcional(datos.almacenamiento, "almacenamiento", 60),
+        color: validarTextoOpcional(datos.color, "color", 30),
+        en_garantia: validarBooleanoOpcional(datos.en_garantia, "en_garantia") ?? 0,
+        garantia_vence: validarFechaOpcional(datos.garantia_vence, "garantia_vence"),
+        codigo_activo: validarTextoOpcional(datos.codigo_activo, "codigo_activo", 50),
+    };
+
+    // sin garantia no tiene sentido una fecha de vencimiento
+    if (!ficha.en_garantia) ficha.garantia_vence = null;
 
     const cliente = await obtenerCliente(id_cliente);
 
@@ -87,10 +109,18 @@ const crearEquipo = async (datos = {}) => {
     try {
         [resultado] = await pool.query(
             `
-            INSERT INTO equipo (id_usuario, tipo, marca, modelo, numero_serie, observaciones)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO equipo (
+                id_usuario, tipo, marca, modelo, numero_serie, observaciones,
+                sistema_operativo, procesador, memoria_ram, almacenamiento, color,
+                en_garantia, garantia_vence, codigo_activo
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
-            [id_cliente, tipo, marca, modelo, numero_serie, observaciones]
+            [
+                id_cliente, tipo, marca, modelo, numero_serie, observaciones,
+                ficha.sistema_operativo, ficha.procesador, ficha.memoria_ram, ficha.almacenamiento, ficha.color,
+                ficha.en_garantia, ficha.garantia_vence, ficha.codigo_activo
+            ]
         );
     } catch (error) {
         // dos registros con la misma serie al mismo tiempo: el SELECT de

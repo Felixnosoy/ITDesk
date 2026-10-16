@@ -54,6 +54,49 @@ describe("usuario.service.crearUsuario", () => {
         expect(argsInsert).toContain("hash-de-la-clave");
         expect(argsInsert).not.toContain("clave12345");
     });
+    const insertCon = async (extra) => {
+        pool.query
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([[]])
+            .mockResolvedValueOnce([{ insertId: 42 }])
+            .mockResolvedValueOnce([[{ id_usuario: 42 }]]);
+        bcrypt.hash.mockResolvedValueOnce("hash");
+
+        await usuarioService.crearUsuario({ ...datos, ...extra });
+
+        // tipo_cliente, empresa, rnc, contacto alterno: posiciones 10 a 14 del INSERT
+        return pool.query.mock.calls[2][1].slice(10, 15);
+    };
+
+    test("un cliente sin datos extra queda como Persona", async () => {
+        expect(await insertCon({})).toEqual(["Persona", null, null, null, null]);
+    });
+
+    test("un cliente empresa guarda empresa, RNC y contacto alterno", async () => {
+        expect(await insertCon({
+            tipo_cliente: "Empresa",
+            empresa: " Distribuidora Caribe ",
+            rnc: "1-01-12345-6",
+            contacto_alterno_nombre: "Rosa Diaz",
+            contacto_alterno_telefono: "809-555-1234"
+        })).toEqual(["Empresa", "Distribuidora Caribe", "1-01-12345-6", "Rosa Diaz", "809-555-1234"]);
+    });
+
+    test("una persona no guarda empresa ni RNC aunque lleguen", async () => {
+        expect(await insertCon({ empresa: "X", rnc: "1" })).toEqual(["Persona", null, null, null, null]);
+    });
+
+    test("el personal no guarda datos de cliente", async () => {
+        expect(await insertCon({ rol: "Tecnico", tipo_cliente: "Empresa", empresa: "X" }))
+            .toEqual([null, null, null, null, null]);
+    });
+
+    test("rechaza con 400 un tipo de cliente fuera del catalogo sin consultar la base", async () => {
+        await expect(usuarioService.crearUsuario({ ...datos, tipo_cliente: "Gobierno" }))
+            .rejects.toMatchObject({ status: 400, message: expect.stringContaining("tipo_cliente") });
+
+        expect(pool.query).not.toHaveBeenCalled();
+    });
 });
 
 describe("usuario.service.cambiarContrasena (self-service)", () => {

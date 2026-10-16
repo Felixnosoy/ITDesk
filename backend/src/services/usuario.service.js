@@ -3,7 +3,9 @@ const bcrypt = require("bcrypt");
 const crearError = require("../utils/crearError");
 const ESTADOS_USUARIO = require("../constants/estadosUsuario");
 const ROLES = require("../constants/roles");
+const TIPOS_CLIENTE = require("../constants/tiposCliente");
 const { verificarUsuarioExiste } = require("../validators/usuario.validator");
+const { validarTextoOpcional, validarCatalogoOpcional } = require("../validators/comun.validator");
 
 // TODO: extraer las validaciones manuales de este service a una capa de
 // validadores dedicada en una futura refactorización.
@@ -19,10 +21,35 @@ const COLUMNAS_USUARIO = `
     telefono,
     direccion,
     especialidad,
+    tipo_cliente,
+    empresa,
+    rnc,
+    contacto_alterno_nombre,
+    contacto_alterno_telefono,
     estado,
     fecha_registro
 `;
 
+
+// Datos que solo tiene un cliente: si es persona o empresa (con su nombre y
+// RNC) y a quien llamar si no responde. Para el personal quedan en null.
+const datosDeCliente = (rol, datos) => {
+    if (rol !== ROLES.CLIENTE) {
+        return { tipo_cliente: null, empresa: null, rnc: null, contacto_alterno_nombre: null, contacto_alterno_telefono: null };
+    }
+
+    const tipo_cliente =
+        validarCatalogoOpcional(datos.tipo_cliente, "tipo_cliente", Object.values(TIPOS_CLIENTE)) ?? TIPOS_CLIENTE.PERSONA;
+    const esEmpresa = tipo_cliente === TIPOS_CLIENTE.EMPRESA;
+
+    return {
+        tipo_cliente,
+        empresa: esEmpresa ? validarTextoOpcional(datos.empresa, "empresa", 150) : null,
+        rnc: esEmpresa ? validarTextoOpcional(datos.rnc, "rnc", 20) : null,
+        contacto_alterno_nombre: validarTextoOpcional(datos.contacto_alterno_nombre, "contacto_alterno_nombre", 150),
+        contacto_alterno_telefono: validarTextoOpcional(datos.contacto_alterno_telefono, "contacto_alterno_telefono", 20),
+    };
+};
 
 //funcion para crear usuarios
 const crearUsuario = async (datosUsuario) => {
@@ -39,6 +66,9 @@ const crearUsuario = async (datosUsuario) => {
         especialidad,
         estado
     } = datosUsuario;
+
+    // se valida antes de consultar la base: un dato mal formado no deja nada a medias
+    const cliente = datosDeCliente(rol, datosUsuario);
 
     //verificar que el correo no exista
     const [usuarioExistente] = await pool.query(
@@ -76,9 +106,14 @@ const crearUsuario = async (datosUsuario) => {
             telefono,
             direccion,
             especialidad,
+            tipo_cliente,
+            empresa,
+            rnc,
+            contacto_alterno_nombre,
+            contacto_alterno_telefono,
             estado
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             nombre,
             apellido,
@@ -90,6 +125,11 @@ const crearUsuario = async (datosUsuario) => {
             telefono,
             direccion,
             especialidad,
+            cliente.tipo_cliente,
+            cliente.empresa,
+            cliente.rnc,
+            cliente.contacto_alterno_nombre,
+            cliente.contacto_alterno_telefono,
             estado
         ]
     );
