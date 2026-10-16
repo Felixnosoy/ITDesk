@@ -42,7 +42,8 @@ const buscarTickets = async (texto, usuario) => {
         `(t.titulo LIKE ? OR t.descripcion LIKE ? OR CONCAT(c.nombre, ' ', c.apellido) LIKE ?
           OR e.numero_serie LIKE ? OR CONCAT(e.marca, ' ', e.modelo) LIKE ? OR t.id_ticket = ?)`,
     ];
-    const parametros = [like, like, like, like, like, numeroTicket(texto) ?? 0];
+    const numero = numeroTicket(texto) ?? 0;
+    const parametros = [like, like, like, like, like, numero];
 
     if (usuario.rol === ROLES.CLIENTE) {
         condiciones.push("t.id_usuario = ?");
@@ -64,10 +65,12 @@ const buscarTickets = async (texto, usuario) => {
         INNER JOIN equipo e
             ON t.id_equipo = e.id_equipo
         WHERE ${condiciones.join(" AND ")}
-        ORDER BY t.fecha_apertura DESC, t.id_ticket DESC
+        ORDER BY t.id_ticket = ? DESC, t.fecha_apertura DESC, t.id_ticket DESC
         LIMIT ${POR_GRUPO}
         `,
-        parametros
+        // el ticket cuyo numero se escribio va primero, antes de los que solo
+        // coinciden por el titulo (idea tomada del PR #280)
+        [...parametros, numero]
     );
 
     return filas;
