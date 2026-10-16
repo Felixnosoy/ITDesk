@@ -35,17 +35,12 @@ export const SECCIONES = [
     },
     {
         ruta: "/perfil",
-        etiqueta: "Mi perfil",
+        etiqueta: "Mi cuenta",
         icono: "perfil",
         roles: TODOS_LOS_ROLES,
-        descripcion: "Consulta tus datos y actualiza tu teléfono y dirección.",
-    },
-    {
-        ruta: "/cambiar-contrasena",
-        etiqueta: "Cambiar contraseña",
-        icono: "llave",
-        roles: TODOS_LOS_ROLES,
-        descripcion: "Actualiza la contraseña con la que inicias sesión.",
+        descripcion: "Tus datos de contacto y tu contraseña.",
+        // la contrasena es una pestana de la cuenta: el menu la marca aqui
+        tambienActiva: ["/cambiar-contrasena"],
     },
 ];
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimiento } from "../api/tickets";
 import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
@@ -32,6 +32,7 @@ import FormularioPago from "../components/FormularioPago";
 import DocumentoImprimible from "../components/DocumentoImprimible";
 import AvisoFlotante from "../components/AvisoFlotante";
 import { EsqueletoDetalle } from "../components/Esqueleto";
+import MigasDePan from "../components/MigasDePan";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -102,6 +103,9 @@ export default function TicketDetalle() {
         };
     }, [token, id]);
 
+    // el listado se llama distinto para el cliente, igual que en su pantalla
+    const listado = sesion.usuario.rol === ROLES.CLIENTE ? "Mis tickets" : "Tickets";
+
     const abrirEdicion = (seccion) => {
         setAviso("");
         setErrorAccion("");
@@ -132,7 +136,7 @@ export default function TicketDetalle() {
     if (error) {
         return (
             <div className="pagina">
-                <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
+                <MigasDePan elementos={[{ etiqueta: listado, ruta: "/tickets" }, { etiqueta: "Ticket no encontrado" }]} />
                 <div className="aviso aviso-error" role="alert">
                     {error}
                 </div>
@@ -222,7 +226,9 @@ export default function TicketDetalle() {
 
     return (
         <div className={`pagina detalle-pagina${imprimiendo ? " no-imprimir" : ""}`}>
-            <Link to="/tickets" className="detalle-volver no-imprimir">← Volver a tickets</Link>
+            <MigasDePan
+                elementos={[{ etiqueta: listado, ruta: "/tickets" }, { etiqueta: `${codigoTicket(ticket.id_ticket)} · ${ticket.titulo}` }]}
+            />
 
             <div className="pagina-cabecera detalle-cabecera">
                 <span className="detalle-codigo etiqueta-codigo">{codigoTicket(ticket.id_ticket)}</span>

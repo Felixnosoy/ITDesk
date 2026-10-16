@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { cambiarContrasena } from "../api/usuarios";
+import PestanasCuenta from "../components/PestanasCuenta";
 
 // mismo minimo que exige el backend (usuario.service.js)
 const LONGITUD_MINIMA = 8;
@@ -58,13 +59,11 @@ export default function CambiarContrasena() {
     };
 
     return (
-        <div className="pagina">
-            <div className="pagina-cabecera">
-                <h1>Cambiar contraseña</h1>
-                <p>Para confirmar el cambio hace falta escribir la contraseña actual.</p>
-            </div>
+        <div className="pagina cuenta-pagina">
+            <PestanasCuenta />
+            <p className="cuenta-ayuda">Para confirmar el cambio hace falta escribir la contraseña actual.</p>
 
-            <form className="tarjeta" style={{ maxWidth: 480 }} onSubmit={enviar}>
+            <form className="tarjeta" onSubmit={enviar}>
                 {error && (
                     <div className="aviso aviso-error" role="alert">
                         {error}

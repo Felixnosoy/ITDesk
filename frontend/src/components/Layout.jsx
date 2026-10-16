@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ETIQUETA_ROL } from "../constants/roles";
 import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
@@ -18,6 +18,7 @@ function iniciales(usuario) {
 export default function Layout() {
     const { sesion, cerrarSesion } = useAuth();
     const { usuario } = sesion;
+    const { pathname } = useLocation();
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [tema, setTema] = useState(() => document.documentElement.dataset.tema ?? TEMAS.CLARO);
     const oscuro = tema === TEMAS.OSCURO;
@@ -91,7 +92,9 @@ export default function Layout() {
                             key={opcion.ruta}
                             to={opcion.ruta}
                             end
-                            className="layout-enlace"
+                            className={({ isActive }) =>
+                                `layout-enlace${isActive || opcion.tambienActiva?.includes(pathname) ? " active" : ""}`
+                            }
                             onClick={() => setMenuAbierto(false)}
                         >
                             <Icono nombre={opcion.icono} />

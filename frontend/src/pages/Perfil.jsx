@@ -4,6 +4,7 @@ import { ETIQUETA_ROL } from "../constants/roles";
 import { obtenerUsuario, actualizarPerfil } from "../api/usuarios";
 import AvisoFlotante from "../components/AvisoFlotante";
 import { EsqueletoFormulario } from "../components/Esqueleto";
+import PestanasCuenta from "../components/PestanasCuenta";
 import "./Perfil.css";
 
 function formatearFecha(fecha) {
@@ -79,11 +80,8 @@ export default function Perfil() {
     };
 
     return (
-        <div className="pagina">
-            <div className="pagina-cabecera">
-                <h1>Mi perfil</h1>
-                <p>Consulta los datos de tu cuenta y mantén al día tu contacto.</p>
-            </div>
+        <div className="pagina cuenta-pagina">
+            <PestanasCuenta />
 
             {cargando && <EsqueletoFormulario campos={2} etiqueta="Cargando tu perfil" />}
 

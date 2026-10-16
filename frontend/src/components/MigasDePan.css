@@ -1,0 +1,45 @@
+.migas {
+  margin-bottom: var(--espacio-3);
+  font-size: var(--texto-sm);
+}
+
+.migas ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-1) var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.migas li {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-width: 0;
+}
+
+/* separador dibujado: no lo lee el lector de pantalla */
+.migas li + li::before {
+  content: "›";
+  color: var(--texto-4);
+}
+
+.migas a {
+  color: var(--rol-principal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.migas a:hover {
+  text-decoration: underline;
+}
+
+.migas [aria-current="page"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 42ch;
+  color: var(--texto-3);
+}

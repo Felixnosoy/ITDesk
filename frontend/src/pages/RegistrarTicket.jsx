@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import { PRIORIDADES, CATEGORIAS, ETIQUETA_PRIORIDAD, ETIQUETA_CATEGORIA } from "../constants/tickets";
@@ -8,6 +8,7 @@ import { crearTicket } from "../api/tickets";
 import { codigoTicket } from "../utils/formato";
 import SelectorCliente from "../components/SelectorCliente";
 import SelectorEquipo from "../components/SelectorEquipo";
+import MigasDePan from "../components/MigasDePan";
 import "./RegistrarTicket.css";
 
 const Paso = ({ numero, titulo, activo, children }) => (
@@ -85,7 +86,7 @@ export default function RegistrarTicket() {
 
     return (
         <div className="pagina registro-pagina">
-            <Link to="/tickets" className="detalle-volver">← Volver a tickets</Link>
+            <MigasDePan elementos={[{ etiqueta: "Tickets", ruta: "/tickets" }, { etiqueta: "Registrar ticket" }]} />
 
             <div className="pagina-cabecera">
                 <h1>Registrar ticket</h1>
