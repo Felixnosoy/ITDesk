@@ -5,7 +5,7 @@ import { obtenerDetalle, registrarDiagnostico, cambiarEstado, registrarSeguimien
 import { crearCotizacion, decidirCotizacion } from "../api/cotizaciones";
 import { generarFactura, pagarFactura } from "../api/facturas";
 import { ROLES } from "../constants/roles";
-import { ESTADOS_TICKET, ETIQUETA_ESTADO } from "../constants/tickets";
+import { ESTADOS_TICKET, ETIQUETA_ESTADO, ETIQUETA_CANAL } from "../constants/tickets";
 import { ESTADOS_COTIZACION, ESTADOS_FACTURA } from "../constants/cotizaciones";
 import {
     codigoCotizacion,
@@ -188,6 +188,22 @@ export default function TicketDetalle() {
     const cotizacionActual = cotizaciones[0];
     const esCliente = sesion.usuario.rol === ROLES.CLIENTE;
 
+    // ficha tecnica del equipo: solo lo que se cargo, para no llenar de guiones
+    const fichaEquipo = [
+        ["Sistema operativo", ticket.equipo_sistema_operativo],
+        ["Procesador", ticket.equipo_procesador],
+        ["Memoria RAM", ticket.equipo_memoria_ram],
+        ["Almacenamiento", ticket.equipo_almacenamiento],
+        ["Color", ticket.equipo_color],
+        [
+            "Garantía",
+            ticket.equipo_en_garantia
+                ? `Sí${ticket.equipo_garantia_vence ? `, vence ${formatearFecha(ticket.equipo_garantia_vence)}` : ""}`
+                : null,
+        ],
+        ["Código de activo", ticket.equipo_codigo_activo],
+    ].filter(([, valor]) => valor);
+
     // Aviso del proximo paso: lo que hay que hacer ahora, con un solo boton
     // principal. Las acciones son las mismas de cada tarjeta, solo que aca
     // quedan arriba en vez de a mitad de la pagina.
@@ -301,6 +317,37 @@ export default function TicketDetalle() {
                             )}
                             {ticket.fecha_cierre && <Dato etiqueta="Cierre">{formatearFecha(ticket.fecha_cierre)}</Dato>}
                         </dl>
+
+                        <h3 className="detalle-subtitulo">Recepción del equipo</h3>
+                        <dl className="detalle-resumen detalle-resumen-sin-linea">
+                            <Dato etiqueta="Canal de entrada">{ETIQUETA_CANAL[ticket.canal_entrada] ?? ticket.canal_entrada}</Dato>
+                            <Dato etiqueta="Accesorios">{ticket.accesorios || "Ninguno"}</Dato>
+                            <Dato etiqueta="Encendía al recibirlo">
+                                {ticket.enciende_al_recibir === null ? "No se probó" : ticket.enciende_al_recibir ? "Sí" : "No"}
+                            </Dato>
+                            <Dato etiqueta="Contraseña del equipo">
+                                {ticket.dejo_contrasena ? (esTaller ? "La dejó (ver notas internas)" : "La dejaste") : "No la dejó"}
+                            </Dato>
+                            {ticket.condicion_fisica && (
+                                <div className="detalle-dato detalle-dato-ancho">
+                                    <dt>Estado físico</dt>
+                                    <dd className="detalle-texto">{ticket.condicion_fisica}</dd>
+                                </div>
+                            )}
+                        </dl>
+
+                        {fichaEquipo.length > 0 && (
+                            <>
+                                <h3 className="detalle-subtitulo">Ficha del equipo</h3>
+                                <dl className="detalle-resumen detalle-resumen-sin-linea">
+                                    {fichaEquipo.map(([etiqueta, valor]) => (
+                                        <Dato key={etiqueta} etiqueta={etiqueta}>
+                                            {valor}
+                                        </Dato>
+                                    ))}
+                                </dl>
+                            </>
+                        )}
                     </div>
 
                     <div className="tarjeta" id="seccion-diagnostico">

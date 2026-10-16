@@ -36,6 +36,23 @@
   border-top: 1px solid var(--borde);
 }
 
+.detalle-subtitulo {
+  margin: var(--espacio-5) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--borde);
+  font-size: var(--texto-md);
+}
+
+.detalle-resumen-sin-linea {
+  margin-top: var(--espacio-3);
+  padding-top: 0;
+  border-top: none;
+}
+
+.detalle-dato-ancho {
+  grid-column: 1 / -1;
+}
+
 .detalle-serie {
   font-family: var(--fuente-codigo);
 }

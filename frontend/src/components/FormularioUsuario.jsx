@@ -23,6 +23,11 @@ function valoresIniciales(usuario) {
         telefono: aTexto(usuario?.telefono),
         direccion: aTexto(usuario?.direccion),
         especialidad: aTexto(usuario?.especialidad),
+        tipo_cliente: usuario?.tipo_cliente ?? "Persona",
+        empresa: aTexto(usuario?.empresa),
+        rnc: aTexto(usuario?.rnc),
+        contacto_alterno_nombre: aTexto(usuario?.contacto_alterno_nombre),
+        contacto_alterno_telefono: aTexto(usuario?.contacto_alterno_telefono),
     };
 }
 
@@ -44,6 +49,7 @@ export default function FormularioUsuario({
 
     const cambiar = (campo) => (evento) =>
         setValores((previos) => ({ ...previos, [campo]: evento.target.value }));
+    const esAltaCliente = modo === "crear" && valores.rol === ROLES.CLIENTE;
 
     const enviar = (evento) => {
         evento.preventDefault();
@@ -70,6 +76,18 @@ export default function FormularioUsuario({
         if (modo === "crear") {
             datos.contraseña = valores.contraseña;
             datos.estado = "Activo";
+        }
+
+        // datos propios de un cliente (por ahora solo en el alta)
+        if (esAltaCliente) {
+            const esEmpresa = valores.tipo_cliente === "Empresa";
+            Object.assign(datos, {
+                tipo_cliente: valores.tipo_cliente,
+                empresa: esEmpresa ? vacioANulo(valores.empresa) : null,
+                rnc: esEmpresa ? vacioANulo(valores.rnc) : null,
+                contacto_alterno_nombre: vacioANulo(valores.contacto_alterno_nombre),
+                contacto_alterno_telefono: vacioANulo(valores.contacto_alterno_telefono),
+            });
         }
 
         onGuardar(datos);
@@ -163,6 +181,50 @@ export default function FormularioUsuario({
                     <label htmlFor="uf-direccion">Dirección</label>
                     <input id="uf-direccion" value={valores.direccion} onChange={cambiar("direccion")} maxLength={255} />
                 </div>
+
+                {esAltaCliente && (
+                    <>
+                        <div className="campo formulario-ancho">
+                            <label htmlFor="uf-tipo-cliente">Tipo de cliente</label>
+                            <select id="uf-tipo-cliente" value={valores.tipo_cliente} onChange={cambiar("tipo_cliente")}>
+                                <option value="Persona">Persona</option>
+                                <option value="Empresa">Empresa</option>
+                            </select>
+                        </div>
+                        {valores.tipo_cliente === "Empresa" && (
+                            <>
+                                <div className="campo">
+                                    <label htmlFor="uf-empresa">Nombre de la empresa</label>
+                                    <input id="uf-empresa" value={valores.empresa} onChange={cambiar("empresa")} maxLength={150} />
+                                </div>
+                                <div className="campo">
+                                    <label htmlFor="uf-rnc">RNC</label>
+                                    <input id="uf-rnc" value={valores.rnc} onChange={cambiar("rnc")} maxLength={20} />
+                                </div>
+                            </>
+                        )}
+                        <div className="campo">
+                            <label htmlFor="uf-alterno">Contacto alterno (opcional)</label>
+                            <input
+                                id="uf-alterno"
+                                value={valores.contacto_alterno_nombre}
+                                onChange={cambiar("contacto_alterno_nombre")}
+                                maxLength={150}
+                                placeholder="A quién llamar si no responde"
+                            />
+                        </div>
+                        <div className="campo">
+                            <label htmlFor="uf-alterno-tel">Teléfono del contacto alterno</label>
+                            <input
+                                id="uf-alterno-tel"
+                                type="tel"
+                                value={valores.contacto_alterno_telefono}
+                                onChange={cambiar("contacto_alterno_telefono")}
+                                maxLength={20}
+                            />
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="modal-acciones">

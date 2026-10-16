@@ -47,3 +47,21 @@ export const ETIQUETA_CATEGORIA = {
 
 // Estado inicial del panel de filtros del listado: sin ningun filtro aplicado.
 export const FILTROS_VACIOS = { busqueda: "", estado: "", categoria: "", prioridad: "" };
+
+// Por donde llego el caso. Mismos valores que backend/src/constants/canalesEntrada.js
+export const CANALES_ENTRADA = {
+    PRESENCIAL: "Presencial",
+    TELEFONO: "Telefono",
+    CORREO: "Correo",
+    WHATSAPP: "WhatsApp",
+};
+
+export const ETIQUETA_CANAL = {
+    [CANALES_ENTRADA.PRESENCIAL]: "Presencial",
+    [CANALES_ENTRADA.TELEFONO]: "Teléfono",
+    [CANALES_ENTRADA.CORREO]: "Correo",
+    [CANALES_ENTRADA.WHATSAPP]: "WhatsApp",
+};
+
+// Lo que mas suele dejar un cliente junto con el equipo; "Otro" se escribe a mano
+export const ACCESORIOS_COMUNES = ["Cargador", "Cable de corriente", "Batería", "Bolso o funda", "Mouse", "Teclado", "Control remoto"];
