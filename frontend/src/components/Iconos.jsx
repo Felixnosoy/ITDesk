@@ -24,6 +24,9 @@ const TRAZOS = {
         "M21 12H9",
     ],
     menu: ["M3 6h18", "M3 12h18", "M3 18h18"],
+    // menu lateral: plegar a la franja de iconos y volver a desplegar
+    plegar: ["M3 4h18v16H3z", "M9 4v16", "M16 10l-2 2 2 2"],
+    desplegar: ["M3 4h18v16H3z", "M9 4v16", "M14 10l2 2-2 2"],
     tickets: [
         "M4 4h16a1 1 0 0 1 1 1v4a2 2 0 0 0 0 4v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4a2 2 0 0 0 0-4V5a1 1 0 0 1 1-1z",
         "M9 4v14",

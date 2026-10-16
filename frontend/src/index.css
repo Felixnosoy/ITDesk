@@ -68,7 +68,7 @@ textarea:focus-visible {
    pantallas. Solo usan tokens: el color principal es el del rol. */
 
 .pagina {
-  max-width: 1040px;
+  max-width: var(--ancho-trabajo);
   margin: 0 auto;
 }
 

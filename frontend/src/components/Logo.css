@@ -36,8 +36,8 @@
   padding: 0.3em 0.2em 0 0;
   box-sizing: border-box;
   border-radius: 28% 28% 28% 7%;
-  background: var(--rol-principal);
-  color: var(--rol-logo-texto);
+  background: var(--logo-fondo);
+  color: var(--logo-letras);
   font-family: var(--fuente-codigo);
   font-size: var(--logo-letra);
   font-weight: 600;

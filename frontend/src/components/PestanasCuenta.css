@@ -12,7 +12,7 @@
 /* las dos pantallas de la cuenta tienen el mismo ancho: al cambiar de
    pestana nada se mueve */
 .cuenta-pagina {
-  max-width: 640px;
+  max-width: var(--ancho-lectura);
 }
 
 .cuenta-ayuda {

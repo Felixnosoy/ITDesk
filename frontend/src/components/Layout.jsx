@@ -6,20 +6,29 @@ import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
 import Logo from "./Logo";
 import { TEMAS, guardarTema } from "../utils/tema";
+import { leerMenuPlegado, guardarMenuPlegado } from "../utils/preferencias";
 import "./Layout.css";
 
 function iniciales(usuario) {
     return `${usuario.nombre?.[0] ?? ""}${usuario.apellido?.[0] ?? ""}`.toUpperCase();
 }
 
+// el menu se oculta del todo por debajo de este ancho (mismo valor que la
+// media query de Layout.css)
+const CONSULTA_ANGOSTA = "(max-width: 960px)";
+
 // Marco compartido de todas las pantallas con sesion: menu lateral segun el
-// rol, datos del usuario y cierre de sesion. En pantallas angostas el menu se
-// oculta y se abre desde la barra superior.
-export default function Layout() {
+// rol, barra superior y cierre de sesion.
+//
+// En escritorio el menu se puede plegar a una franja de iconos para dejarle
+// la pantalla al trabajo; la eleccion se recuerda. En pantallas angostas el
+// menu no ocupa lugar: se abre encima del contenido desde el mismo boton.
+export default function Layout({ barra }) {
     const { sesion, cerrarSesion } = useAuth();
     const { usuario } = sesion;
     const { pathname } = useLocation();
     const [menuAbierto, setMenuAbierto] = useState(false);
+    const [plegado, setPlegado] = useState(leerMenuPlegado);
     const [tema, setTema] = useState(() => document.documentElement.dataset.tema ?? TEMAS.CLARO);
     const oscuro = tema === TEMAS.OSCURO;
 
@@ -27,6 +36,18 @@ export default function Layout() {
         const nuevo = oscuro ? TEMAS.CLARO : TEMAS.OSCURO;
         guardarTema(nuevo);
         setTema(nuevo);
+    };
+
+    // un solo boton para las dos cosas: en escritorio pliega, en angosto abre
+    const alternarMenu = () => {
+        if (window.matchMedia(CONSULTA_ANGOSTA).matches) {
+            setMenuAbierto(true);
+            return;
+        }
+        setPlegado((actual) => {
+            guardarMenuPlegado(!actual);
+            return !actual;
+        });
     };
 
     // el color de cada rol sale de data-rol (styles/tokens.css); va en <html>
@@ -53,22 +74,12 @@ export default function Layout() {
         ...seccionesParaRol(usuario.rol),
     ];
 
-    return (
-        <div className="layout">
-            <header className="layout-topbar">
-                <button
-                    type="button"
-                    className="layout-hamburguesa"
-                    aria-label="Abrir menú"
-                    aria-expanded={menuAbierto}
-                    aria-controls="menu-lateral"
-                    onClick={() => setMenuAbierto(true)}
-                >
-                    <Icono nombre="menu" tamano={22} />
-                </button>
-                <Logo />
-            </header>
+    // plegado, el texto de cada opcion queda solo para el lector de pantalla
+    // y el title muestra el nombre al pasar el cursor
+    const pista = (texto) => (plegado ? texto : undefined);
 
+    return (
+        <div className={`layout${plegado ? " layout-plegado" : ""}`}>
             {menuAbierto && (
                 <div
                     className="layout-fondo"
@@ -92,23 +103,24 @@ export default function Layout() {
                             key={opcion.ruta}
                             to={opcion.ruta}
                             end
+                            title={pista(opcion.etiqueta)}
                             className={({ isActive }) =>
                                 `layout-enlace${isActive || opcion.tambienActiva?.includes(pathname) ? " active" : ""}`
                             }
                             onClick={() => setMenuAbierto(false)}
                         >
                             <Icono nombre={opcion.icono} />
-                            <span>{opcion.etiqueta}</span>
+                            <span className="layout-texto">{opcion.etiqueta}</span>
                         </NavLink>
                     ))}
                 </nav>
 
                 <div className="layout-usuario">
-                    <div className="layout-usuario-datos">
+                    <div className="layout-usuario-datos" title={pista(`${usuario.nombre} ${usuario.apellido}`)}>
                         <span className="layout-avatar" aria-hidden="true">
                             {iniciales(usuario)}
                         </span>
-                        <div className="layout-usuario-texto">
+                        <div className="layout-usuario-texto layout-texto">
                             <strong>
                                 {usuario.nombre} {usuario.apellido}
                             </strong>
@@ -119,25 +131,52 @@ export default function Layout() {
                         type="button"
                         className="layout-accion"
                         aria-pressed={oscuro}
+                        title={pista("Modo oscuro")}
                         onClick={cambiarTema}
                     >
                         <Icono nombre={oscuro ? "sol" : "luna"} />
-                        <span>Modo oscuro</span>
+                        <span className="layout-texto">Modo oscuro</span>
                     </button>
                     <button
                         type="button"
                         className="layout-accion layout-salir"
+                        title={pista("Cerrar sesión")}
                         onClick={cerrarSesion}
                     >
                         <Icono nombre="salir" />
-                        <span>Cerrar sesión</span>
+                        <span className="layout-texto">Cerrar sesión</span>
                     </button>
                 </div>
             </aside>
 
-            <main className="layout-contenido">
-                <Outlet />
-            </main>
+            <div className="layout-principal">
+                <header className="layout-barra no-imprimir">
+                    <button
+                        type="button"
+                        className="layout-alternar"
+                        aria-label={plegado ? "Desplegar el menú" : "Plegar el menú"}
+                        aria-controls="menu-lateral"
+                        aria-expanded={menuAbierto || !plegado}
+                        title={plegado ? "Desplegar el menú" : "Plegar el menú"}
+                        onClick={alternarMenu}
+                    >
+                        <span className="layout-alternar-escritorio">
+                            <Icono nombre={plegado ? "desplegar" : "plegar"} tamano={20} />
+                        </span>
+                        <span className="layout-alternar-angosto">
+                            <Icono nombre="menu" tamano={22} />
+                        </span>
+                    </button>
+                    <span className="layout-barra-logo">
+                        <Logo />
+                    </span>
+                    {barra}
+                </header>
+
+                <main className="layout-contenido">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 }
