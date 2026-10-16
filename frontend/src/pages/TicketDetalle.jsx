@@ -35,17 +35,20 @@ import { EsqueletoDetalle } from "../components/Esqueleto";
 import MigasDePan from "../components/MigasDePan";
 import "./TicketDetalle.css";
 
-// Que puede hacer quien mira: escribir en el ticket (personal, ticket
-// abierto) y cambiar su estado (tecnico o administrador con un estado al
-// que pasar). Se usa en la pantalla y en los atajos de teclado.
+// Que puede hacer quien mira: escribir en el ticket (diagnostico, avances y
+// notas) y cambiar su estado, con las mismas reglas que las rutas del
+// backend: solo tecnico o administrador. Recepcion ve todo el detalle, notas
+// internas incluidas, pero no escribe; antes veia la caja y el servidor le
+// respondia 403. Se usa en la pantalla y en los atajos de teclado.
+const ROLES_QUE_TRABAJAN = [ROLES.TECNICO, ROLES.ADMINISTRADOR];
+
 const permisosDe = (detalle, rol) => {
     const esTaller = "notas_privadas" in detalle;
     return {
         esTaller,
-        puedeEditar: esTaller && detalle.ticket.estado !== ESTADOS_TICKET.CERRADO,
+        puedeEditar: esTaller && ROLES_QUE_TRABAJAN.includes(rol) && detalle.ticket.estado !== ESTADOS_TICKET.CERRADO,
         // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
-        puedeCambiarEstado:
-            [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(rol) && detalle.estados_siguientes?.length > 0,
+        puedeCambiarEstado: ROLES_QUE_TRABAJAN.includes(rol) && detalle.estados_siguientes?.length > 0,
     };
 };
 
@@ -269,7 +272,7 @@ export default function TicketDetalle() {
         ];
     } else if (puedePagar) {
         acciones = [{ etiqueta: "Pagar en línea", abrir: "pago" }];
-    } else if (puedeEditar && !diagnostico && [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol)) {
+    } else if (puedeEditar && !diagnostico) {
         paso.texto = "Registra el diagnóstico: sin él no se puede cotizar.";
         acciones = [{ etiqueta: "Registrar diagnóstico", abrir: "diagnostico" }];
     } else if (puedeCotizar) {
