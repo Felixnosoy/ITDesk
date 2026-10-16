@@ -9,6 +9,7 @@ import {
     resetearContrasena,
 } from "../api/usuarios";
 import Modal from "../components/Modal";
+import MenuAcciones from "../components/MenuAcciones";
 import FormularioUsuario from "../components/FormularioUsuario";
 import "./Usuarios.css";
 
@@ -212,34 +213,49 @@ export default function Usuarios() {
                         <table className="usuarios-tabla">
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
+                                    <th>Usuario</th>
                                     <th>Rol</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th>
+                                        <span className="sr-only">Acciones</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {visibles.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="usuarios-vacio">
+                                        <td colSpan={4} className="usuarios-vacio">
                                             No hay usuarios que coincidan con la búsqueda.
                                         </td>
                                     </tr>
                                 )}
                                 {visibles.map((u) => (
                                     <tr key={u.id_usuario}>
-                                        <td>
-                                            {u.nombre} {u.apellido}
+                                        <td className="usuarios-persona">
+                                            <div className="usuarios-persona-fila">
+                                                <span className="usuarios-avatar" aria-hidden="true">
+                                                    {`${u.nombre?.[0] ?? ""}${u.apellido?.[0] ?? ""}`.toUpperCase()}
+                                                </span>
+                                                <span className="usuarios-persona-texto">
+                                                    <strong>
+                                                        {u.nombre} {u.apellido}
+                                                    </strong>
+                                                    <span>{u.correo}</span>
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td>{u.correo}</td>
-                                        <td>{ETIQUETA_ROL[u.rol] ?? u.rol}</td>
+                                        <td>
+                                            <span className={`usuarios-rol usuarios-rol-${u.rol.toLowerCase()}`}>
+                                                {ETIQUETA_ROL[u.rol] ?? u.rol}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`insignia insignia-${u.estado === "Activo" ? "activo" : "inactivo"}`}>
                                                 {u.estado}
                                             </span>
                                         </td>
                                         <td>
+                                            {/* editar es lo frecuente; lo demas va en el menu de la fila */}
                                             <div className="usuarios-acciones">
                                                 <button
                                                     type="button"
@@ -249,24 +265,22 @@ export default function Usuarios() {
                                                 >
                                                     Editar
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="boton boton-chico boton-secundario"
-                                                    aria-label={`${u.estado === "Activo" ? "Desactivar" : "Activar"} a ${u.nombre} ${u.apellido}`}
-                                                    disabled={esPropia(u)}
-                                                    title={esPropia(u) ? "No puedes desactivar tu propia cuenta" : undefined}
-                                                    onClick={() => abrir({ tipo: "estado", usuario: u })}
-                                                >
-                                                    {u.estado === "Activo" ? "Desactivar" : "Activar"}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="boton boton-chico boton-secundario"
-                                                    aria-label={`Restablecer la contraseña de ${u.nombre} ${u.apellido}`}
-                                                    onClick={() => abrir({ tipo: "clave", usuario: u })}
-                                                >
-                                                    Restablecer contraseña
-                                                </button>
+                                                <MenuAcciones
+                                                    etiqueta={`Más acciones para ${u.nombre} ${u.apellido}`}
+                                                    opciones={[
+                                                        {
+                                                            etiqueta: "Restablecer contraseña",
+                                                            onClick: () => abrir({ tipo: "clave", usuario: u }),
+                                                        },
+                                                        {
+                                                            etiqueta: u.estado === "Activo" ? "Desactivar cuenta" : "Activar cuenta",
+                                                            peligro: u.estado === "Activo",
+                                                            deshabilitada: esPropia(u),
+                                                            motivo: "No puedes desactivar tu propia cuenta",
+                                                            onClick: () => abrir({ tipo: "estado", usuario: u }),
+                                                        },
+                                                    ]}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

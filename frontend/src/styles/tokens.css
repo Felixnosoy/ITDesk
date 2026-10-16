@@ -97,6 +97,16 @@
   --estado-cerrado-texto: #57534e;
   --estado-cerrado-suave: #f5f5f4;
 
+  /* insignia de cada rol (lista de usuarios): fija, no depende de quien mira */
+  --insignia-cliente-fondo: #ecebfb;
+  --insignia-cliente-texto: #3730a3;
+  --insignia-tecnico-fondo: #e7f2f0;
+  --insignia-tecnico-texto: #0f5e5a;
+  --insignia-recepcionista-fondo: #eff4ff;
+  --insignia-recepcionista-texto: #1d4ed8;
+  --insignia-administrador-fondo: #eaf0f8;
+  --insignia-administrador-texto: #1e3a6e;
+
   /* panel de marca del inicio de sesion: oscuro en los dos temas */
   --marca-fondo: #1c1917;
   --marca-texto: #f2efea;
@@ -226,6 +236,15 @@
     --estado-resuelto-suave: rgba(22, 163, 74, 0.16);
     --estado-cerrado-texto: #b3ada5;
     --estado-cerrado-suave: rgba(120, 113, 108, 0.16);
+
+    --insignia-cliente-fondo: rgba(99, 102, 241, 0.18);
+    --insignia-cliente-texto: #a5b4fc;
+    --insignia-tecnico-fondo: rgba(20, 184, 166, 0.16);
+    --insignia-tecnico-texto: #5eead4;
+    --insignia-recepcionista-fondo: rgba(59, 130, 246, 0.18);
+    --insignia-recepcionista-texto: #93c5fd;
+    --insignia-administrador-fondo: rgba(96, 135, 200, 0.18);
+    --insignia-administrador-texto: #a9c1ea;
 
     --rol-principal: #f2efea;
     --rol-principal-hover: #ffffff;
