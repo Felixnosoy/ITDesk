@@ -492,7 +492,7 @@ export default function TicketDetalle() {
                     )}
                 </div>
 
-                <aside className="detalle-lateral">
+                <aside className="detalle-lateral" aria-label="Resumen y equipo">
                     <div className="tarjeta">
                         <h2>Resumen</h2>
                         <dl className="detalle-datos">

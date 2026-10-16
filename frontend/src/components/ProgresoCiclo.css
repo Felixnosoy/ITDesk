@@ -34,7 +34,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--texto-sm);
-  color: var(--texto-4);
+  /* texto-4 no llega a 4.5:1 sobre el fondo del aviso del rol */
+  color: var(--texto-3);
 }
 
 .progreso-hecho .progreso-etiqueta {

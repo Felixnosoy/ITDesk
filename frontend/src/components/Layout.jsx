@@ -78,6 +78,7 @@ export default function Layout() {
 
             <aside
                 id="menu-lateral"
+                aria-label="Menú lateral"
                 className={`layout-lateral${menuAbierto ? " abierto" : ""}`}
             >
                 <div className="layout-lateral-marca">
