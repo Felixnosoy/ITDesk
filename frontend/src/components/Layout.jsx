@@ -6,6 +6,7 @@ import { RUTA_INICIO, seccionesParaRol } from "../constants/navegacion";
 import Icono from "./Iconos";
 import Logo from "./Logo";
 import BuscadorGlobal from "./BuscadorGlobal";
+import AyudaAtajos from "./AyudaAtajos";
 import { TEMAS, guardarTema } from "../utils/tema";
 import { leerMenuPlegado, guardarMenuPlegado } from "../utils/preferencias";
 import "./Layout.css";
@@ -172,6 +173,7 @@ export default function Layout() {
                         <Logo />
                     </span>
                     <BuscadorGlobal />
+                    <AyudaAtajos />
                 </header>
 
                 <main className="layout-contenido">

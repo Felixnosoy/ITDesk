@@ -56,10 +56,25 @@ export default function PanelActividad({
     guardando,
     error,
     onEnviar,
+    pedido,
 }) {
     const conNotas = Array.isArray(notas);
     const [canal, setCanal] = useState("publico");
     const lista = useRef(null);
+    const panel = useRef(null);
+
+    // pedido = { canal, vez }: un atajo de teclado pide escribir en un canal.
+    // El canal se ajusta durante el render (al cambiar el pedido) y el foco
+    // va en un efecto, cuando la caja de ese canal ya esta montada; vez
+    // cambia en cada pedido, asi repetir la tecla vuelve a enfocar.
+    const [pedidoAtendido, setPedidoAtendido] = useState(null);
+    if (pedido && pedido !== pedidoAtendido) {
+        setPedidoAtendido(pedido);
+        if (pedido.canal === "publico" || conNotas) setCanal(pedido.canal);
+    }
+    useEffect(() => {
+        if (pedidoAtendido) panel.current?.querySelector(".actividad-caja textarea")?.focus();
+    }, [pedidoAtendido, canal]);
 
     const mensajes =
         canal === "publico"
@@ -78,7 +93,7 @@ export default function PanelActividad({
     ];
 
     return (
-        <section className={`tarjeta actividad actividad-${canal}`} aria-labelledby="actividad-titulo">
+        <section ref={panel} className={`tarjeta actividad actividad-${canal}`} aria-labelledby="actividad-titulo">
             <div className="actividad-cabecera">
                 <h2 id="actividad-titulo">Actividad</h2>
                 {canales.length > 1 && (

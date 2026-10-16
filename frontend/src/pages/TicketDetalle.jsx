@@ -17,6 +17,7 @@ import {
 } from "../utils/formato";
 import { proximoPaso, leToca } from "../utils/ciclo";
 import { marcarVisto } from "../utils/novedades";
+import { esAtajoLibre } from "../utils/teclado";
 import ProgresoCiclo from "../components/ProgresoCiclo";
 import Insignia from "../components/Insignia";
 import FormularioDiagnostico from "../components/FormularioDiagnostico";
@@ -33,6 +34,20 @@ import AvisoFlotante from "../components/AvisoFlotante";
 import { EsqueletoDetalle } from "../components/Esqueleto";
 import MigasDePan from "../components/MigasDePan";
 import "./TicketDetalle.css";
+
+// Que puede hacer quien mira: escribir en el ticket (personal, ticket
+// abierto) y cambiar su estado (tecnico o administrador con un estado al
+// que pasar). Se usa en la pantalla y en los atajos de teclado.
+const permisosDe = (detalle, rol) => {
+    const esTaller = "notas_privadas" in detalle;
+    return {
+        esTaller,
+        puedeEditar: esTaller && detalle.ticket.estado !== ESTADOS_TICKET.CERRADO,
+        // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
+        puedeCambiarEstado:
+            [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(rol) && detalle.estados_siguientes?.length > 0,
+    };
+};
 
 const Dato = ({ etiqueta, children }) => (
     <div className="detalle-dato">
@@ -84,6 +99,30 @@ export default function TicketDetalle() {
         if (!editando) return;
         document.getElementById(`seccion-${editando}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, [editando]);
+
+    // atajos del detalle: A avance para el cliente, N nota interna, E estado
+    const [pedidoCaja, setPedidoCaja] = useState(null);
+    const rol = sesion.usuario.rol;
+    useEffect(() => {
+        if (!detalle) return undefined;
+        const { puedeEditar: escribe, puedeCambiarEstado: cambia } = permisosDe(detalle, rol);
+        const acciones = {
+            ...(escribe && {
+                a: () => setPedidoCaja({ canal: "publico", vez: Date.now() }),
+                n: () => setPedidoCaja({ canal: "interno", vez: Date.now() }),
+            }),
+            ...(cambia && { e: () => setEditando("estado") }),
+        };
+
+        const alPresionar = (evento) => {
+            const accion = esAtajoLibre(evento) && acciones[evento.key.toLowerCase()];
+            if (!accion) return;
+            evento.preventDefault();
+            accion();
+        };
+        document.addEventListener("keydown", alPresionar);
+        return () => document.removeEventListener("keydown", alPresionar);
+    }, [detalle, rol]);
 
     // lo que se ve ahora deja de contar como novedad en el listado
     useEffect(() => {
@@ -163,12 +202,7 @@ export default function TicketDetalle() {
     }
 
     const { ticket, diagnostico } = detalle;
-    const esTaller = "notas_privadas" in detalle;
-    const estaCerrado = ticket.estado === ESTADOS_TICKET.CERRADO;
-    const puedeEditar = esTaller && !estaCerrado;
-    // Recepcion ve el detalle completo pero no cambia estados (lo hace el tecnico)
-    const puedeCambiarEstado =
-        [ROLES.TECNICO, ROLES.ADMINISTRADOR].includes(sesion.usuario.rol) && detalle.estados_siguientes?.length > 0;
+    const { esTaller, puedeEditar, puedeCambiarEstado } = permisosDe(detalle, sesion.usuario.rol);
     const cotizaciones = detalle.cotizaciones ?? [];
     // cotizable ya dice si se puede cotizar ahora (hay diagnostico, no hay
     // otra vigente, no esta resuelto); el rol es porque Recepcion no cotiza
@@ -249,6 +283,7 @@ export default function TicketDetalle() {
         acciones = [{ etiqueta: "Cambiar estado", abrir: "estado" }];
     }
     const pasoUrgente = acciones.length > 0;
+
 
     return (
         <div className={`pagina detalle-pagina${imprimiendo ? " no-imprimir" : ""}`}>
@@ -555,6 +590,7 @@ export default function TicketDetalle() {
                         puedeEscribir={puedeEditar}
                         guardando={guardando && editando === "seguimiento"}
                         error={editando === "seguimiento" ? errorAccion : ""}
+                        pedido={pedidoCaja}
                         onEnviar={(tipo, texto, imagenes) => {
                             setEditando("seguimiento");
                             return ejecutar(
