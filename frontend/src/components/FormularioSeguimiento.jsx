@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { RESPUESTAS_RAPIDAS } from "../constants/respuestas";
 import "./FormularioSeguimiento.css";
 
 // mismos limites que el backend (archivo.service.js); revisarlos aqui
@@ -55,6 +56,17 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar, tip
     const [imagenes, setImagenes] = useState([]);
     const [avisoImagen, setAvisoImagen] = useState("");
     const selector = useRef(null);
+    const caja = useRef(null);
+
+    // la respuesta rapida se suma a lo ya escrito y deja el cursor al final
+    const usarRespuesta = (frase) => {
+        const nuevo = texto.trim() ? `${texto.trimEnd()} ${frase}` : frase;
+        setTexto(nuevo);
+        requestAnimationFrame(() => {
+            caja.current?.focus();
+            caja.current?.setSelectionRange(nuevo.length, nuevo.length);
+        });
+    };
 
     const agregar = (archivos) => {
         const nuevas = [];
@@ -139,11 +151,28 @@ export default function FormularioSeguimiento({ guardando, error, onGuardar, tip
                 </div>
             )}
 
+            {tipoFijo && (
+                <div className="seguimiento-rapidas" role="group" aria-label="Respuestas rápidas">
+                    {RESPUESTAS_RAPIDAS[tipo].map((respuesta) => (
+                        <button
+                            key={respuesta.etiqueta}
+                            type="button"
+                            className="seguimiento-rapida"
+                            title={respuesta.texto}
+                            onClick={() => usarRespuesta(respuesta.texto)}
+                        >
+                            {respuesta.etiqueta}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             <div className="campo">
                 <label htmlFor={`seguimiento-texto-${tipo}`} className={tipoFijo ? "sr-only" : undefined}>
                     {actual.etiqueta}
                 </label>
                 <textarea
+                    ref={caja}
                     id={`seguimiento-texto-${tipo}`}
                     rows={tipoFijo ? 2 : 3}
                     value={texto}
