@@ -1,4 +1,4 @@
-// Iconos de trazo simple (viewBox 24) para el menu. Se dibujan inline para no
+// Iconos de trazo simple (viewBox 24) para el menu y los estados vacios. Se dibujan inline para no
 // depender de ninguna libreria de iconos.
 const TRAZOS = {
     inicio: ["M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"],
@@ -41,6 +41,13 @@ const TRAZOS = {
         "M19.07 4.93l-1.41 1.41",
     ],
     luna: ["M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"],
+    // estados vacios
+    buscar: ["M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z", "M21 21l-4.35-4.35"],
+    listo: ["M20 6 9 17l-5-5"],
+    bandeja: [
+        "M22 12h-6l-2 3h-4l-2-3H2",
+        "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+    ],
 };
 
 export default function Icono({ nombre, tamano = 18 }) {

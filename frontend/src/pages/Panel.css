@@ -293,17 +293,6 @@
   color: var(--rol-aviso-texto);
 }
 
-.panel-vacio-tarjeta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-1);
-  color: var(--texto-3);
-}
-
-.panel-vacio-tarjeta strong {
-  color: var(--texto);
-}
-
 .panel-historial {
   margin: var(--espacio-5) 0 0;
   color: var(--texto-3);

@@ -10,6 +10,8 @@ import { codigoTicket, formatearMonto } from "../utils/formato";
 import { PASOS_CICLO, proximoPaso, leToca } from "../utils/ciclo";
 import Insignia from "../components/Insignia";
 import ProgresoCiclo from "../components/ProgresoCiclo";
+import { EsqueletoTarjetas } from "../components/Esqueleto";
+import EstadoVacio from "../components/EstadoVacio";
 import "./Panel.css";
 
 const ROLES_QUE_REGISTRAN = [ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR];
@@ -177,7 +179,9 @@ export default function Panel() {
                 </div>
             )}
 
-            {!tickets && !error && <p className="panel-vacio">Cargando...</p>}
+            {!tickets && !error && (
+                <EsqueletoTarjetas cantidad={esCliente ? 3 : 4} alto={esCliente ? "220px" : "96px"} etiqueta="Cargando tu inicio" />
+            )}
 
             {tickets && !esCliente && (
                 <div className="panel-indicadores">
@@ -204,9 +208,11 @@ export default function Panel() {
                         <Link to="/tickets">Ver todos</Link>
                     </div>
                     {conPaso.filter(({ ticket }) => activo(ticket)).length === 0 ? (
-                        <div className="tarjeta panel-vacio-tarjeta">
-                            <strong>No tienes equipos en el taller.</strong>
-                            <span>Cuando dejes un equipo en recepción, aquí verás cómo avanza su reparación.</span>
+                        <div className="tarjeta">
+                            <EstadoVacio
+                                titulo="No tienes equipos en el taller"
+                                texto="Cuando dejes un equipo en recepción, aquí verás cómo avanza su reparación."
+                            />
                         </div>
                     ) : (
                         <div className="panel-equipos">
@@ -238,7 +244,7 @@ export default function Panel() {
                             <Link to="/tickets">Ver todos los tickets</Link>
                         </div>
                         {pendientes.length === 0 ? (
-                            <p className="panel-vacio">Nada pendiente por ahora. Todo al día.</p>
+                            <EstadoVacio icono="listo" titulo="Todo al día" texto="No hay tickets esperando una acción tuya." />
                         ) : (
                             <ul className="panel-lista">
                                 {pendientes.slice(0, 8).map(({ ticket, paso }) => (

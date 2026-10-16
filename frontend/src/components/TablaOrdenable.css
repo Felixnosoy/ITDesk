@@ -76,6 +76,10 @@
   cursor: pointer;
 }
 
+.tabla tbody tr:has(.tabla-vacia):hover {
+  background: none;
+}
+
 .tabla-vacia {
   text-align: center !important;
   color: var(--texto-3);

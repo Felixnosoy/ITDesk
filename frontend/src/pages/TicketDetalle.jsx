@@ -31,6 +31,7 @@ import ConfirmarFactura from "../components/ConfirmarFactura";
 import FormularioPago from "../components/FormularioPago";
 import DocumentoImprimible from "../components/DocumentoImprimible";
 import AvisoFlotante from "../components/AvisoFlotante";
+import { EsqueletoDetalle } from "../components/Esqueleto";
 import "./TicketDetalle.css";
 
 const Dato = ({ etiqueta, children }) => (
@@ -141,8 +142,8 @@ export default function TicketDetalle() {
 
     if (!detalle) {
         return (
-            <div className="pagina">
-                <p>Cargando ticket...</p>
+            <div className="pagina detalle-pagina">
+                <EsqueletoDetalle />
             </div>
         );
     }

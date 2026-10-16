@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { ETIQUETA_ROL } from "../constants/roles";
 import { obtenerUsuario, actualizarPerfil } from "../api/usuarios";
 import AvisoFlotante from "../components/AvisoFlotante";
+import { EsqueletoFormulario } from "../components/Esqueleto";
 import "./Perfil.css";
 
 function formatearFecha(fecha) {
@@ -84,7 +85,7 @@ export default function Perfil() {
                 <p>Consulta los datos de tu cuenta y mantén al día tu contacto.</p>
             </div>
 
-            {cargando && <p>Cargando perfil...</p>}
+            {cargando && <EsqueletoFormulario campos={2} etiqueta="Cargando tu perfil" />}
 
             {!cargando && !perfil && error && (
                 <div className="aviso aviso-error" role="alert">

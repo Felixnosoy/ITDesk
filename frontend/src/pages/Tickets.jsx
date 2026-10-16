@@ -12,6 +12,8 @@ import FiltrosTickets from "../components/FiltrosTickets";
 import TablaOrdenable from "../components/TablaOrdenable";
 import Paginacion from "../components/Paginacion";
 import Insignia from "../components/Insignia";
+import { EsqueletoTabla } from "../components/Esqueleto";
+import EstadoVacio from "../components/EstadoVacio";
 import "./Tickets.css";
 
 // orden por etapa del ciclo de vida y por gravedad, no alfabetico
@@ -183,6 +185,48 @@ export default function Tickets() {
         setPagina(1);
     };
 
+    const hayFiltros = Boolean(estado || prioridad || categoria || busqueda.trim());
+    const limpiar = () => {
+        cambiarFiltros(FILTROS_VACIOS);
+        setVista("todos");
+    };
+
+    // Tres razones distintas para una tabla vacia, cada una con su salida:
+    // no hay tickets todavia, la vista "te toca" esta al dia, o los filtros
+    // no encuentran nada
+    let vacio;
+    if (tickets.length === 0 && !hayFiltros) {
+        vacio = esCliente ? (
+            <EstadoVacio
+                titulo="Todavía no tienes equipos en el taller"
+                texto="Cuando dejes un equipo en recepción, aquí verás cómo avanza su reparación."
+            />
+        ) : (
+            <EstadoVacio
+                titulo="Todavía no hay tickets"
+                texto="Los tickets aparecen aquí cuando recepción registra un equipo."
+                accion={ROLES_QUE_REGISTRAN.includes(usuario.rol) ? { etiqueta: "Registrar ticket", ruta: "/tickets/nuevo" } : undefined}
+            />
+        );
+    } else if (!hayFiltros && vista === "toca") {
+        vacio = (
+            <EstadoVacio
+                icono="listo"
+                titulo="Todo al día"
+                texto={esCliente ? "Ningún equipo espera tu respuesta." : "No hay tickets esperando una acción tuya."}
+            />
+        );
+    } else {
+        vacio = (
+            <EstadoVacio
+                icono="buscar"
+                titulo="Ningún ticket coincide"
+                texto={busqueda.trim() ? `No hay resultados para "${busqueda.trim()}" con esta vista y filtros.` : "Prueba con otra vista o quita algún filtro."}
+                accion={{ etiqueta: "Ver todos los tickets", onClick: limpiar }}
+            />
+        );
+    }
+
     const ordenarPor = (columna) => {
         setOrden((actual) => siguienteOrden(actual, columna));
         setPagina(1);
@@ -244,11 +288,12 @@ export default function Tickets() {
 
             {!error && (
                 <div className="tarjeta tickets-tarjeta">
-                    <p className="tickets-contador" aria-live="polite">
-                        {cargando
-                            ? "Cargando tickets..."
-                            : `${visibles.length} ${visibles.length === 1 ? "ticket" : "tickets"}`}
-                    </p>
+                    {!cargando && (
+                        <p className="tickets-contador" aria-live="polite">
+                            {visibles.length} {visibles.length === 1 ? "ticket" : "tickets"}
+                        </p>
+                    )}
+                    {cargando && <EsqueletoTabla columnas={esCliente ? 5 : 7} etiqueta="Cargando los tickets" />}
                     {!cargando && (
                         <>
                             <TablaOrdenable
@@ -260,13 +305,7 @@ export default function Tickets() {
                                 tarjetas
                                 orden={orden}
                                 onOrdenar={ordenarPor}
-                                textoVacio={
-                                    tickets.length === 0 && !estado && !prioridad && !categoria
-                                        ? "Todavía no hay tickets."
-                                        : vista === "toca" && !busqueda
-                                          ? "Nada pendiente por ahora. Todo al día."
-                                          : "Ningún ticket coincide con los filtros."
-                                }
+                                textoVacio={vacio}
                             />
                             <Paginacion pagina={paginaActual} totalPaginas={paginas} onCambiar={setPagina} />
                         </>

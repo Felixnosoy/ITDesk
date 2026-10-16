@@ -12,6 +12,8 @@ import Modal from "../components/Modal";
 import MenuAcciones from "../components/MenuAcciones";
 import FormularioUsuario from "../components/FormularioUsuario";
 import AvisoFlotante from "../components/AvisoFlotante";
+import { EsqueletoTabla } from "../components/Esqueleto";
+import EstadoVacio from "../components/EstadoVacio";
 import "./Usuarios.css";
 
 // mismo minimo que exige el backend (usuario.service.js)
@@ -192,7 +194,11 @@ export default function Usuarios() {
                 </div>
             </div>
 
-            {cargando && <p>Cargando usuarios...</p>}
+            {cargando && (
+                <div className="tarjeta usuarios-tarjeta">
+                    <EsqueletoTabla columnas={4} filas={5} etiqueta="Cargando los usuarios" />
+                </div>
+            )}
 
             {errorCarga && (
                 <div className="aviso aviso-error" role="alert">
@@ -222,7 +228,18 @@ export default function Usuarios() {
                                 {visibles.length === 0 && (
                                     <tr>
                                         <td colSpan={4} className="usuarios-vacio">
-                                            No hay usuarios que coincidan con la búsqueda.
+                                            <EstadoVacio
+                                                icono="buscar"
+                                                titulo="Ningún usuario coincide"
+                                                texto="Revisa el nombre o el correo, o mira todos los roles."
+                                                accion={{
+                                                    etiqueta: "Quitar la búsqueda",
+                                                    onClick: () => {
+                                                        setBusqueda("");
+                                                        setFiltroRol("");
+                                                    },
+                                                }}
+                                            />
                                         </td>
                                     </tr>
                                 )}
